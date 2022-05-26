@@ -1,0 +1,8 @@
+{
+  "extends": "./packages/build-tools/ts/configs/tsconfig.lib.json",
+  "compilerOptions": {
+    "outDir": ".tsc-out",
+    "baseUrl": "."
+  },
+  "include": ["./packages/*/*/*.ts"]
+}

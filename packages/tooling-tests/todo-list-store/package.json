@@ -1,0 +1,14 @@
+{
+  "name": "@tooling-tests/todo-list-store",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "tsx ./lint.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@build-tools/ts": "workspace:*"
+  }
+}

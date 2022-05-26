@@ -2,17 +2,25 @@
   "name": "startup-repo",
   "version": "0.0.0-development",
   "private": true,
+  "scripts": {
+    "lint:changed": "pnpm turbo run lint --filter=...[HEAD]",
+    "prepare": "husky install",
+    "prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml)' --write"
+  },
+  "dependencies": {
+    "turbo": "1.2.14"
+  },
+  "devDependencies": {
+    "@types/node": "16",
+    "husky": "8.0.1",
+    "lint-staged": "12.4.2",
+    "prettier": "2.6.2",
+    "tsx": "3.4.0"
+  },
+  "packageManager": "pnpm@7.1.5",
   "engines": {
     "node": "16",
     "npm": "8",
-    "pnpm": "7.0.1"
-  },
-  "scripts": {
-    "prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml)' --write"
-  },
-  "devDependencies": {
-    "esbuild-node-loader": "workspace:*",
-    "prettier": "2.6.2"
-  },
-  "dependencies": {}
+    "pnpm": "7.1.5"
+  }
 }
