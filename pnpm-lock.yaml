@@ -51,6 +51,12 @@ importers:
     devDependencies:
       '@types/eslint': 8.4.2
 
+  packages/templates/ts-package:
+    specifiers:
+      '@build-tools/ts': workspace:*
+    devDependencies:
+      '@build-tools/ts': link:../../build-tools/ts
+
   packages/tooling-tests/todo-list-cli:
     specifiers:
       '@build-tools/ts': workspace:*
