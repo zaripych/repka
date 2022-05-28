@@ -8,7 +8,7 @@ const eslintPath = () =>
   new URL('../node_modules/.bin/eslint', import.meta.url).pathname;
 
 const eslintConfigPath = () =>
-  new URL('../../../../.eslintrc.cjs', import.meta.url).pathname;
+  new URL('../configs/eslint/eslint-root.cjs', import.meta.url).pathname;
 
 const restArgs = () => {
   const args = process.argv.slice(2);
