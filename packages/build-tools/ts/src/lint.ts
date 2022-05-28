@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 
 import { spawnToPromise } from './child-processes/spawnToPromise';
 import { tscComposite } from './tsc-cli/tsc';
+import { allFulfilled } from './utils/allFullfilled';
 import { setFunctionName } from './utils/setFunctionName';
 
 const eslintPath = () =>
@@ -37,17 +38,6 @@ const eslint = async () =>
 
 export function lint(): () => Promise<void> {
   return setFunctionName('lint', async () => {
-    const tscTask = tscComposite();
-    const eslintTask = eslint();
-    const [tscResult, eslintResult] = await Promise.allSettled([
-      tscTask,
-      eslintTask,
-    ]);
-    if (
-      tscResult.status !== 'fulfilled' ||
-      eslintResult.status !== 'fulfilled'
-    ) {
-      throw new Error(`Failed to lint`);
-    }
+    await allFulfilled([tscComposite(), eslint()]);
   });
 }
