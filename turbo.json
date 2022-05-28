@@ -10,6 +10,15 @@
         "../../build-tools/ts/src/**/*.ts"
       ],
       "outputs": [".tsc-out"]
+    },
+    "build": {
+      "dependsOn": [],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "../../build-tools/ts/src/**/*.ts"
+      ],
+      "outputs": ["dist"]
     }
   }
 }
