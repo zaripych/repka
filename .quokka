@@ -1,4 +1,9 @@
 {
   "stdEsm": false,
-  "nativeEsm": true
+  "nativeEsm": true,
+  "env": {
+    "params": {
+      "runner": "--experimental-specifier-resolution=node"
+    }
+  }
 }
