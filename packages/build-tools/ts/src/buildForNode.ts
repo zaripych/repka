@@ -2,6 +2,7 @@
 
 import type { Plugin } from 'rollup';
 
+import { rmrfDist } from './file-system/clean';
 import { copyFiles } from './file-system/copyFiles';
 import type { PackageJson } from './package-json/packageJson';
 import { readCwdPackageJson } from './package-json/readPackageJson';
@@ -64,6 +65,8 @@ export function buildForNode(opts?: BuildOpts): () => Promise<void> {
     if (!types) {
       throw new Error('"types" in package.json should be defined');
     }
+
+    await rmrfDist();
 
     const declarations = opts?.declarations;
 
