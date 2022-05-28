@@ -2,8 +2,8 @@
 
 import type { Plugin } from 'rollup';
 
-import { rmrfDist } from './file-system/clean';
 import { copyFiles } from './file-system/copyFiles';
+import { rmrfDist } from './file-system/rmrfDist';
 import type { PackageJson } from './package-json/packageJson';
 import { readCwdPackageJson } from './package-json/readPackageJson';
 import { resolveNodeEntryPoints } from './package-json/resolveEntryPoints';
