@@ -1,24 +1,32 @@
-import nodeBuiltins from 'builtin-modules/static.js';
-import type { Plugin, PluginOption } from 'vite';
-import { build } from 'vite';
+/// <reference types="./@types/rollup-plugin-generate-package-json" />
+
+import type { Plugin } from 'rollup';
 
 import { copyFiles } from './file-system/copyFiles';
 import type { PackageJson } from './package-json/packageJson';
 import { readCwdPackageJson } from './package-json/readPackageJson';
 import { resolveNodeEntryPoints } from './package-json/resolveEntryPoints';
+import { rollupBuild } from './rollup/rollupBuild';
 import { tscComposite } from './tsc-cli/tsc';
+import { allFulfilled } from './utils/allFullfilled';
 import { setFunctionName } from './utils/setFunctionName';
 
 export type BuildOpts = {
   /**
-   * Extra externals which are not listed in dependencies
+   * Extra externals which are not listed in dependencies or those
+   * listed which are not explicitly referenced in the code
    */
   externals?: string[];
 
   /**
-   * Whether to generate dependencies during build
+   * Whether to generate declarations during build
    */
-  declarations?: true | string;
+  declarations?: true;
+
+  /**
+   * Extra files to copy to the ./dist directory to be published
+   */
+  copy?: Array<{ sourceDir: string; globs: string[] }>;
 
   /**
    * Module resolution function, in case you have weird dependencies
@@ -30,10 +38,6 @@ export type BuildOpts = {
   ) => ReturnType<NonNullable<Plugin['resolveId']>>;
 };
 
-const allBuiltins = nodeBuiltins
-  .flatMap((builtin) => [builtin, `node:${builtin}`])
-  .concat(['fs/promises', 'node:fs/promises']);
-
 const externalsFromDependencies = (
   packageJson: PackageJson,
   opts?: BuildOpts
@@ -42,43 +46,9 @@ const externalsFromDependencies = (
   return [...new Set([...dependencies, ...(opts?.externals || [])])];
 };
 
-const resolveNodeBuiltinsPlugin = (): PluginOption => {
-  return {
-    name: 'node:builtins',
-    enforce: 'pre',
-    resolveId(source) {
-      if (allBuiltins.includes(source)) {
-        return {
-          id: source.replace('node:', ''),
-          external: true,
-        };
-      }
-      return null;
-    },
-  };
-};
-
-const nodeVitePlugins = (opts: BuildOpts): PluginOption[] => {
-  const resolveIdFn = opts.resolveId;
-  return [
-    resolveIdFn && {
-      name: 'buildLibrary:resolveId',
-      enforce: 'pre',
-      async resolveId(id, importer) {
-        return await Promise.resolve(resolveIdFn(id, importer));
-      },
-    },
-    resolveNodeBuiltinsPlugin(),
-  ];
-};
-
-export function buildForNode(optsOptional?: BuildOpts): () => Promise<void> {
+export function buildForNode(opts?: BuildOpts): () => Promise<void> {
   return setFunctionName('buildForNode', async () => {
     const packageJson = await readCwdPackageJson();
-    const opts: BuildOpts = {
-      ...optsOptional,
-      externals: externalsFromDependencies(packageJson, optsOptional),
-    };
     if (packageJson.type !== 'module') {
       throw new Error('"type" in package.json should be "module"');
     }
@@ -95,55 +65,62 @@ export function buildForNode(optsOptional?: BuildOpts): () => Promise<void> {
       throw new Error('"types" in package.json should be defined');
     }
 
-    const declarationsPath = opts.declarations;
+    const declarations = opts?.declarations;
 
     // ./src will imply that we should just include ./src
     // into the package, otherwise, let's build declarations
-    const declarationsPre = declarationsPath
+    const declarationsPre = declarations
       ? async () => {
           await tscComposite();
         }
       : () => Promise.resolve();
-    const declarationsPost = declarationsPath
+
+    const entryPoints = resolveNodeEntryPoints(packageJson.exports);
+
+    const declarationsPost = declarations
       ? async () => {
           await copyFiles({
             sourceDirectory: '.tsc-out',
-            globs: '**/*.d.ts',
-            destination:
-              declarationsPath !== true
-                ? `./dist/${declarationsPath}`
-                : './dist/types',
+            globs: ['**/*.d.ts'],
+            destination: './dist/types',
           });
         }
-      : () => Promise.resolve();
+      : async () => {
+          await copyFiles({
+            sourceDirectory: './src',
+            globs: ['**/*'],
+            destination: './dist/src',
+          });
+        };
 
-    const entryPoints = resolveNodeEntryPoints(packageJson.exports);
-    const results = await Promise.allSettled([
+    const allExternals = externalsFromDependencies(packageJson, opts);
+
+    await allFulfilled([
       declarationsPre(),
-      ...entryPoints.map((entry) =>
-        build({
-          plugins: nodeVitePlugins(opts),
-          build: {
-            sourcemap: true,
-            target: 'node16',
-            lib: {
-              entry: entry.entryPoint,
-              name: entry.name,
-              fileName: (format) => `${entry.name}.${format}.js`,
-              formats: ['es'],
-            },
-            rollupOptions: {
-              external: opts.externals ? opts.externals : [],
-            },
-          },
-        })
-      ),
+      rollupBuild({
+        entryPoints,
+        externals: allExternals,
+        packageJson: (packageJson) => {
+          if (declarations) {
+            packageJson['types'] = './dist/types';
+          } else {
+            packageJson['types'] = packageJson['types'] || './src/index.ts';
+          }
+          return packageJson;
+        },
+      }),
     ]);
-    for (const result of results) {
-      if (result.status === 'rejected') {
-        throw result.reason;
-      }
-    }
-    await declarationsPost();
+    await allFulfilled([
+      declarationsPost(),
+      ...(opts?.copy
+        ? opts.copy.map((entry) =>
+            copyFiles({
+              sourceDirectory: entry.sourceDir,
+              globs: entry.globs,
+              destination: `./dist/${entry.sourceDir}`,
+            })
+          )
+        : []),
+    ]);
   });
 }

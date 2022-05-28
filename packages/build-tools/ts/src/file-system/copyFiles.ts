@@ -8,10 +8,10 @@ export async function copyFiles({
   destination,
 }: {
   sourceDirectory: string;
-  globs: string;
+  globs: string[];
   destination: string;
 }) {
-  const entries = await fg(`${sourceDirectory}/${globs}`);
+  const entries = await fg(globs.map((glob) => `${sourceDirectory}/${glob}`));
   const createdDirs = new Set<string>();
   for (const sourcePath of entries) {
     const relativePath = relative(sourceDirectory, sourcePath);

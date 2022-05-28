@@ -1,29 +1,31 @@
 import type { PackageJsonExports } from './packageJson';
 
-const resolveEntryPointsNoConditions = (
-  results: Map<string, string>,
-  exports: PackageJsonExports,
-  nameParam?: string
-): void => {
-  // determine name of the entry point which is used
-  // for the file name we want to use for the output
-  const determineName = (name = 'main') => {
-    return name === '.'
-      ? 'main'
-      : name
-          .replace(/(^\.\/)/, '')
-          .replace(/(\/(\*)?$)/, '')
-          .replace('*', '')
-          .replace('/', '_');
-  };
+const determineName = (key = 'main') => {
+  return key === '.'
+    ? 'main'
+    : key
+        .replace(/(^\.\/)/, '')
+        .replace(/(\/(\*)?$)/, '')
+        .replace('*', '')
+        .replace('/', '_');
+};
 
-  const name = determineName(nameParam);
-  if (results.has(name)) {
+const resolveEntryPointsNoConditions = (
+  results: Record<string, PackageExportsEntryPoint>,
+  exports: PackageJsonExports,
+  key?: string
+): void => {
+  const name = determineName(key);
+  if (name in results) {
     return;
   }
 
   if (typeof exports === 'string') {
-    results.set(name, exports);
+    results[name] = {
+      key: key || '.',
+      value: exports,
+      name,
+    };
     return;
   }
 
@@ -41,13 +43,35 @@ const resolveEntryPointsNoConditions = (
   }
 };
 
+/**
+ * Represents single entry from package.json exports object
+ *
+ * ```json
+ *   ".": "./src/index.ts",
+ *   "./feature/*": "./src/feature/index.ts"
+ * ```
+ * Contains 2 entries, where `"."` and "./feature/*" - are keys,
+ * `"./src/index.ts"`, "./src/feature/index.ts" etc. - are values.
+ */
+export type PackageExportsEntryPoint = {
+  /**
+   * Export path pattern
+   */
+  key: string;
+  /**
+   * Path to the module this entry point represents
+   */
+  value: string;
+  /**
+   * Chunk name generated from the key
+   */
+  name: string;
+};
+
 export const resolveNodeEntryPoints = (
   exports: PackageJsonExports
-): Array<{ name: string; entryPoint: string }> => {
-  const results = new Map<string, string>();
+): Record<string, PackageExportsEntryPoint> => {
+  const results: Record<string, PackageExportsEntryPoint> = {};
   resolveEntryPointsNoConditions(results, exports);
-  return [...results.entries()].map(([key, value]) => ({
-    name: key,
-    entryPoint: value,
-  }));
+  return results;
 };

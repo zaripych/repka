@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import pico from 'picocolors';
 
 import { readCwdPackageJson } from './package-json/readPackageJson';
 
@@ -14,10 +14,10 @@ export async function run<Args extends [Builder, ...Builder[]]>(
           .then(() => builder())
           .catch(async (err: Error) => {
             console.error(
-              chalk.redBright(
-                `\nERROR: Failed to ${builder.name}`,
-                (await readCwdPackageJson()).name,
-                err.message
+              pico.red(
+                `\nERROR: Failed to ${builder.name} ${
+                  (await readCwdPackageJson()).name
+                } ${err.message}`
               )
             );
             return Promise.reject(err);

@@ -21,6 +21,14 @@ export type PackageJsonExports =
       [exportPath: `.${string}`]: PackageJsonExports;
     });
 
+export type JsonPrimitive = boolean | number | string | null;
+
+export type JsonType =
+  | {
+      [key: string]: JsonType | JsonPrimitive;
+    }
+  | JsonPrimitive;
+
 export type PackageJson = {
   name: string;
   type?: string;
@@ -32,4 +40,4 @@ export type PackageJson = {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
-} & Record<string, string | string[] | boolean>;
+} & Record<string, JsonType>;
