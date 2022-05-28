@@ -30,7 +30,8 @@ export type JsonType =
   | JsonPrimitive;
 
 export type PackageJson = {
-  name: string;
+  name?: string;
+  version?: string;
   type?: string;
   types?: string;
   typings?: string;

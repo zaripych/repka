@@ -4,9 +4,9 @@ import type { Plugin } from 'rollup';
 
 import { copyFiles } from './file-system/copyFiles';
 import { rmrfDist } from './file-system/rmrfDist';
-import type { PackageJson } from './package-json/packageJson';
 import { readCwdPackageJson } from './package-json/readPackageJson';
 import { resolveNodeEntryPoints } from './package-json/resolveEntryPoints';
+import { validatePackageJson } from './package-json/validatePackageJson';
 import { rollupBuild } from './rollup/rollupBuild';
 import { tscComposite } from './tsc-cli/tsc';
 import { allFulfilled } from './utils/allFullfilled';
@@ -40,31 +40,16 @@ export type BuildOpts = {
 };
 
 const externalsFromDependencies = (
-  packageJson: PackageJson,
+  dependenciesParam?: Record<string, string>,
   opts?: BuildOpts
 ) => {
-  const dependencies = Object.keys(packageJson.dependencies || {});
+  const dependencies = Object.keys(dependenciesParam || {});
   return [...new Set([...dependencies, ...(opts?.externals || [])])];
 };
 
 export function buildForNode(opts?: BuildOpts): () => Promise<void> {
   return setFunctionName('buildForNode', async () => {
-    const packageJson = await readCwdPackageJson();
-    if (packageJson.type !== 'module') {
-      throw new Error('"type" in package.json should be "module"');
-    }
-    if (!packageJson.exports) {
-      throw new Error('"exports" in package.json should be defined');
-    }
-    if (packageJson.typings) {
-      throw new Error(
-        '"typings" in package.json should not be defined, use "types"'
-      );
-    }
-    const types = packageJson.types;
-    if (!types) {
-      throw new Error('"types" in package.json should be defined');
-    }
+    const packageJson = validatePackageJson(await readCwdPackageJson());
 
     await rmrfDist();
 
@@ -96,7 +81,10 @@ export function buildForNode(opts?: BuildOpts): () => Promise<void> {
           });
         };
 
-    const allExternals = externalsFromDependencies(packageJson, opts);
+    const allExternals = externalsFromDependencies(
+      packageJson.dependencies,
+      opts
+    );
 
     await allFulfilled([
       declarationsPre(),
