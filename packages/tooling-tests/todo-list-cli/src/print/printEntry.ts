@@ -1,27 +1,19 @@
 import type { TodoEntry } from '@tooling-tests/todo-list-store';
-import chalk from 'chalk';
+import pico from 'picocolors';
 
 export function printEntry(entry: TodoEntry, variant?: 'removed' | 'added') {
   switch (variant) {
     case 'added':
       console.log(
-        chalk.greenBright('+'),
-        chalk.greenBright(entry.entryId),
-        chalk.greenBright(entry.text)
+        pico.green('+'),
+        pico.green(entry.entryId),
+        pico.green(entry.text)
       );
       break;
     case 'removed':
-      console.log(
-        chalk.redBright('-'),
-        chalk.redBright(entry.entryId),
-        chalk.redBright(entry.text)
-      );
+      console.log(pico.red('-'), pico.red(entry.entryId), pico.red(entry.text));
       break;
     default:
-      console.log(
-        '•',
-        chalk.greenBright(entry.entryId),
-        chalk.whiteBright(entry.text)
-      );
+      console.log('•', pico.green(entry.entryId), pico.white(entry.text));
   }
 }
