@@ -34,10 +34,9 @@ const plugins = () => [
   json(),
   esbuild({
     target: 'node16',
-    minify: false,
+    minify: true,
   }),
   analyze({
-    filter: 'src',
     summaryOnly: true,
     limit: 5,
   }),
@@ -67,26 +66,19 @@ const customPlugins = (opts: BuildOpts) => {
 export async function rollupBuild(opts: BuildOpts) {
   const entryByName = opts.entryPoints;
   const entries = Object.values(entryByName);
-  try {
-    const result = await rollup({
-      input: Object.fromEntries(
-        entries.map(({ name, value }) => [name, value])
-      ),
-      plugins: [...plugins(), ...customPlugins(opts)],
-      watch: {
-        clearScreen: false,
-      },
-      external: opts.externals || [],
-    });
-    await result.write({
-      dir: './dist/dist',
-      sourcemap: true,
-      entryFileNames: `[name].[format].js`,
-      format: 'es',
-    });
-    await result.close();
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
+  const result = await rollup({
+    input: Object.fromEntries(entries.map(({ name, value }) => [name, value])),
+    plugins: [...plugins(), ...customPlugins(opts)],
+    watch: {
+      clearScreen: false,
+    },
+    external: opts.externals || [],
+  });
+  await result.write({
+    dir: './dist/dist',
+    sourcemap: true,
+    entryFileNames: `[name].[format].js`,
+    format: 'es',
+  });
+  await result.close();
 }
