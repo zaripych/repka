@@ -3,6 +3,8 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
+    "build:all": "pnpm turbo run build",
+    "lint:all": "pnpm turbo run lint",
     "lint:changed": "pnpm turbo run lint --filter=...[HEAD]",
     "prepare": "husky install",
     "prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml)' --write"
