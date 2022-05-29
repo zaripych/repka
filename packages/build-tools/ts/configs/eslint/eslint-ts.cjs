@@ -47,7 +47,13 @@ module.exports = {
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
     '@typescript-eslint/consistent-type-imports': 'error',
-    '@typescript-eslint/no-unused-expressions': [
+    '@typescript-eslint/no-namespace': [
+      'error',
+      {
+        allowDeclarations: true,
+      },
+    ],
+    'no-unused-expressions': [
       'error',
       {
         allowShortCircuit: true,
