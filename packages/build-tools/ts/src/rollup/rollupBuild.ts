@@ -6,12 +6,13 @@ import resolve from '@rollup/plugin-node-resolve';
 import type { Plugin } from 'rollup';
 import { rollup } from 'rollup';
 import analyze from 'rollup-plugin-analyzer';
-import esbuild from 'rollup-plugin-esbuild';
 import generatePackageJsonPlugin from 'rollup-plugin-generate-package-json';
 
 import type { JsonType } from '../package-json/packageJson';
 import type { PackageExportsEntryPoint } from '../package-json/resolveEntryPoints';
 import { resolveNodeBuiltinsPlugin } from './resolveNodeBuiltinsPlugin';
+import { esbuild } from './rollupPluginEsbuild';
+import { extensions } from './rollupPluginExtensions';
 import { transformPackageJson } from './transformPackageJson';
 
 export type BuildOpts = {
@@ -32,10 +33,29 @@ const plugins = () => [
     ignoreTryCatch: true,
   }),
   json(),
+  extensions({
+    extensions: ['.ts', '.tsx'],
+  }),
   esbuild({
     target: 'node16',
+    sourcemap: true,
     minify: true,
+    format: 'esm',
+    loader: 'tsx',
   }),
+  // swc({
+  //   module: {
+  //     type: 'es6',
+  //   },
+  //   jsc: {
+  //     parser: {
+  //       syntax: 'typescript',
+  //     },
+  //     target: 'es2022',
+  //   },
+  //   sourceMaps: true,
+  //   minify: true,
+  // }),
   analyze({
     summaryOnly: true,
     limit: 5,
@@ -76,7 +96,7 @@ export async function rollupBuild(opts: BuildOpts) {
   });
   await result.write({
     dir: './dist/dist',
-    sourcemap: true,
+    sourcemap: 'inline',
     entryFileNames: `[name].[format].js`,
     format: 'es',
   });

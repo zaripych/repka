@@ -40,7 +40,6 @@ importers:
       picocolors: 1.0.0
       rollup: 2.75.0
       rollup-plugin-analyzer: 4.0.0
-      rollup-plugin-esbuild: 4.9.1
       rollup-plugin-generate-package-json: 3.2.0
       typescript: 4.7.2
     dependencies:
@@ -62,7 +61,6 @@ importers:
       picocolors: 1.0.0
       rollup: 2.75.0
       rollup-plugin-analyzer: 4.0.0
-      rollup-plugin-esbuild: 4.9.1_pf4ciewabmfawf2ccdly3yuqp4
       rollup-plugin-generate-package-json: 3.2.0_rollup@2.75.0
       typescript: 4.7.2
     devDependencies:
@@ -254,14 +252,6 @@ packages:
       estree-walker: 1.0.1
       picomatch: 2.3.1
       rollup: 2.75.0
-    dev: false
-
-  /@rollup/pluginutils/4.2.1:
-    resolution: {integrity: sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ==}
-    engines: {node: '>= 8.0.0'}
-    dependencies:
-      estree-walker: 2.0.2
-      picomatch: 2.3.1
     dev: false
 
   /@types/eslint/8.4.2:
@@ -882,10 +872,6 @@ packages:
   /es-module-lexer/0.10.5:
     resolution: {integrity: sha512-+7IwY/kiGAacQfY+YBhKMvEmyAJnw5grTUgjG85Pe7vcUI/6b7pZjZG8nQ7+48YhzEAEqrEgD2dCz/JIK+AYvw==}
     dev: true
-
-  /es-module-lexer/0.9.3:
-    resolution: {integrity: sha512-1HQ2M2sPtxwnvOvT1ZClHyQDiggdNjURWpY2we6aMKCQiUVxTmVs2UYPLIrD84sS+kMdUwfBSylbJPwNnBrnHQ==}
-    dev: false
 
   /es-shim-unscopables/1.0.0:
     resolution: {integrity: sha512-Jm6GPcCdC30eMLbZ2x8z2WuRwAws3zTBBKuusffYVUrNj/GVSUAZ+xKMaUpfNDR5IbyNA5LJbaecoUVbmUcB1w==}
@@ -2011,11 +1997,6 @@ packages:
   /isexe/2.0.0:
     resolution: {integrity: sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=}
 
-  /joycon/3.1.1:
-    resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
-    engines: {node: '>=10'}
-    dev: false
-
   /js-tokens/4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
     dev: false
@@ -2048,10 +2029,6 @@ packages:
     hasBin: true
     dependencies:
       minimist: 1.2.6
-    dev: false
-
-  /jsonc-parser/3.0.0:
-    resolution: {integrity: sha512-fQzRfAbIBnR0IQvftw9FJveWiHp72Fg20giDrHz6TdfB12UH/uue0D3hm57UB5KgAVuniLMCaS8P1IMj9NR7cA==}
     dev: false
 
   /levn/0.4.1:
@@ -2450,24 +2427,6 @@ packages:
   /rollup-plugin-analyzer/4.0.0:
     resolution: {integrity: sha512-LL9GEt3bkXp6Wa19SNR5MWcvHNMvuTFYg+eYBZN2OIFhSWN+pEJUQXEKu5BsOeABob3x9PDaLKW7w5iOJnsESQ==}
     engines: {node: '>=8.0.0'}
-    dev: false
-
-  /rollup-plugin-esbuild/4.9.1_pf4ciewabmfawf2ccdly3yuqp4:
-    resolution: {integrity: sha512-qn/x7Wz9p3Xnva99qcb+nopH0d2VJwVnsxJTGEg+Sh2Z3tqQl33MhOwzekVo1YTKgv+yAmosjcBRJygMfGrtLw==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      esbuild: '>=0.10.1'
-      rollup: ^1.20.0 || ^2.0.0
-    dependencies:
-      '@rollup/pluginutils': 4.2.1
-      debug: 4.3.4
-      es-module-lexer: 0.9.3
-      esbuild: 0.14.41
-      joycon: 3.1.1
-      jsonc-parser: 3.0.0
-      rollup: 2.75.0
-    transitivePeerDependencies:
-      - supports-color
     dev: false
 
   /rollup-plugin-generate-package-json/3.2.0_rollup@2.75.0:

@@ -1,0 +1,36 @@
+import type { FilterPattern } from '@rollup/pluginutils';
+import { createFilter } from '@rollup/pluginutils';
+import type { Options } from '@swc/core';
+import { transform } from '@swc/core';
+import type { Plugin } from 'rollup';
+
+type SWCPluginOptions<O = Options> = Pick<O, Exclude<keyof O, 'filename'>>;
+
+type RollupOptions = {
+  rollup?: {
+    include: FilterPattern;
+    exclude: FilterPattern;
+  };
+};
+
+type PluginOptions = SWCPluginOptions & RollupOptions;
+
+type RollupPluginSWC = (options?: PluginOptions) => Plugin;
+
+export const swc: RollupPluginSWC = (pluginOptions = {}) => {
+  const { rollup, ...options } = pluginOptions;
+
+  const filter = createFilter(rollup?.include, rollup?.exclude);
+
+  return {
+    name: 'swc',
+    transform(code, filename) {
+      if (!filter(filename)) {
+        return null;
+      }
+
+      (options as SWCPluginOptions & { filename: string }).filename = filename;
+      return transform(code, options);
+    },
+  };
+};
