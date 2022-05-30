@@ -27,7 +27,7 @@ export async function load() {
       if (err.code === 'ENOENT') {
         return Promise.resolve([] as Array<TodoEntry>);
       }
-      return Promise.reject(err);
+      throw new Error('Cannot read the TODO list state file');
     });
   entries.splice(0, entries.length, ...loaded);
   totalEntries = loaded.reduce(

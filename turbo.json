@@ -2,9 +2,22 @@
   "$schema": "https://turborepo.org/schema.json",
   "baseBranch": "origin/master",
   "pipeline": {
+    "test": {
+      "dependsOn": [],
+      "inputs": [
+        "src/*.ts",
+        "src/*.tsx",
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "../../build-tools/ts/src/**/*.ts"
+      ],
+      "outputs": []
+    },
     "lint": {
       "dependsOn": [],
       "inputs": [
+        "src/*.ts",
+        "src/*.tsx",
         "src/**/*.ts",
         "src/**/*.tsx",
         "../../build-tools/ts/src/**/*.ts"
@@ -14,6 +27,8 @@
     "build": {
       "dependsOn": [],
       "inputs": [
+        "src/*.ts",
+        "src/*.tsx",
         "src/**/*.ts",
         "src/**/*.tsx",
         "../../build-tools/ts/src/**/*.ts"

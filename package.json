@@ -4,20 +4,25 @@
   "private": true,
   "scripts": {
     "build:all": "pnpm turbo run build",
+    "build:changed": "pnpm turbo run build --filter='...[HEAD]'",
     "lint:all": "pnpm turbo run lint",
-    "lint:changed": "pnpm turbo run lint --filter=...[HEAD]",
+    "lint:changed": "pnpm turbo run lint --filter='...[HEAD]'",
     "prepare": "husky install",
-    "prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml)' --write"
+    "prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml)' --write",
+    "test": "pnpm turbo run test",
+    "test:all": "pnpm turbo run test",
+    "test:changed": "pnpm turbo run test --filter='...[HEAD]'"
   },
   "dependencies": {
     "turbo": "1.2.14"
   },
   "devDependencies": {
+    "@types/jest": "27.5.1",
     "@types/node": "16",
     "husky": "8.0.1",
     "lint-staged": "12.4.2",
     "prettier": "2.6.2",
-    "tsx": "3.4.0"
+    "tsx": "3.4.2"
   },
   "packageManager": "pnpm@7.1.5",
   "engines": {

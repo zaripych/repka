@@ -10,6 +10,12 @@ module.exports = {
       extends: ['./eslint-ts.cjs'],
     },
     {
+      files: ['**/*.test.ts', '**/*.test.tsx'],
+      env: {
+        jest: true,
+      },
+    },
+    {
       files: ['**/*.json', '*.json'],
       extends: ['./eslint-json.cjs'],
     },

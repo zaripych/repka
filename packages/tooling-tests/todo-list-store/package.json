@@ -6,7 +6,8 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsx ./build.ts",
-    "lint": "tsx ./lint.ts"
+    "lint": "tsx ./lint.ts",
+    "test": "tsx ./test.ts"
   },
   "dependencies": {},
   "devDependencies": {

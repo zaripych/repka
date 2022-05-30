@@ -1,20 +1,9 @@
-import { load, save } from '@tooling-tests/todo-list-store';
-import { program } from 'commander';
+import { enableSourceMapsSupport } from './enableSourceMapsSupport';
 
-import { addCommand } from './add/command';
-import { listCommand } from './list/command';
-import { removeCommand } from './remove/command';
-
-async function run() {
-  await load();
-  await program
-    .addCommand(listCommand(), {
-      isDefault: true,
-    })
-    .addCommand(addCommand())
-    .addCommand(removeCommand())
-    .parseAsync();
-  await save();
+async function main() {
+  enableSourceMapsSupport();
+  const { run } = await import('./program');
+  await run();
 }
 
-await run();
+await main();
