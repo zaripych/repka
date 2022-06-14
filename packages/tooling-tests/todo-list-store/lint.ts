@@ -1,3 +1,3 @@
-import { lint, run } from '@build-tools/ts';
+import { lint, pipeline } from '@build-tools/ts';
 
-await run(lint());
+await pipeline(lint());

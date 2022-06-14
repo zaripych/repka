@@ -1,6 +1,6 @@
-import { buildForNode, run } from '@build-tools/ts';
+import { buildForNode, pipeline } from '@build-tools/ts';
 
-await run(
+await pipeline(
   // this package is built but never published
   buildForNode()
 );

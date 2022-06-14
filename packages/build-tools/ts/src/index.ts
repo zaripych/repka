@@ -1,4 +1,4 @@
 export * from './buildForNode';
 export * from './lint';
-export * from './run';
+export * from './pipeline';
 export * from './unitTest';

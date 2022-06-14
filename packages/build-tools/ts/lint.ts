@@ -1,3 +1,3 @@
-import { lint, run } from './src';
+import { lint, pipeline } from './src';
 
-await run(lint());
+await pipeline(lint());

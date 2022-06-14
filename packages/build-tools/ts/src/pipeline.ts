@@ -5,7 +5,10 @@ import { enableSourceMapsSupport } from './utils/enableSourceMapsSupport';
 
 type Builder = () => Promise<void>;
 
-export async function run<Args extends [Builder, ...Builder[]]>(
+/**
+ * Declare tasks that are associated with a dev pipeline script
+ */
+export async function pipeline<Args extends [Builder, ...Builder[]]>(
   ...builders: Args
 ): Promise<void> {
   try {

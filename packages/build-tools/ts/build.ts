@@ -1,6 +1,6 @@
-import { buildForNode, run } from './src';
+import { buildForNode, pipeline } from './src';
 
-await run(
+await pipeline(
   buildForNode({
     externals: ['typescript', 'eslint'],
     copy: [

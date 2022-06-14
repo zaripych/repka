@@ -1,3 +1,3 @@
-import { run, unitTest } from '@build-tools/ts';
+import { pipeline, unitTest } from '@build-tools/ts';
 
-await run(unitTest());
+await pipeline(unitTest());
