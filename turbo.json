@@ -2,38 +2,26 @@
   "$schema": "https://turborepo.org/schema.json",
   "baseBranch": "origin/master",
   "pipeline": {
-    "test": {
+    "build:tools": {
       "dependsOn": [],
-      "inputs": [
-        "src/*.ts",
-        "src/*.tsx",
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "../../build-tools/ts/src/**/*.ts"
-      ],
-      "outputs": []
-    },
-    "lint": {
-      "dependsOn": [],
-      "inputs": [
-        "src/*.ts",
-        "src/*.tsx",
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "../../build-tools/ts/src/**/*.ts"
-      ],
-      "outputs": [".tsc-out"]
+      "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts", "configs"],
+      "outputs": ["dist"],
+      "outputMode": "none"
     },
     "build": {
-      "dependsOn": [],
-      "inputs": [
-        "src/*.ts",
-        "src/*.tsx",
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "../../build-tools/ts/src/**/*.ts"
-      ],
+      "dependsOn": ["^build:tools"],
+      "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts"],
       "outputs": ["dist"]
+    },
+    "lint": {
+      "dependsOn": ["^build:tools"],
+      "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts"],
+      "outputs": [".tsc-out"]
+    },
+    "test": {
+      "dependsOn": ["^build:tools"],
+      "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts"],
+      "outputs": []
     }
   }
 }

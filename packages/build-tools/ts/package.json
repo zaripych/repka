@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "build": "tsx ./build.ts",
+    "build:tools": "tsx ./build.ts",
     "lint": "tsx ./lint.ts"
   },
   "dependencies": {
