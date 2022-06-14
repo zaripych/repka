@@ -4,8 +4,6 @@ importers:
 
   .:
     specifiers:
-      '@types/jest': 28.1.1
-      '@types/node': '16'
       husky: 8.0.1
       lint-staged: 13.0.1
       prettier: 2.7.0
@@ -13,8 +11,6 @@ importers:
       turbo: 1.2.16
       typescript: 4.7.3
     devDependencies:
-      '@types/jest': 28.1.1
-      '@types/node': 16.11.34
       husky: 8.0.1
       lint-staged: 13.0.1
       prettier: 2.7.0
@@ -30,6 +26,8 @@ importers:
       '@rollup/plugin-node-resolve': 13.3.0
       '@rollup/plugin-virtual': 2.1.0
       '@types/eslint': 8.4.3
+      '@types/jest': 28.1.1
+      '@types/node': '16'
       '@typescript-eslint/eslint-plugin': 5.28.0
       '@typescript-eslint/parser': 5.28.0
       builtin-modules: 3.3.0
@@ -66,7 +64,7 @@ importers:
       eslint-plugin-json-files: 1.3.0_eslint@8.17.0
       eslint-plugin-simple-import-sort: 7.0.0_eslint@8.17.0
       fast-glob: 3.2.11
-      jest: 28.1.1
+      jest: 28.1.1_@types+node@16.11.34
       picocolors: 1.0.0
       rollup: 2.75.6
       rollup-plugin-analyzer: 4.0.0
@@ -76,6 +74,8 @@ importers:
     devDependencies:
       '@jest/types': 28.1.1
       '@types/eslint': 8.4.3
+      '@types/jest': 28.1.1
+      '@types/node': 16.11.34
 
   packages/templates/ts-package:
     specifiers:
@@ -2514,7 +2514,7 @@ packages:
       '@typescript-eslint/eslint-plugin': 5.28.0_7yumg2qjgbp7maccqlfhx2vudu
       '@typescript-eslint/utils': 5.26.0_ud6rd4xtew5bv4yhvkvu24pzm4
       eslint: 8.17.0
-      jest: 28.1.1
+      jest: 28.1.1_@types+node@16.11.34
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -3524,7 +3524,7 @@ packages:
       - supports-color
     dev: false
 
-  /jest-cli/28.1.1:
+  /jest-cli/28.1.1_@types+node@16.11.34:
     resolution: {integrity: sha512-+sUfVbJqb1OjBZ0OdBbI6OWfYM1i7bSfzYy6gze1F1w3OKWq8ZTEKkZ8a7ZQPq6G/G1qMh/uKqpdWhgl11NFQQ==}
     engines: {node: ^12.13.0 || ^14.15.0 || ^16.10.0 || >=17.0.0}
     hasBin: true
@@ -3541,7 +3541,7 @@ packages:
       exit: 0.1.2
       graceful-fs: 4.2.10
       import-local: 3.1.0
-      jest-config: 28.1.1
+      jest-config: 28.1.1_@types+node@16.11.34
       jest-util: 28.1.1
       jest-validate: 28.1.1
       prompts: 2.4.2
@@ -3550,44 +3550,6 @@ packages:
       - '@types/node'
       - supports-color
       - ts-node
-    dev: false
-
-  /jest-config/28.1.1:
-    resolution: {integrity: sha512-tASynMhS+jVV85zKvjfbJ8nUyJS/jUSYZ5KQxLUN2ZCvcQc/OmhQl2j6VEL3ezQkNofxn5pQ3SPYWPHb0unTZA==}
-    engines: {node: ^12.13.0 || ^14.15.0 || ^16.10.0 || >=17.0.0}
-    peerDependencies:
-      '@types/node': '*'
-      ts-node: '>=9.0.0'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      ts-node:
-        optional: true
-    dependencies:
-      '@babel/core': 7.18.2
-      '@jest/test-sequencer': 28.1.1
-      '@jest/types': 28.1.1
-      babel-jest: 28.1.1_@babel+core@7.18.2
-      chalk: 4.1.2
-      ci-info: 3.3.1
-      deepmerge: 4.2.2
-      glob: 7.2.3
-      graceful-fs: 4.2.10
-      jest-circus: 28.1.1
-      jest-environment-node: 28.1.1
-      jest-get-type: 28.0.2
-      jest-regex-util: 28.0.2
-      jest-resolve: 28.1.1
-      jest-runner: 28.1.1
-      jest-util: 28.1.1
-      jest-validate: 28.1.1
-      micromatch: 4.0.5
-      parse-json: 5.2.0
-      pretty-format: 28.1.1
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
-    transitivePeerDependencies:
-      - supports-color
     dev: false
 
   /jest-config/28.1.1_@types+node@16.11.34:
@@ -3995,7 +3957,7 @@ packages:
       supports-color: 8.1.1
     dev: false
 
-  /jest/28.1.1:
+  /jest/28.1.1_@types+node@16.11.34:
     resolution: {integrity: sha512-qw9YHBnjt6TCbIDMPMpJZqf9E12rh6869iZaN08/vpOGgHJSAaLLUn6H8W3IAEuy34Ls3rct064mZLETkxJ2XA==}
     engines: {node: ^12.13.0 || ^14.15.0 || ^16.10.0 || >=17.0.0}
     hasBin: true
@@ -4008,7 +3970,7 @@ packages:
       '@jest/core': 28.1.1
       '@jest/types': 28.1.1
       import-local: 3.1.0
-      jest-cli: 28.1.1
+      jest-cli: 28.1.1_@types+node@16.11.34
     transitivePeerDependencies:
       - '@types/node'
       - supports-color

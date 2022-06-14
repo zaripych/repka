@@ -3,6 +3,16 @@
     "lib": ["ES2022"],
     "target": "esnext",
     "module": "esnext",
+    "jsx": "react-jsx",
+    "typeRoots": [
+      // Thes are relative to the config, so will include
+      // types that we reference in devDependencies of the
+      // @build-tools/ts
+      "../../../node_modules/@types",
+      "../../node_modules/@types",
+      "../node_modules/@types",
+      "node_modules/@types"
+    ],
     "sourceMap": false,
     "moduleResolution": "node",
     "allowJs": true,
@@ -13,7 +23,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,

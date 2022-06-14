@@ -41,6 +41,8 @@
   },
   "devDependencies": {
     "@jest/types": "28.1.1",
-    "@types/eslint": "8.4.3"
+    "@types/eslint": "8.4.3",
+    "@types/jest": "28.1.1",
+    "@types/node": "16"
   }
 }
