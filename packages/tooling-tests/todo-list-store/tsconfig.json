@@ -1,8 +1,7 @@
 {
-  "extends": "./node_modules/@build-tools/ts/configs/tsconfig.lib.json",
+  "extends": "./node_modules/@build-tools/ts/configs/tsconfig.base.json",
   "compilerOptions": {
     "outDir": ".tsc-out",
-    "rootDir": "src",
     "tsBuildInfoFile": ".tsc-out/.tsbuildinfo"
   },
   "include": ["src"]
