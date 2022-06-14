@@ -9,6 +9,7 @@ export async function spawnToPromise(
   child: ChildProcess | ChildProcessWithoutNullStreams,
   opts?: {
     exitCodes?: number[];
+    cwd?: string;
   }
 ): Promise<void> {
   const stack = new Error().stack;
@@ -20,12 +21,13 @@ export async function spawnToPromise(
 
   const cwd = guessMonorepoRoot();
   console.log(
-    ['•', child.spawnfile, ...child.spawnargs.slice(1)]
+    ['>', child.spawnfile, ...child.spawnargs.slice(1)]
       .map((entry) => entry.replace(cwd + '/', './'))
-      .join(' ')
+      .join(' '),
+    ...(opts?.cwd ? [`in ${opts.cwd}`] : [])
   );
 
-  return new Promise((res, rej) =>
+  await new Promise<void>((res, rej) =>
     child
       .on('close', (code, signal) => {
         if (typeof code === 'number') {
@@ -42,4 +44,11 @@ export async function spawnToPromise(
       })
       .on('error', rej)
   );
+  // inherit exit code
+  if (
+    typeof child.exitCode === 'number' &&
+    typeof process.exitCode !== 'number'
+  ) {
+    process.exitCode = child.exitCode;
+  }
 }

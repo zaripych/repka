@@ -1,14 +1,14 @@
 import { spawn } from 'node:child_process';
 
-import { filterAndPrint } from '../child-processes/filterAndPrint';
-import { spawnToPromise } from '../child-processes/spawnToPromise';
+import { filterAndPrint } from '../child-process/filterAndPrint';
+import { spawnToPromise } from '../child-process/spawnToPromise';
+import { configFilePath } from '../utils/configFilePath';
+import { modulesBinPath } from '../utils/modulesBinPath';
 import { processArgsBuilder } from '../utils/processArgsBuilder';
 
-const jestPath = () =>
-  new URL('../../node_modules/.bin/jest', import.meta.url).pathname;
+const jestPath = () => modulesBinPath('jest');
 
-const jestConfigPath = () =>
-  new URL('../../configs/jest/jest.config.mjs', import.meta.url).pathname;
+const jestRootDir = () => './src';
 
 const jest = async (args: string[]) => {
   const child = spawn(jestPath(), args, {
@@ -26,21 +26,25 @@ const jest = async (args: string[]) => {
       replaceWith: undefined,
     },
   ]);
-  await spawnToPromise(child);
+  await spawnToPromise(child, {
+    exitCodes: [0, 1],
+  });
 };
 
-export const jestStandardConfig = async (args: string[] = []) =>
+const jestUnitTestConfigPath = () => configFilePath('./jest/jest.config.mjs');
+
+export const jestUnitTests = async (args: string[] = []) =>
   jest(
     processArgsBuilder(args)
       .defaultArg(
-        ['--color'],
+        ['--color', '--colors'],
         [],
         (args) => !args.hasArg('--no-color', '--noColor')
       )
-      .defaultArg(['-c', '--config'], [jestConfigPath()])
+      .defaultArg(['-c', '--config'], [jestUnitTestConfigPath()])
       .defaultArg(
         ['--rootDir', '--root-dir'],
-        [process.cwd()],
+        [jestRootDir()],
         (args) => !args.hasArg('-c', '--config')
       )
       .buildResult()

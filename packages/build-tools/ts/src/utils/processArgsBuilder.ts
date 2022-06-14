@@ -8,6 +8,7 @@ export function processArgsBuilder(processArgs: string[] = []) {
   const hasArg = (...argVariants: string[]) => {
     return argVariants.some((variant) => processArgs.includes(variant));
   };
+  const modifiedProcessArgs: string[] = [...processArgs];
   const result: string[] = [];
   const api = {
     hasArg,
@@ -35,7 +36,24 @@ export function processArgsBuilder(processArgs: string[] = []) {
       );
       return api;
     },
-    buildResult: () => [...result],
+    removeArgs: (
+      args: Array<string | RegExp>,
+      opts?: { numValues: number }
+    ) => {
+      for (const arg of args) {
+        const index = modifiedProcessArgs.findIndex((value) =>
+          typeof arg === 'string' ? value === arg : arg.test(value)
+        );
+        if (index !== -1) {
+          modifiedProcessArgs.splice(
+            index,
+            opts?.numValues ? opts.numValues + 1 : 1
+          );
+        }
+      }
+      return api;
+    },
+    buildResult: () => [...result, ...modifiedProcessArgs],
   };
   return api;
 }

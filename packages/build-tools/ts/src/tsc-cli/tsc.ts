@@ -1,10 +1,11 @@
 import { spawn } from 'node:child_process';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 
-import { spawnToPromise } from '../child-processes/spawnToPromise';
+import { spawnToPromise } from '../child-process/spawnToPromise';
+import { guessMonorepoRoot } from '../file-system/guessMonorepoRoot';
+import { modulesBinPath } from '../utils/modulesBinPath';
 
-const tscPath = () =>
-  new URL('../../node_modules/.bin/tsc', import.meta.url).pathname;
+const tscPath = () => modulesBinPath('tsc');
 
 const tsc = async (args: string[]) =>
   spawnToPromise(
@@ -12,8 +13,11 @@ const tsc = async (args: string[]) =>
       stdio: 'inherit',
       // based on the monorepo "packages/*/*" directory structure
       // for full paths in TypeScript errors just do this:
-      cwd: '../../../',
-    })
+      cwd: relative(process.cwd(), guessMonorepoRoot()),
+    }),
+    {
+      exitCodes: [0, 1],
+    }
   );
 
 // building composite has an advantage of caching and incremental builds

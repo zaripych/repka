@@ -1,15 +1,16 @@
 import { spawn } from 'node:child_process';
 
-import { spawnToPromise } from './child-processes/spawnToPromise';
+import { spawnToPromise } from './child-process/spawnToPromise';
 import { tscComposite } from './tsc-cli/tsc';
 import { allFulfilled } from './utils/allFullfilled';
+import { configFilePath } from './utils/configFilePath';
+import { modulesBinPath } from './utils/modulesBinPath';
+import { processArgsBuilder } from './utils/processArgsBuilder';
 import { setFunctionName } from './utils/setFunctionName';
 
-const eslintPath = () =>
-  new URL('../node_modules/.bin/eslint', import.meta.url).pathname;
+const eslintPath = () => modulesBinPath('eslint');
 
-const eslintConfigPath = () =>
-  new URL('../configs/eslint/eslint-root.cjs', import.meta.url).pathname;
+const eslintConfigPath = () => configFilePath('./eslint/eslint-root.cjs');
 
 const restArgs = () => {
   const args = process.argv.slice(2);
@@ -20,20 +21,23 @@ const eslint = async () =>
   spawnToPromise(
     spawn(
       eslintPath(),
-      [
-        '--format',
-        'unix',
-        '--ext',
-        ['.ts', '.tsx', '.js', '.jsx', '.cjs', '.json'].join(','),
-        '-c',
-        eslintConfigPath(),
-        '--fix',
-        ...restArgs(),
-      ],
+      processArgsBuilder(restArgs())
+        .defaultArg(['--format'], ['unix'])
+        .defaultArg(
+          ['--ext'],
+          [['.ts', '.tsx', '.js', '.jsx', '.cjs', '.json'].join(',')]
+        )
+        .defaultArg(['--config', '-c'], [eslintConfigPath()])
+        .defaultArg(['--fix'], [], (args) => !args.hasArg('--no-fix'))
+        .removeArgs(['--no-fix'])
+        .buildResult(),
       {
         stdio: 'inherit',
       }
-    )
+    ),
+    {
+      exitCodes: [0, 2],
+    }
   );
 
 export function lint(): () => Promise<void> {
