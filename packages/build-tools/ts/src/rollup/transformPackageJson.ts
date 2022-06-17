@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import type { JsonType } from '../package-json/packageJson';
-import type { PackageExportsEntryPoint } from '../package-json/resolveEntryPoints';
+import type { PackageExportsEntryPoint } from '../package-json/parseEntryPoints';
 
 export function transformPackageJson(
   entryPoints: Record<string, PackageExportsEntryPoint>
@@ -14,6 +14,7 @@ export function transformPackageJson(
     const name = packageJson['name'];
     const version = packageJson['version'];
     const type = packageJson['type'];
+    const bin = packageJson['bin'];
     assert(!!name);
     assert(!!version);
     assert(!!type);
@@ -23,6 +24,9 @@ export function transformPackageJson(
       type,
       ...(license && {
         license,
+      }),
+      ...(bin && {
+        bin,
       }),
       ...('main' in packageJson && {
         main: `./dist/${main.name}.es.js`,

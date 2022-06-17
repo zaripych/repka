@@ -1,5 +1,5 @@
 module.exports = {
-  ignorePatterns: ['.tsc-out', 'dist'],
+  ignorePatterns: ['.tsc-out', 'dist', '.coverage*', '*.gen.*'],
   overrides: [
     {
       files: ['**/*.js', '**/*.cjs', '**/*.mjs', '**/*.jsx'],

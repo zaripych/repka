@@ -2,15 +2,14 @@
 
 import type { Plugin } from 'rollup';
 
-import { copyFiles } from './file-system/copyFiles';
 import { rmrfDist } from './file-system/rmrfDist';
+import { parseEntryPoints } from './package-json/parseEntryPoints';
 import { readCwdPackageJson } from './package-json/readPackageJson';
-import { resolveNodeEntryPoints } from './package-json/resolveEntryPoints';
 import { validatePackageJson } from './package-json/validatePackageJson';
 import { rollupBuild } from './rollup/rollupBuild';
-import { tscComposite } from './tsc-cli/tsc';
-import { allFulfilled } from './utils/allFullfilled';
-import { setFunctionName } from './utils/setFunctionName';
+import { rollupNodeConfig } from './rollup/rollupNodeConfig';
+import { rollupPackageJsonPlugin } from './rollup/rollupPackageJsonPlugin';
+import { declareTask } from './tasks/declareTask';
 
 export type BuildOpts = {
   /**
@@ -18,16 +17,6 @@ export type BuildOpts = {
    * listed which are not explicitly referenced in the code
    */
   externals?: string[];
-
-  /**
-   * Whether to generate declarations during build
-   */
-  declarations?: true;
-
-  /**
-   * Extra files to copy to the ./dist directory to be published
-   */
-  copy?: Array<{ sourceDir: string; globs: string[] }>;
 
   /**
    * Module resolution function, in case you have weird dependencies
@@ -47,71 +36,42 @@ const externalsFromDependencies = (
   return [...new Set([...dependencies, ...(opts?.externals || [])])];
 };
 
-export function buildForNode(opts?: BuildOpts): () => Promise<void> {
-  return setFunctionName('buildForNode', async () => {
-    const packageJson = validatePackageJson(await readCwdPackageJson());
+export function buildForNode(opts?: BuildOpts) {
+  return declareTask({
+    name: 'build',
+    args: opts,
+    execute: async () => {
+      const packageJson = validatePackageJson(await readCwdPackageJson());
 
-    await rmrfDist();
+      await rmrfDist();
 
-    const declarations = opts?.declarations;
+      const entryPoints = parseEntryPoints(packageJson.exports);
 
-    // ./src will imply that we should just include ./src
-    // into the package, otherwise, let's build declarations
-    const declarationsPre = declarations
-      ? async () => {
-          await tscComposite();
-        }
-      : () => Promise.resolve();
+      const allExternals = externalsFromDependencies(
+        packageJson.dependencies,
+        opts
+      );
 
-    const entryPoints = resolveNodeEntryPoints(packageJson.exports);
-
-    const declarationsPost = declarations
-      ? async () => {
-          await copyFiles({
-            sourceDirectory: '.tsc-out',
-            globs: ['**/*.d.ts'],
-            destination: './dist/types',
-          });
-        }
-      : async () => {
-          await copyFiles({
-            sourceDirectory: './src',
-            globs: ['**/*'],
-            destination: './dist/src',
-          });
-        };
-
-    const allExternals = externalsFromDependencies(
-      packageJson.dependencies,
-      opts
-    );
-
-    await allFulfilled([
-      declarationsPre(),
-      rollupBuild({
-        entryPoints,
+      const baseConfig = await rollupNodeConfig({
+        outDir: './dist/dist',
+        input: Object.fromEntries(
+          Object.values(entryPoints).map(({ name, value }) => [name, value])
+        ),
         externals: allExternals,
-        packageJson: (packageJson) => {
-          if (declarations) {
-            packageJson['types'] = './dist/types';
-          } else {
-            packageJson['types'] = packageJson['types'] || './src/index.ts';
-          }
-          return packageJson;
-        },
-      }),
-    ]);
-    await allFulfilled([
-      declarationsPost(),
-      ...(opts?.copy
-        ? opts.copy.map((entry) =>
-            copyFiles({
-              sourceDirectory: entry.sourceDir,
-              globs: entry.globs,
-              destination: `./dist/${entry.sourceDir}`,
-            })
-          )
-        : []),
-    ]);
+        resolveId: opts?.resolveId,
+      });
+      const configWithExtraPlugin = {
+        ...baseConfig,
+        plugins: [
+          ...(baseConfig.plugins || []),
+          rollupPackageJsonPlugin({
+            outDir: './dist',
+            entryPoints,
+            externals: allExternals,
+          }),
+        ],
+      };
+      await rollupBuild(configWithExtraPlugin);
+    },
   });
 }

@@ -5,13 +5,18 @@ export const nodeExportsConditions = [
   'default',
 ] as const;
 
-export const ignoredExportConditions = ['browser', 'development', 'production'];
+export const ignoredByNodeExportConditions = [
+  'types',
+  'browser',
+  'development',
+  'production',
+] as const;
 
 export type NodeExportsConditions = typeof nodeExportsConditions[number];
 
 export type ExportsConditions =
   | NodeExportsConditions
-  | typeof ignoredExportConditions[number];
+  | typeof ignoredByNodeExportConditions[number];
 
 export type PackageJsonExports =
   | string

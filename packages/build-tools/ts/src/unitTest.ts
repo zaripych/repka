@@ -1,8 +1,12 @@
 import { jestUnitTests } from './jest/jest';
-import { setFunctionName } from './utils/setFunctionName';
+import { declareTask } from './tasks/declareTask';
 
-export function unitTest(): () => Promise<void> {
-  return setFunctionName('unitTest', async () => {
-    await jestUnitTests(process.argv.slice(2));
+export function unitTest() {
+  return declareTask({
+    name: 'test',
+    args: undefined,
+    execute: async () => {
+      await jestUnitTests(process.argv.slice(2));
+    },
   });
 }

@@ -1,12 +1,12 @@
 import { spawn } from 'node:child_process';
 
 import { spawnToPromise } from './child-process/spawnToPromise';
+import { declareTask } from './tasks/declareTask';
 import { tscComposite } from './tsc-cli/tsc';
 import { allFulfilled } from './utils/allFullfilled';
 import { configFilePath } from './utils/configFilePath';
 import { modulesBinPath } from './utils/modulesBinPath';
 import { processArgsBuilder } from './utils/processArgsBuilder';
-import { setFunctionName } from './utils/setFunctionName';
 
 const eslintPath = () => modulesBinPath('eslint');
 
@@ -36,12 +36,25 @@ const eslint = async () =>
       }
     ),
     {
-      exitCodes: [0, 2],
+      exitCodes: 'any',
     }
   );
 
-export function lint(): () => Promise<void> {
-  return setFunctionName('lint', async () => {
-    await allFulfilled([tscComposite(), eslint()]);
+/**
+ * Lint using eslint, no customizations possible, other than
+ * via creating custom `eslint.config.mjs` in a directory.
+ *
+ * `Status: Minimum implemented`
+ *
+ * TODO: Allow specifying type of package: web app requires
+ * different linting compared to a published npm package.
+ */
+export function lint() {
+  return declareTask({
+    name: 'lint',
+    args: undefined,
+    execute: async () => {
+      await allFulfilled([tscComposite(), eslint()]);
+    },
   });
 }

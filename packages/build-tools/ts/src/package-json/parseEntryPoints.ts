@@ -68,7 +68,7 @@ export type PackageExportsEntryPoint = {
   name: string;
 };
 
-export const resolveNodeEntryPoints = (
+export const parseEntryPoints = (
   exports: PackageJsonExports
 ): Record<string, PackageExportsEntryPoint> => {
   const results: Record<string, PackageExportsEntryPoint> = {};

@@ -4,19 +4,16 @@ import type {
 } from 'child_process';
 
 import { guessMonorepoRoot } from '../file-system/guessMonorepoRoot';
+import { captureStackTrace } from '../utils/stackTrace';
 
 export async function spawnToPromise(
   child: ChildProcess | ChildProcessWithoutNullStreams,
   opts?: {
-    exitCodes?: number[];
+    exitCodes?: number[] | 'any';
     cwd?: string;
   }
 ): Promise<void> {
-  const stack = new Error().stack;
-  const makeError = (err: Error) => {
-    err.stack = stack;
-    return err;
-  };
+  const { prepareForRethrow } = captureStackTrace();
   const exitCodes = opts?.exitCodes || [0];
 
   const cwd = guessMonorepoRoot();
@@ -31,15 +28,21 @@ export async function spawnToPromise(
     child
       .on('close', (code, signal) => {
         if (typeof code === 'number') {
-          if (!exitCodes.includes(code)) {
-            rej(makeError(new Error(`Process has failed with code ${code}`)));
+          if (exitCodes !== 'any' && !exitCodes.includes(code)) {
+            rej(
+              prepareForRethrow(
+                new Error(`Process has failed with code ${code}`)
+              )
+            );
           } else {
             res();
           }
         } else if (signal) {
-          rej(makeError(new Error(`Failed to execute process: ${signal}`)));
+          rej(
+            prepareForRethrow(new Error(`Failed to execute process: ${signal}`))
+          );
         } else {
-          throw makeError(new Error('Expected signal or error code'));
+          throw prepareForRethrow(new Error('Expected signal or error code'));
         }
       })
       .on('error', rej)
