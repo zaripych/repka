@@ -1,0 +1,15 @@
+{
+	"extends": "../../tsconfig.options.json",
+	"compilerOptions": {
+		"composite": true,
+		"incremental": true,
+		"outDir": "./.tsc-out"
+	},
+	"references": [{ "path": "../../src" }],
+	"include": [
+		"./all-test-cases.ts",
+		"./test-case-config.ts",
+		"./test-cases/**/config.ts",
+		"./test-cases/test-case-config.ts"
+	]
+}

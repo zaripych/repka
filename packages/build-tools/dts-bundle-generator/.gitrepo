@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:zaripych/dts-bundle-generator.git
+	branch = embedded
+	commit = 6e2246b23cce9ee533f047ef1e57d56ad773d809
+	parent = 0d70fc38a9d0c5fa18edc93101050d39040fe12d
+	method = merge
+	cmdver = 0.4.3

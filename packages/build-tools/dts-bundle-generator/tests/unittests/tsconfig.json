@@ -1,0 +1,10 @@
+{
+	"extends": "../../tsconfig.options.json",
+	"compilerOptions": {
+		"composite": true,
+		"incremental": true,
+		"outDir": "./.tsc-out"
+	},
+	"references": [{ "path": "../../src" }],
+	"include": ["**/*.ts"]
+}

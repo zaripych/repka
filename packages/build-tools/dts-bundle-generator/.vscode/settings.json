@@ -1,0 +1,9 @@
+{
+	"files.exclude": {
+		"**/*.tsbuildinfo": true,
+		"config-schema.d.ts": true,
+		"dts-out/**": true,
+		"tests/e2e/.tsc-out/**": true,
+		"tests/unittests/.tsc-out/**": true
+	}
+}
