@@ -7,9 +7,9 @@ import { spawnToPromise } from '../child-process';
 const binPath = (bin: string) =>
   new URL(`../node_modules/.bin/${bin}`, import.meta.url).pathname;
 
-export async function runBin(bin: string) {
+export async function runBin(bin: string, args = process.argv.slice(2)) {
   await spawnToPromise(
-    spawn(binPath(bin), process.argv.slice(2), {
+    spawn(binPath(bin), args, {
       stdio: 'inherit',
     }),
     {

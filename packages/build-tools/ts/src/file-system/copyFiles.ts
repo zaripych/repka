@@ -44,7 +44,7 @@ async function entriesFromGlobs({
   exclude,
   include,
   options,
-}: CopyGlobOpts) {
+}: Pick<CopyGlobOpts, 'source' | 'include' | 'exclude' | 'options'>) {
   const entries = await fg(
     [
       ...(exclude ? exclude.map((glob) => `!${source || '.'}/${glob}`) : []),
@@ -66,16 +66,27 @@ async function entriesFromGlobs({
 
 async function entriesFromBasic({ files, source }: CopyBasicOpts) {
   const entries = await Promise.all(
-    files
-      .map((path) => join(source || '.', path))
-      .map((path) =>
-        stat(path).then((stats) => ({
-          path,
-          stats,
-        }))
-      )
+    files.map((path) =>
+      stat(join(source || '.', path)).then((stats) => {
+        if (stats.isDirectory()) {
+          return entriesFromGlobs({
+            source,
+            include: [`${path}**/*`],
+            options: {
+              dot: true,
+            },
+          });
+        }
+        return [
+          {
+            path: join(source || '.', path),
+            stats,
+          },
+        ];
+      })
+    )
   );
-  return entries;
+  return entries.flatMap((entries) => entries);
 }
 
 function getDeps(opts: CopyOpts) {
@@ -139,7 +150,18 @@ export async function copyFiles(opts: CopyOpts) {
 
     if (info.isSymbolicLink() && !followSymbolicLinks) {
       const realSourcePath = await realpath(sourcePath);
-      await deps.symlink(realSourcePath, targetPath);
+      await deps
+        .symlink(realSourcePath, targetPath)
+        .catch(async (err: NodeJS.ErrnoException) => {
+          if (err.code === 'EEXIST') {
+            const existingRealSourcePath = await realpath(targetPath);
+            if (existingRealSourcePath !== realSourcePath) {
+              return Promise.reject(err);
+            } else {
+              return Promise.resolve();
+            }
+          }
+        });
     } else if (info.isFile()) {
       await deps.copyFile(sourcePath, targetPath);
     } else if (info.isDirectory()) {
