@@ -3,7 +3,7 @@
   "baseBranch": "origin/master",
   "pipeline": {
     "build:tools": {
-      "dependsOn": [],
+      "dependsOn": ["^build:tools"],
       "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts", "configs"],
       "outputs": ["dist"],
       "outputMode": "none"
