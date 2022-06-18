@@ -3,7 +3,12 @@
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
-import type { InputOption, Plugin, RollupWatchOptions } from 'rollup';
+import type {
+  InputOption,
+  ModuleFormat,
+  Plugin,
+  RollupWatchOptions,
+} from 'rollup';
 import analyze from 'rollup-plugin-analyzer';
 
 import { readCwdPackageJson } from '../package-json/readPackageJson';
@@ -14,7 +19,7 @@ import { extensions } from './rollupPluginExtensions';
 
 export type BespokeBuildOpts = {
   outDir: string;
-  input: InputOption;
+  input?: InputOption;
   externals?: string[];
   resolveId?: (
     id: string,
@@ -25,6 +30,7 @@ export type BespokeBuildOpts = {
    */
   minify?: boolean;
   sourcemap?: boolean | 'inline' | 'hidden';
+  format?: ModuleFormat;
 };
 
 const plugins = (opts: BespokeBuildOpts) => {
@@ -80,7 +86,9 @@ const buildExternals = async (opts: BespokeBuildOpts) => {
 
 export async function rollupNodeConfig(opts: BespokeBuildOpts) {
   const config: RollupWatchOptions = {
-    input: opts.input,
+    ...(opts.input && {
+      input: opts.input,
+    }),
     plugins: plugins(opts),
     external: await buildExternals(opts),
     output: {
@@ -88,7 +96,7 @@ export async function rollupNodeConfig(opts: BespokeBuildOpts) {
       sourcemap: opts.sourcemap ?? 'inline',
       chunkFileNames: `chunk.[hash].js`,
       entryFileNames: `[name].[format].js`,
-      format: 'es',
+      format: opts.format || 'esm',
     },
     watch: {
       clearScreen: false,

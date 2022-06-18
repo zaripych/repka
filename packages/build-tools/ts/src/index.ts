@@ -1,6 +1,7 @@
 export * from './buildForNode';
 export * from './child-process';
 export * from './copy';
+export * from './declarations';
 export * from './file-system/copyFiles';
 export * from './lint';
 export * from './pipeline';

@@ -50,7 +50,7 @@ export async function spawnToPromise(
   // inherit exit code
   if (
     typeof child.exitCode === 'number' &&
-    typeof process.exitCode !== 'number'
+    (typeof process.exitCode !== 'number' || process.exitCode === 0)
   ) {
     process.exitCode = child.exitCode;
   }

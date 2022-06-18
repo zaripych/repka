@@ -10,7 +10,12 @@ type Task = AllTaskTypes | TaskExecuteFn;
 
 const postTaskNames: Array<AllTaskTypes['name']> = ['copy'];
 
-const mainTaskNames: Array<AllTaskTypes['name']> = ['lint', 'build', 'test'];
+const mainTaskNames: Array<AllTaskTypes['name']> = [
+  'lint',
+  'build',
+  'test',
+  'declarations',
+];
 
 /**
  * Declare how your package is linted, built, bundled and published

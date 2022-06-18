@@ -4,7 +4,7 @@ import { join } from 'path';
 import { spawnToPromise } from './child-process/spawnToPromise';
 import { guessMonorepoRoot } from './file-system/guessMonorepoRoot';
 
-export type TaskTypes = 'lint' | 'build' | 'test';
+export type TaskTypes = 'lint' | 'build' | 'test' | 'declarations';
 
 const turboPath = () => join(guessMonorepoRoot(), './node_modules/.bin/turbo');
 
