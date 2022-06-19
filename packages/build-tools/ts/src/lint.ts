@@ -34,10 +34,7 @@ const eslint = async () =>
       {
         stdio: 'inherit',
       }
-    ),
-    {
-      exitCodes: 'any',
-    }
+    )
   );
 
 /**

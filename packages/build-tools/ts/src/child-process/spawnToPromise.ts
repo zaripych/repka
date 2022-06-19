@@ -9,12 +9,16 @@ import { captureStackTrace } from '../utils/stackTrace';
 export async function spawnToPromise(
   child: ChildProcess | ChildProcessWithoutNullStreams,
   opts?: {
-    exitCodes?: number[] | 'any';
+    exitCodes?: number[] | 'inherit';
     cwd?: string;
   }
 ): Promise<void> {
   const { prepareForRethrow } = captureStackTrace();
-  const exitCodes = opts?.exitCodes || [0];
+
+  // by default we do not throw if exit code is non-zero
+  // and instead just inherit the exit code into the main
+  // process
+  const exitCodes = opts?.exitCodes || 'inherit';
 
   const cwd = guessMonorepoRoot();
   console.log(
@@ -28,7 +32,7 @@ export async function spawnToPromise(
     child
       .on('close', (code, signal) => {
         if (typeof code === 'number') {
-          if (exitCodes !== 'any' && !exitCodes.includes(code)) {
+          if (exitCodes !== 'inherit' && !exitCodes.includes(code)) {
             rej(
               prepareForRethrow(
                 new Error(`Process has failed with code ${code}`)
@@ -48,10 +52,12 @@ export async function spawnToPromise(
       .on('error', rej)
   );
   // inherit exit code
-  if (
-    typeof child.exitCode === 'number' &&
-    (typeof process.exitCode !== 'number' || process.exitCode === 0)
-  ) {
-    process.exitCode = child.exitCode;
+  if (exitCodes === 'inherit') {
+    if (
+      typeof child.exitCode === 'number' &&
+      (typeof process.exitCode !== 'number' || process.exitCode === 0)
+    ) {
+      process.exitCode = child.exitCode;
+    }
   }
 }

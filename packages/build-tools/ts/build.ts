@@ -1,15 +1,9 @@
 import { buildForNode, copy, pipeline } from './src';
-import { buildBinsBundleConfig } from './src/bin/buildBinsBundleConfig';
-import { rollupBuild } from './src/rollup/rollupBuild';
-import { allFulfilled } from './src/utils/allFullfilled';
+import { dtsBundleGeneratorBuildPlugins } from './src/bin/dtsBundleGeneratorBuildPlugins';
 
 await pipeline(
-  async () =>
-    buildBinsBundleConfig().then((configs) =>
-      allFulfilled(configs.map((config) => rollupBuild(config)))
-    ),
   buildForNode({
-    externals: ['typescript', 'eslint'],
+    plugins: [...dtsBundleGeneratorBuildPlugins()],
   }),
   copy({
     include: ['configs/**/*', 'bin/**/*'],

@@ -1,3 +1,4 @@
+import { performance } from 'perf_hooks';
 import pico from 'picocolors';
 
 import { readCwdPackageJson } from './package-json/readPackageJson';
@@ -30,6 +31,7 @@ const mainTaskNames: Array<AllTaskTypes['name']> = [
 export async function pipeline<Args extends [Task, ...Task[]]>(
   ...tasks: Args
 ): Promise<void> {
+  const start = performance.now();
   try {
     enableSourceMapsSupport();
 
@@ -84,5 +86,9 @@ export async function pipeline<Args extends [Task, ...Task[]]>(
     if (typeof process.exitCode !== 'number') {
       process.exitCode = 1;
     }
+  } finally {
+    const end = performance.now();
+    const toSeconds = (value: number) => `${(value / 1000).toFixed(2)}s`;
+    console.log(`\nTask took ${toSeconds(end - start)}`);
   }
 }

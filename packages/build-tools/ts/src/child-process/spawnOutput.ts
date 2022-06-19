@@ -35,6 +35,11 @@ export async function spawnOutput(
       combinedData.push(data);
     });
   }
-  await spawnToPromise(child, opts);
+  await spawnToPromise(child, {
+    // since we expect an output, we should double check
+    // that we are only interpreting output if the child process
+    // is done successfully
+    exitCodes: opts?.exitCodes ?? [0],
+  });
   return combinedData.join('');
 }

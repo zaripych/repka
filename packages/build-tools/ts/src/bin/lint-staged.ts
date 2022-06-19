@@ -43,7 +43,9 @@ const getDeps = (dryRun: boolean) => {
 
 const saveUntracked = async () => {
   const dryRun = process.argv.includes('--dry-run');
-  console.log('Running in DRY RUN mode');
+  if (dryRun) {
+    console.log('Running in DRY RUN mode');
+  }
 
   const output = await spawnOutput(
     spawn('git', 'ls-files --others --exclude-standard --full-name'.split(' '))

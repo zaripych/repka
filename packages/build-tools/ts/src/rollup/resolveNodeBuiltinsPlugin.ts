@@ -15,7 +15,7 @@ export const resolveNodeBuiltinsPlugin = (): Plugin => {
     resolveId(source) {
       if (allBuiltins().includes(source)) {
         return {
-          id: source.replace('node:', ''),
+          id: !source.startsWith('node:') ? `node:${source}` : source,
           external: true,
         };
       }

@@ -51,9 +51,7 @@ export function declarations() {
             }
           );
         }),
-        spawnToPromise(child, {
-          exitCodes: 'any',
-        }),
+        spawnToPromise(child),
       ]);
     },
   });

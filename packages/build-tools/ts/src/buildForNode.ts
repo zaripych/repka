@@ -1,15 +1,23 @@
 /// <reference types="./@types/rollup-plugin-generate-package-json" />
 
-import type { Plugin } from 'rollup';
+import type { Plugin, RollupWatchOptions } from 'rollup';
 
 import { rmrfDist } from './file-system/rmrfDist';
 import { parseEntryPoints } from './package-json/parseEntryPoints';
 import { readCwdPackageJson } from './package-json/readPackageJson';
 import { validatePackageJson } from './package-json/validatePackageJson';
+import { buildBinsBundleConfig } from './rollup/buildBinsBundleConfig';
 import { rollupBuild } from './rollup/rollupBuild';
-import { rollupNodeConfig } from './rollup/rollupNodeConfig';
 import { rollupPackageJsonPlugin } from './rollup/rollupPackageJsonPlugin';
+import type {
+  DefaultRollupConfigBuildOpts,
+  RollupOptionsBuilder,
+} from './rollup/standardRollupConfig';
+import { combinePluginsProp } from './rollup/standardRollupConfig';
+import { combineDefaultRollupConfigBuildOpts } from './rollup/standardRollupConfig';
+import { defaultRollupConfig } from './rollup/standardRollupConfig';
 import { declareTask } from './tasks/declareTask';
+import { allFulfilled } from './utils/allFullfilled';
 
 export type BuildOpts = {
   /**
@@ -26,6 +34,35 @@ export type BuildOpts = {
     id: string,
     importer?: string
   ) => ReturnType<NonNullable<Plugin['resolveId']>>;
+
+  /**
+   * Entries in package.json "exports" represent inputs for Rollup.
+   *
+   * If you have a need fine tune configuration for entries defined
+   * in package.json "exports" prop - you can do that in this callback.
+   */
+  buildExportsConfig?: RollupOptionsBuilder;
+
+  /**
+   * Entries in package.json "bin" need to be pre-bundled and included
+   * as source code for normal operation during development.
+   *
+   * If you have a need to fine-tune configuration entries defined
+   * in package.json "bin" prop - you can do that in this callback.
+   */
+  buildBinsConfig?: RollupOptionsBuilder;
+
+  /**
+   * If you have a need to bundle different entries with different
+   * non-standard parameters, have a function here return those
+   * configs
+   */
+  extraRollupConfigs?: RollupOptionsBuilder;
+
+  /**
+   * Rollup plugins to inject into every bundle config
+   */
+  plugins?: Plugin[];
 };
 
 const externalsFromDependencies = (
@@ -51,27 +88,68 @@ export function buildForNode(opts?: BuildOpts) {
         packageJson.dependencies,
         opts
       );
-
-      const baseConfig = await rollupNodeConfig({
-        outDir: './dist/dist',
-        input: Object.fromEntries(
-          Object.values(entryPoints).map(({ name, value }) => [name, value])
-        ),
-        externals: allExternals,
+      const baseOpts: DefaultRollupConfigBuildOpts = {
+        external: allExternals,
         resolveId: opts?.resolveId,
-      });
-      const configWithExtraPlugin = {
-        ...baseConfig,
-        plugins: [
-          ...(baseConfig.plugins || []),
-          rollupPackageJsonPlugin({
-            outDir: './dist',
-            entryPoints,
-            externals: allExternals,
-          }),
-        ],
+        plugins: opts?.plugins,
       };
-      await rollupBuild(configWithExtraPlugin);
+
+      const defaultConfig = (opts?: DefaultRollupConfigBuildOpts) =>
+        defaultRollupConfig(
+          combineDefaultRollupConfigBuildOpts(baseOpts, opts)
+        );
+
+      const binConfigs = await buildBinsBundleConfig({
+        packageJson,
+        defaultConfig,
+      });
+
+      const extraConfigs = opts?.extraRollupConfigs
+        ? await Promise.resolve(
+            opts.extraRollupConfigs({
+              packageJson,
+              defaultConfig,
+            })
+          )
+        : [];
+
+      const buildExportsConfig = (
+        opts?: DefaultRollupConfigBuildOpts
+      ): RollupWatchOptions => {
+        const config = defaultConfig(opts);
+        return {
+          ...config,
+          input: Object.fromEntries(
+            Object.values(entryPoints).map(({ name, value }) => [name, value])
+          ),
+          output: {
+            ...config.output,
+            dir: './dist/dist',
+          },
+          ...combinePluginsProp(config.plugins, [
+            rollupPackageJsonPlugin({
+              outDir: './dist',
+              entryPoints,
+              externals: allExternals,
+            }),
+          ]),
+        };
+      };
+
+      const exportsConfig = opts?.buildExportsConfig
+        ? await Promise.resolve(
+            opts.buildExportsConfig({
+              packageJson,
+              defaultConfig: buildExportsConfig,
+            })
+          )
+        : [buildExportsConfig()];
+
+      await allFulfilled(
+        [...exportsConfig, ...binConfigs, ...extraConfigs].map((config) =>
+          rollupBuild(config)
+        )
+      );
     },
   });
 }

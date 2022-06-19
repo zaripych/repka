@@ -21,5 +21,10 @@ export async function rollupBuild(opts: RollupOptions) {
     ...inputProps,
     cache: rollupCache(),
   });
-  return await Promise.all(output.map((out) => builder.write(out)));
+  const results = await Promise.all(output.map((out) => builder.write(out)));
+  if (builder.getTimings) {
+    console.log('Timings for', inputProps.input);
+    console.log(builder.getTimings());
+  }
+  return results;
 }

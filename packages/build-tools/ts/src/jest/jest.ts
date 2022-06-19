@@ -26,9 +26,7 @@ const jest = async (args: string[]) => {
       replaceWith: undefined,
     },
   ]);
-  await spawnToPromise(child, {
-    exitCodes: [0, 1],
-  });
+  await spawnToPromise(child);
 };
 
 const jestUnitTestConfigPath = () =>

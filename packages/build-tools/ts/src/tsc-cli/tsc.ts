@@ -14,10 +14,7 @@ const tsc = async (args: string[]) =>
       // based on the monorepo "packages/*/*" directory structure
       // for full paths in TypeScript errors just do this:
       cwd: relative(process.cwd(), guessMonorepoRoot()),
-    }),
-    {
-      exitCodes: [0, 1],
-    }
+    })
   );
 
 // building composite has an advantage of caching and incremental builds

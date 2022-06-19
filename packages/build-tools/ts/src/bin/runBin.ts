@@ -11,9 +11,6 @@ export async function runBin(bin: string, args = process.argv.slice(2)) {
   await spawnToPromise(
     spawn(binPath(bin), args, {
       stdio: 'inherit',
-    }),
-    {
-      exitCodes: 'any',
-    }
+    })
   );
 }
