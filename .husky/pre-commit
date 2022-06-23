@@ -1,4 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+[ $DISABLE_LINT_STAGED != "" ] && echo "Lint staged disabled via env var DISABLE_LINT_STAGED" && exit 0;
+
 lint-staged
