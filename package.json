@@ -5,6 +5,9 @@
   "scripts": {
     "build:all": "pnpm turbo run build",
     "build:changed": "pnpm turbo run build --filter='...[HEAD]'",
+    "integration": "pnpm turbo run integration",
+    "integration:all": "pnpm turbo run integration",
+    "integration:changed": "pnpm turbo run integration --filter='...[HEAD]'",
     "lint:all": "pnpm turbo run lint",
     "lint:changed": "pnpm turbo run lint --filter='...[HEAD]'",
     "prepare": "husky install",
