@@ -3,3 +3,4 @@ node_modules
 dist
 pnpm-lock.yaml
 *.gen.*
+packages/build-tools/ts/configs/eslint/tsconfig.eslint.json

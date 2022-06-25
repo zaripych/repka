@@ -1,27 +1,18 @@
+const { syncEslintConfigHelpers } = require('./eslintConfigHelpers.gen.cjs');
 /**
  * Switch this to `false` if linting takes too long
  */
 const tsEnabled = () => true;
 
-const determineRepoRoot = (
-  candidate = process.env['INIT_CWD'] || process.cwd()
-) => {
-  // try to guess what the root is considering that our commands
-  // can be executed from within package directory or from the root
-  const result = /(.*(?=\/packages\/))|(.*(?=\/node_modules\/))|(.*)/.exec(
-    candidate
-  );
-  const [, packagesRoot, nodeModulesRoot, entirePath] = result;
-  const rootPath = packagesRoot || nodeModulesRoot || entirePath;
-  return rootPath;
-};
-
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: tsEnabled()
     ? {
-        tsconfigRootDir: determineRepoRoot(),
-        project: ['./packages/*/*/tsconfig.json', './tsconfig.eslint.json'],
+        tsconfigRootDir: syncEslintConfigHelpers().monorepoRootPath,
+        project: [
+          ...syncEslintConfigHelpers().tsConfigGlobs,
+          './tsconfig.eslint.json',
+        ],
         EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
       }
     : {

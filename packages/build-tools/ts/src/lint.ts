@@ -1,41 +1,8 @@
-import { spawn } from 'node:child_process';
-
-import { spawnToPromise } from './child-process/spawnToPromise';
+import { ensureEslintConfigFilesExist } from './eslint/ensureEslintConfigFilesExist';
+import { eslint } from './eslint/eslint';
 import { declareTask } from './tasks/declareTask';
-import { tscComposite } from './tsc-cli/tsc';
+import { tscCompositeTypeCheck } from './tsc-cli/tsc';
 import { allFulfilled } from './utils/allFullfilled';
-import { configFilePath } from './utils/configFilePath';
-import { modulesBinPath } from './utils/modulesBinPath';
-import { processArgsBuilder } from './utils/processArgsBuilder';
-
-const eslintPath = () => modulesBinPath('eslint');
-
-const eslintConfigPath = () => configFilePath('./eslint/eslint-root.cjs');
-
-const restArgs = () => {
-  const args = process.argv.slice(2);
-  return args.length === 0 ? ['.'] : args;
-};
-
-const eslint = async () =>
-  spawnToPromise(
-    spawn(
-      eslintPath(),
-      processArgsBuilder(restArgs())
-        .defaultArg(['--format'], ['unix'])
-        .defaultArg(
-          ['--ext'],
-          [['.ts', '.tsx', '.js', '.jsx', '.cjs', '.json'].join(',')]
-        )
-        .defaultArg(['--config', '-c'], [eslintConfigPath()])
-        .defaultArg(['--fix'], [], (args) => !args.hasArg('--no-fix'))
-        .removeArgs(['--no-fix'])
-        .buildResult(),
-      {
-        stdio: 'inherit',
-      }
-    )
-  );
 
 /**
  * Lint using eslint, no customizations possible, other than
@@ -51,7 +18,10 @@ export function lint() {
     name: 'lint',
     args: undefined,
     execute: async () => {
-      await allFulfilled([tscComposite(), eslint()]);
+      await allFulfilled([
+        tscCompositeTypeCheck(),
+        ensureEslintConfigFilesExist().then(() => eslint()),
+      ]);
     },
   });
 }
