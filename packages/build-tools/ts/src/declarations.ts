@@ -38,7 +38,7 @@ export function declarations() {
         stdio: ['pipe', 'inherit', 'inherit'],
       });
       child.stdin.setDefaultEncoding('utf-8');
-      await Promise.all([
+      const writeToStdin = () =>
         new Promise<void>((res, rej) => {
           child.stdin.write(
             JSON.stringify(dtsBundleGeneratorConfigFile),
@@ -50,8 +50,12 @@ export function declarations() {
               }
             }
           );
+        });
+      await Promise.all([
+        writeToStdin(),
+        spawnToPromise(child, {
+          cwd: process.cwd(),
         }),
-        spawnToPromise(child),
       ]);
     },
   });
