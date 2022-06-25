@@ -65,10 +65,9 @@ export async function spawnToPromise(
 
   const cwd = opts?.cwd ? opts.cwd.toString() : undefined;
 
-  logger.log(
-    ['>', command, ...(args ? args : [])].join(' '),
-    ...(cwd ? [`in ${cwd}`] : [])
-  );
+  const cmd = () => [command, ...(args ? args : [])].join(' ');
+
+  logger.log(['>', cmd()].join(' '), ...(cwd ? [`in ${cwd}`] : []));
 
   await new Promise<void>((res, rej) =>
     child
@@ -77,7 +76,7 @@ export async function spawnToPromise(
           if (exitCodes !== 'inherit' && !exitCodes.includes(code)) {
             rej(
               prepareForRethrow(
-                new Error(`Process has failed with code ${code}`)
+                new Error(`Command "${cmd()}" has failed with code ${code}`)
               )
             );
           } else {
@@ -85,7 +84,9 @@ export async function spawnToPromise(
           }
         } else if (signal) {
           rej(
-            prepareForRethrow(new Error(`Failed to execute process: ${signal}`))
+            prepareForRethrow(
+              new Error(`Failed to execute command "${cmd()}" - ${signal}`)
+            )
           );
         } else {
           throw prepareForRethrow(new Error('Expected signal or error code'));
