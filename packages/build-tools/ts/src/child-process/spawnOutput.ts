@@ -1,18 +1,17 @@
-import type {
-  ChildProcess,
-  ChildProcessWithoutNullStreams,
-} from 'child_process';
 import { assert } from 'console';
 
+import type { SpawnParameterMix, SpawnToPromiseExtra } from './spawnToPromise';
+import { spawnWithSpawnParameters } from './spawnToPromise';
 import { spawnToPromise } from './spawnToPromise';
 
+type ExtraSpawnOutputOpts = {
+  output?: ['stdout' | 'stderr', ...Array<'stdout' | 'stderr'>];
+} & SpawnToPromiseExtra;
+
 export async function spawnOutput(
-  child: ChildProcess | ChildProcessWithoutNullStreams,
-  opts?: {
-    exitCodes?: number[];
-    output?: ['stdout' | 'stderr', ...Array<'stdout' | 'stderr'>];
-  }
+  ...parameters: SpawnParameterMix<ExtraSpawnOutputOpts>
 ): Promise<string> {
+  const { child, opts } = spawnWithSpawnParameters(parameters);
   const combinedData: string[] = [];
   const output = opts?.output ?? ['stdout', 'stderr'];
   if (output.includes('stdout')) {
@@ -40,6 +39,7 @@ export async function spawnOutput(
     // that we are only interpreting output if the child process
     // is done successfully
     exitCodes: opts?.exitCodes ?? [0],
+    cwd: opts?.cwd,
   });
   return combinedData.join('');
 }

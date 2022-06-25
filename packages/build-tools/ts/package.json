@@ -25,7 +25,7 @@
   "scripts": {
     "build:tools": "tsx ./build.ts",
     "declarations": "tsx ./declarations.ts",
-    "lint": "node --enable-source-maps ./dist/dist/lint.es.js"
+    "lint": "tsx ./lint.ts"
   },
   "dependencies": {
     "@rollup/plugin-commonjs": "22.0.0",
@@ -61,6 +61,7 @@
     "@types/eslint": "8.4.3",
     "@types/jest": "28.1.1",
     "@types/node": "16",
-    "dts-bundle-generator": "workspace:*"
+    "dts-bundle-generator": "workspace:*",
+    "utility-types": "3.10.0"
   }
 }

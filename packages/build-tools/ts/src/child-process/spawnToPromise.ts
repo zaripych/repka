@@ -1,18 +1,61 @@
-import type {
-  ChildProcess,
-  ChildProcessWithoutNullStreams,
-} from 'child_process';
+import type { SpawnOptions } from 'child_process';
+import { ChildProcess } from 'child_process';
+import { spawn } from 'child_process';
+import type { Assign } from 'utility-types';
 
-import { guessMonorepoRoot } from '../file-system/guessMonorepoRoot';
+import { logger } from '../logger/logger';
 import { captureStackTrace } from '../utils/stackTrace';
 
+export type SpawnToPromiseExtra = {
+  exitCodes?: number[] | 'inherit';
+};
+
+type SharedOpts = Pick<SpawnOptions, 'cwd'>;
+
+type SpawnArgs<E extends object> = [
+  command: string,
+  args?: ReadonlyArray<string>,
+  options?: Assign<SpawnOptions, E>
+];
+
+export type SpawnParameterMix<E extends object = SpawnToPromiseExtra> =
+  | [cp: ChildProcess, extraOpts?: Assign<E, SharedOpts>]
+  | SpawnArgs<E>;
+
+export function isSpawnArgs<E extends object>(
+  args: SpawnParameterMix<E>
+): args is SpawnArgs<E> {
+  return !(args[0] instanceof ChildProcess) && typeof args[0] === 'string';
+}
+
+export function spawnWithSpawnParameters<E extends object>(
+  parameters: SpawnParameterMix<E>
+) {
+  const [child, [command, args, opts]] = isSpawnArgs(parameters)
+    ? [
+        spawn(...(parameters as unknown as Parameters<typeof spawn>)),
+        parameters,
+      ]
+    : [
+        parameters[0],
+        [
+          parameters[0].spawnfile,
+          parameters[0].spawnargs.slice(1),
+          parameters[1] as Assign<SpawnOptions, E>,
+        ],
+      ];
+  return {
+    child,
+    command,
+    args,
+    opts,
+  };
+}
+
 export async function spawnToPromise(
-  child: ChildProcess | ChildProcessWithoutNullStreams,
-  opts?: {
-    exitCodes?: number[] | 'inherit';
-    cwd?: string;
-  }
+  ...parameters: SpawnParameterMix
 ): Promise<void> {
+  const { child, command, args, opts } = spawnWithSpawnParameters(parameters);
   const { prepareForRethrow } = captureStackTrace();
 
   // by default we do not throw if exit code is non-zero
@@ -20,12 +63,11 @@ export async function spawnToPromise(
   // process
   const exitCodes = opts?.exitCodes || 'inherit';
 
-  const cwd = guessMonorepoRoot();
-  console.log(
-    ['>', child.spawnfile, ...child.spawnargs.slice(1)]
-      .map((entry) => entry.replace(cwd + '/', './'))
-      .join(' '),
-    ...(opts?.cwd ? [`in ${opts.cwd}`] : [])
+  const cwd = opts?.cwd ? opts.cwd.toString() : undefined;
+
+  logger.log(
+    ['>', command, ...(args ? args : [])].join(' '),
+    ...(cwd ? [`in ${cwd}`] : [])
   );
 
   await new Promise<void>((res, rej) =>
