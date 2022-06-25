@@ -15,7 +15,10 @@ export function validatePackageJson(packageJson: PackageJson) {
   }
   const exports = packageJson.exports;
   if (!exports) {
-    throw new Error('"exports" in package.json should be defined');
+    throw new Error(
+      '"exports" in package.json should be defined, for starters you can point it' +
+        ' to your main entry point; ie "./src/index.ts"'
+    );
   }
   if (packageJson.typings) {
     throw new Error(
@@ -24,7 +27,10 @@ export function validatePackageJson(packageJson: PackageJson) {
   }
   const types = packageJson.types;
   if (!types) {
-    throw new Error('"types" in package.json should be defined');
+    throw new Error(
+      `"types" in package.json should be defined, point it` +
+        ` directly to your TypeScript files; ie "./src/index.ts"`
+    );
   }
   return {
     ...packageJson,
