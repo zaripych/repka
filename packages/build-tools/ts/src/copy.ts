@@ -1,4 +1,5 @@
 import { copyFiles } from './file-system/copyFiles';
+import { logger } from './logger/logger';
 import { declareTask } from './tasks/declareTask';
 
 export const copy = (opts: {
@@ -11,7 +12,7 @@ export const copy = (opts: {
     name: 'copy',
     args: opts,
     execute: async () => {
-      console.log('Copying', opts);
+      logger.log('Copying', opts);
       await copyFiles(opts);
     },
   });

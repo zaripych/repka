@@ -1,6 +1,7 @@
 import { performance } from 'perf_hooks';
 import pico from 'picocolors';
 
+import { logger } from './logger/logger';
 import { readCwdPackageJson } from './package-json/readPackageJson';
 import type { TaskExecuteFn } from './tasks/declareTask';
 import type { AllTaskTypes } from './taskTypes';
@@ -31,6 +32,7 @@ const mainTaskNames: Array<AllTaskTypes['name']> = [
 export async function pipeline<Args extends [Task, ...Task[]]>(
   ...tasks: Args
 ): Promise<void> {
+  logger.log('Running in', process.cwd());
   const start = performance.now();
   try {
     enableSourceMapsSupport();
@@ -68,8 +70,8 @@ export async function pipeline<Args extends [Task, ...Task[]]>(
           ? await task()
           : await Promise.resolve(task.execute?.());
       } catch (err) {
-        console.error(err);
-        console.error(
+        logger.error(err);
+        logger.error(
           pico.red(
             `\nERROR: Failed to ${task.name || 'execute a task'} ${String(
               (await readCwdPackageJson()).name
@@ -89,6 +91,6 @@ export async function pipeline<Args extends [Task, ...Task[]]>(
   } finally {
     const end = performance.now();
     const toSeconds = (value: number) => `${(value / 1000).toFixed(2)}s`;
-    console.log(`\nTask took ${toSeconds(end - start)}`);
+    logger.log(`\nTask took ${toSeconds(end - start)}`);
   }
 }

@@ -3,6 +3,8 @@ import type { Stats } from 'node:fs';
 import { copyFile, mkdir, realpath, stat, symlink } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 
+import { logger } from '../logger/logger';
+
 export type CopyOptsExtra = Pick<
   fg.Options,
   'cwd' | 'deep' | 'dot' | 'onlyDirectories' | 'followSymbolicLinks'
@@ -98,16 +100,16 @@ function getDeps(opts: CopyOpts) {
   };
   const dryRunDeps = {
     mkdir: (...[directory]: Parameters<typeof mkdir>) => {
-      console.log('mkdir', { directory });
+      logger.log('mkdir', { directory });
       return Promise.resolve();
     },
     realpath,
     symlink: (...[source, target]: Parameters<typeof symlink>) => {
-      console.log('symlink', { source, target });
+      logger.log('symlink', { source, target });
       return Promise.resolve();
     },
     copyFile: (...[source, target]: Parameters<typeof copyFile>) => {
-      console.log('copyFile', { source, target });
+      logger.log('copyFile', { source, target });
       return Promise.resolve();
     },
   };
@@ -125,7 +127,7 @@ export async function copyFiles(opts: CopyOpts) {
       : [];
 
   if (opts.options?.dryRun) {
-    console.log(
+    logger.log(
       'entries',
       entries.map((entry) => entry.path)
     );

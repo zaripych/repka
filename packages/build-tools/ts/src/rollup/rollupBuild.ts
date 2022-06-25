@@ -1,6 +1,7 @@
 import type { RollupCache, RollupOptions } from 'rollup';
 import { rollup } from 'rollup';
 
+import { logger } from '../logger/logger';
 import { once } from '../utils/once';
 
 const rollupCache = once((): RollupCache => {
@@ -23,8 +24,8 @@ export async function rollupBuild(opts: RollupOptions) {
   });
   const results = await Promise.all(output.map((out) => builder.write(out)));
   if (builder.getTimings) {
-    console.log('Timings for', inputProps.input);
-    console.log(builder.getTimings());
+    logger.log('Timings for', inputProps.input);
+    logger.log(builder.getTimings());
   }
   return results;
 }
