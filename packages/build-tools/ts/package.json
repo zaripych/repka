@@ -25,7 +25,10 @@
   "scripts": {
     "build:tools": "tsx ./build.ts",
     "declarations": "tsx ./declarations.ts",
-    "lint": "tsx ./lint.ts"
+    "integration": "tsx ./integration.ts",
+    "lint": "tsx ./lint.ts",
+    "setup:integration": "tsx ./src/__integration__/setup.ts",
+    "test": "tsx ./test.ts"
   },
   "dependencies": {
     "@rollup/plugin-commonjs": "22.0.0",

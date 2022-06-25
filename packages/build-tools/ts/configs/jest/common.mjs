@@ -1,5 +1,13 @@
 export const extensions = ['js', 'jsx', 'ts', 'tsx'];
-export const ignoreDirs = ['/node_modules/', '/dist/', '/.tsc-out/'];
+export const ignoreDirs = [
+  '/node_modules/',
+  '/dist/',
+  '/.tsc-out/',
+  '/.integration/',
+  '/.jest-cache/',
+  '/.coverage-integration/',
+  '/.coverage-unit/',
+];
 
 export const commonConfig = {
   cacheDirectory: '../.jest-cache',
@@ -7,7 +15,9 @@ export const commonConfig = {
   transformIgnorePatterns: [...ignoreDirs],
   coveragePathIgnorePatterns: [
     '/node_modules/',
+    '/__integration__/',
     '/__tests__/',
+    '**/*.test.(ts,tsx)',
   ],
   extensionsToTreatAsEsm: extensions
     .filter((entry) => !['js'].includes(entry))

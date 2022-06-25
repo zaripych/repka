@@ -17,6 +17,7 @@ const mainTaskNames: Array<AllTaskTypes['name']> = [
   'build',
   'test',
   'declarations',
+  'integration',
 ];
 
 /**
