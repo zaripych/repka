@@ -1,12 +1,19 @@
-import { spawn } from 'child_process';
-import { join } from 'path';
-
 import { spawnToPromise } from './child-process/spawnToPromise';
-import { guessMonorepoRoot } from './file-system/guessMonorepoRoot';
+import { modulesBinPath } from './utils/modulesBinPath';
+import { monorepoRootPath } from './utils/monorepoRootPath';
 
-export type TaskTypes = 'lint' | 'build' | 'test' | 'declarations';
+export type TaskTypes =
+  | 'lint'
+  | 'build'
+  | 'test'
+  | 'declarations'
+  | 'integration'
+  | 'setup:integration'
+  | (string & {
+      _allowStrings?: undefined;
+    });
 
-const turboPath = () => join(guessMonorepoRoot(), './node_modules/.bin/turbo');
+const turboPath = () => modulesBinPath('turbo');
 
 /**
  * Run one of the dev pipeline tasks using Turbo
@@ -16,22 +23,18 @@ export async function runTurboTasks(opts: {
   packageDir?: string;
 }) {
   const rootDir = opts.packageDir ?? process.cwd();
+  const root = await monorepoRootPath();
   await spawnToPromise(
-    spawn(
-      turboPath(),
-      [
-        'run',
-        ...opts.tasks,
-        '--filter=' + rootDir.replace(guessMonorepoRoot(), '.'),
-        '--output-logs=new-only',
-      ],
-      {
-        stdio: 'inherit',
-        cwd: guessMonorepoRoot(),
-      }
-    ),
+    turboPath(),
+    [
+      'run',
+      ...opts.tasks,
+      '--filter=' + rootDir.replace(root, '.'),
+      '--output-logs=new-only',
+    ],
     {
-      exitCodes: [0, 1],
+      stdio: 'inherit',
+      cwd: root,
     }
   );
 }
