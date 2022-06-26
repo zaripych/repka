@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "target": "esnext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "stripInternal": true,
+    "useUnknownInCatchVariables": true,
+    "noErrorTruncation": true,
+    "composite": true,
+    "incremental": true,
+    "outDir": "dist"
+  },
+  "compileOnSave": false
+}

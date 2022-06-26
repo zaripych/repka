@@ -9,6 +9,5 @@ declare global {
 export function enableSourceMapsSupport() {
   if ('setSourceMapsEnabled' in process) {
     process.setSourceMapsEnabled(true);
-    console.log('Source maps support enabled');
   }
 }
