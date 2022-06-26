@@ -9,40 +9,72 @@
         "src/*/*.ts",
         "src/**/*.ts",
         "configs",
-        "build.ts"
+        "build.ts",
+        "package.json"
       ],
       "outputs": ["dist"],
       "outputMode": "none"
     },
     "build": {
       "dependsOn": ["^build:tools"],
-      "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts"],
+      "inputs": [
+        "src/*.ts",
+        "src/*/*.ts",
+        "src/**/*.ts",
+        "build.ts",
+        "package.json"
+      ],
       "outputs": ["dist"]
     },
     "lint": {
       "dependsOn": ["^build:tools"],
-      "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts"],
+      "inputs": [
+        "src/*.ts",
+        "src/*/*.ts",
+        "src/**/*.ts",
+        "lint.ts",
+        "package.json"
+      ],
       "outputs": [".tsc-out"]
     },
     "test": {
       "dependsOn": ["^build:tools"],
-      "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts"],
+      "inputs": [
+        "src/*.ts",
+        "src/*/*.ts",
+        "src/**/*.ts",
+        "test.ts",
+        "package.json"
+      ],
       "outputs": []
     },
     "declarations": {
       "dependsOn": ["^build:tools"],
-      "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts"],
+      "inputs": [
+        "src/*.ts",
+        "src/*/*.ts",
+        "src/**/*.ts",
+        "declarations.ts",
+        "package.json"
+      ],
       "outputs": ["dist/**/*.d.ts"]
     },
     "setup:integration": {
-      "dependsOn": ["^build:tools"],
-      "inputs": ["dist/**/*", "src/__integration__"],
+      "dependsOn": ["^build:tools", "build:tools"],
+      "inputs": ["dist/**/*", "src/__integration__/setup.ts", "package.json"],
       "outputs": [".integration/template"],
       "outputMode": "new-only"
     },
     "integration": {
       "dependsOn": ["^build:tools", "setup:integration"],
-      "inputs": ["src/*.ts", "src/*/*.ts", "src/**/*.ts"],
+      "inputs": [
+        "src/*.ts",
+        "src/*/*.ts",
+        "src/**/*.ts",
+        "src/__integration__/**/*.*",
+        "integration.ts",
+        "package.json"
+      ],
       "outputs": []
     }
   }
