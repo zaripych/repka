@@ -2,11 +2,16 @@ import { readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { configFilePath } from '../utils/configFilePath';
-import { monorepoRootPath } from '../utils/monorepoRootPath';
 
 export async function ensureTsConfigExists() {
-  const root = await monorepoRootPath();
-  const expected = join(root, 'tsconfig.json');
+  const cwdPackageJsonPath = join(process.cwd(), 'package.json');
+  const packageJsonExists = await stat(cwdPackageJsonPath)
+    .then((result) => result.isFile())
+    .catch(() => false);
+  if (!packageJsonExists) {
+    return;
+  }
+  const expected = join(process.cwd(), 'tsconfig.json');
   const configExists = await stat(expected)
     .then((result) => result.isFile())
     .catch(() => false);
