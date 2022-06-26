@@ -1,7 +1,8 @@
 import { ensureEslintConfigFilesExist } from './eslint/ensureEslintConfigFilesExist';
 import { eslint } from './eslint/eslint';
 import { declareTask } from './tasks/declareTask';
-import { tscCompositeTypeCheck } from './tsc-cli/tsc';
+import { ensureTsConfigExists } from './tsc/ensureTsConfigExists';
+import { tscCompositeTypeCheck } from './tsc/tsc';
 import { allFulfilled } from './utils/allFullfilled';
 
 /**
@@ -19,7 +20,7 @@ export function lint() {
     args: undefined,
     execute: async () => {
       await allFulfilled([
-        tscCompositeTypeCheck(),
+        ensureTsConfigExists().then(() => tscCompositeTypeCheck()),
         ensureEslintConfigFilesExist().then(() => eslint()),
       ]);
     },
