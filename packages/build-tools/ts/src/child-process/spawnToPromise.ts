@@ -7,7 +7,7 @@ import { logger } from '../logger/logger';
 import { captureStackTrace } from '../utils/stackTrace';
 
 export type SpawnToPromiseExtra = {
-  exitCodes?: number[] | 'inherit';
+  exitCodes?: number[] | 'inherit' | 'any';
 };
 
 type SharedOpts = Pick<SpawnOptions, 'cwd'>;
@@ -73,7 +73,11 @@ export async function spawnToPromise(
     child
       .on('close', (code, signal) => {
         if (typeof code === 'number') {
-          if (exitCodes !== 'inherit' && !exitCodes.includes(code)) {
+          if (
+            exitCodes !== 'inherit' &&
+            exitCodes !== 'any' &&
+            !exitCodes.includes(code)
+          ) {
             rej(
               prepareForRethrow(
                 new Error(`Command "${cmd()}" has failed with code ${code}`)

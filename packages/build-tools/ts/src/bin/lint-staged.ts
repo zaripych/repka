@@ -1,4 +1,5 @@
-import { spawnOutput, spawnToPromise } from '../child-process';
+import { spawnOutput } from '../child-process';
+import { spawnResult } from '../child-process/spawnResult';
 import { runBin } from './runBin';
 
 const lintStaged = async () => {
@@ -8,50 +9,78 @@ const lintStaged = async () => {
   );
 };
 
-const stashIncludeUntrackedKeepIndex = async () => {
-  const stagedOut = await spawnOutput(
-    'git',
-    'diff --name-only --cached'.split(' ')
-  );
-  const staged = new Set(stagedOut.split('\n').filter(Boolean));
-  await spawnToPromise(
-    'git',
-    'commit --quiet --no-verify -m "lint-staged-temporary"'.split(' '),
-    {
-      exitCodes: [0],
-    }
-  );
-  await spawnToPromise('git', 'stash -u'.split(' '), {
-    exitCodes: [0],
-  });
-  await spawnToPromise('git', 'reset --quiet --soft HEAD~1'.split(' '), {
-    exitCodes: [0],
-  });
-  return [...staged];
+const spawnWithOutputWhenFailed = async (
+  ...parameters: Parameters<typeof spawnResult>
+) => {
+  const result = await spawnResult(...parameters);
+  if (result.error) {
+    console.error(result.output.join(''));
+    return Promise.reject(result.error);
+  }
+  return Promise.resolve(result);
 };
 
-const applyStashed = async () => {
-  await spawnToPromise('git', 'stash pop'.split(' '), {
-    exitCodes: [0],
-    stdio: 'inherit',
-  });
+const stashIncludeUntrackedKeepIndex = async () => {
+  const split = (out: string) => out.split('\n').filter(Boolean);
+  const [staged, modified, untracked] = await Promise.all([
+    spawnOutput('git', 'diff --name-only --cached'.split(' ')).then(split),
+    spawnOutput('git', 'diff --name-only'.split(' ')).then(split),
+    spawnOutput(
+      'git',
+      'ls-files --others --exclude-standard --full-name'.split(' ')
+    ).then(split),
+  ]);
+  const didStash = modified.length > 0 || untracked.length > 0;
+  if (didStash) {
+    await spawnWithOutputWhenFailed(
+      'git',
+      'commit --no-verify -m "lint-staged-temporary"'.split(' '),
+      {
+        exitCodes: [0],
+      }
+    );
+    try {
+      await spawnWithOutputWhenFailed(
+        'git',
+        'stash push -u --message lint-staged-temporary'.split(' '),
+        {
+          exitCodes: [0],
+        }
+      );
+    } finally {
+      // if stashing failed, reset anyway
+      await spawnWithOutputWhenFailed('git', 'reset --soft HEAD~1'.split(' '), {
+        exitCodes: [0],
+      });
+    }
+  }
+  return { staged, modified, untracked, didStash };
 };
+
+const applyStashed = async () => spawnResult('git', 'stash pop'.split(' '));
 
 const run = async () => {
-  const staged = await stashIncludeUntrackedKeepIndex();
+  const { didStash, staged } = await stashIncludeUntrackedKeepIndex();
   try {
     await lintStaged();
   } finally {
-    await applyStashed().catch((err) => {
-      console.error(err);
-      console.log(
-        'To at least restore list of staged files after resolution, try this: \n\n',
-        `git reset && git add ${staged
-          .map((file) => `'${file}'`)
-          .join(' ')} \n\n`
-      );
-      return Promise.resolve();
-    });
+    if (didStash) {
+      await applyStashed().then((result) => {
+        if (result.error) {
+          console.error(result.error);
+        }
+        if (result.status !== 0) {
+          console.error(result.output.join(''));
+          console.log(
+            '\nTo at least restore list of staged files after resolution, try this: \n\n',
+            `git reset && git add ${staged
+              .map((file) => `'${file}'`)
+              .join(' ')} \n\n`
+          );
+        }
+        return Promise.resolve();
+      });
+    }
   }
 };
 
