@@ -25,6 +25,11 @@ export async function declarationsViaDtsBundleGenerator() {
       return {
         filePath: input,
         outFile: output,
+        libraries: {
+          inlinedLibraries: Object.keys(
+            packageJson.devDependencies || {}
+          ).filter((f) => !f.startsWith('@types')),
+        },
       };
     }),
   };
