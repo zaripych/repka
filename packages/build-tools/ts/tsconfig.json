@@ -4,5 +4,6 @@
     "outDir": ".tsc-out",
     "tsBuildInfoFile": ".tsc-out/.tsbuildinfo"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/__integration__/test-cases"]
 }
