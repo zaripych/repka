@@ -63,14 +63,12 @@ it('should build', async () => {
     Rollup File Analysis
     -----------------------------
     bundle size:    38 Bytes
-    original size:  189 Bytes
-    code reduction: 79.89 %
-    module count:   2
+    original size:  78 Bytes
+    code reduction: 51.28 %
+    module count:   1
 
     /src/index.ts
     ██████████████████████████████████████████████████ 100 % (38 Bytes)
-    /src/index.ts?commonjs-entry
-    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 0 % (0 Byte)
 
     ",
     }
