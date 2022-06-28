@@ -11,6 +11,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@build-tools/ts": "workspace:*"
+    "@repka-kit/ts": "workspace:*"
   }
 }

@@ -1,3 +1,3 @@
-import { declarations, pipeline } from '@build-tools/ts';
+import { declarations, pipeline } from '@repka-kit/ts';
 
 await pipeline(declarations());

@@ -1,4 +1,4 @@
-import { spawnOutput } from '@build-tools/ts';
+import { spawnOutput } from '@repka-kit/ts';
 import { rm } from 'fs/promises';
 import assert from 'node:assert';
 import { spawn } from 'node:child_process';

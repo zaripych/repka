@@ -18,7 +18,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@build-tools/ts": "workspace:*",
+    "@repka-kit/ts": "workspace:*",
     "@testing-tools/packages": "workspace:*",
     "@tooling-tests/todo-list-store": "workspace:*",
     "@utils/ts": "workspace:*",

@@ -7,5 +7,5 @@
 // ever need. Feel free to override them standard eslint ways!
 module.exports = {
   root: true,
-  extends: ['./node_modules/@build-tools/ts/configs/eslint/eslint-root.cjs'],
+  extends: ['./node_modules/@repka-kit/ts/configs/eslint/eslint-root.cjs'],
 };

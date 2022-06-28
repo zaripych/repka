@@ -1,5 +1,5 @@
-import type { TaskTypes } from '@build-tools/ts';
-import { runTurboTasks, spawnToPromise } from '@build-tools/ts';
+import type { TaskTypes } from '@repka-kit/ts';
+import { runTurboTasks, spawnToPromise } from '@repka-kit/ts';
 import assert from 'node:assert';
 import { mkdir, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';

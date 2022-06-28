@@ -1,5 +1,5 @@
 {
-  "name": "@repka/reposistory",
+  "name": "@repka-kit/repository",
   "version": "0.0.0-development",
   "private": true,
   "description": "Next generation build tools for monorepo: lint, bundle and package your TypeScript projects",
@@ -19,7 +19,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@build-tools/ts": "workspace:*",
+    "@changesets/cli": "2.23.0",
+    "@repka-kit/ts": "workspace:*",
     "husky": "8.0.1"
   },
   "packageManager": "pnpm@7.3.0",

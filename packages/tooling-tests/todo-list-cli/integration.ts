@@ -1,3 +1,3 @@
-import { integrationTest, pipeline } from '@build-tools/ts';
+import { integrationTest, pipeline } from '@repka-kit/ts';
 
 await pipeline(integrationTest());

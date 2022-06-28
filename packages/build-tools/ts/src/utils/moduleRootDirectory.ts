@@ -20,7 +20,7 @@ export const getModuleRootDirectoryForImportMetaUrl = (opts: {
     return fileURLToPath(new URL(`../`, opts.importMetaUrl));
   }
 
-  // run via tsx to build the @build-tools/ts itself
+  // run via tsx to build the @repka-kit/ts itself
   return fileURLToPath(new URL(`../../`, opts.importMetaUrl));
 };
 

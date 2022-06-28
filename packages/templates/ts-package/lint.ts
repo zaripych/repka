@@ -1,3 +1,3 @@
-import { lint, pipeline } from '@build-tools/ts';
+import { lint, pipeline } from '@repka-kit/ts';
 
 await pipeline(lint());

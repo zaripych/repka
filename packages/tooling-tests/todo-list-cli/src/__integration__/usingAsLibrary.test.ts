@@ -1,4 +1,4 @@
-import { spawnOutput } from '@build-tools/ts';
+import { spawnOutput } from '@repka-kit/ts';
 import { packageTestSandbox } from '@testing-tools/packages';
 import { once } from '@utils/ts';
 import { spawn } from 'child_process';
