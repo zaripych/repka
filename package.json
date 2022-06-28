@@ -22,10 +22,10 @@
     "@build-tools/ts": "workspace:*",
     "husky": "8.0.1"
   },
-  "packageManager": "pnpm@7.2.1",
+  "packageManager": "pnpm@7.3.0",
   "engines": {
     "node": "16",
     "npm": "8",
-    "pnpm": "7.2.1"
+    "pnpm": "7.3.0"
   }
 }
