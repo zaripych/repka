@@ -1,6 +1,7 @@
 {
   "name": "@templates/ts-package",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
+  "private": true,
   "type": "module",
   "exports": "./src/index.ts",
   "main": "./src/index.ts",

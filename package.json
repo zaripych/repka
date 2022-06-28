@@ -1,7 +1,8 @@
 {
-  "name": "startup-repo",
+  "name": "@repka/reposistory",
   "version": "0.0.0-development",
   "private": true,
+  "description": "Next generation build tools for monorepo: lint, bundle and package your TypeScript projects",
   "scripts": {
     "build:all": "pnpm turbo run build",
     "build:changed": "pnpm turbo run build --filter='...[HEAD]'",

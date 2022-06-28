@@ -1,6 +1,26 @@
 {
-  "name": "@build-tools/ts",
+  "name": "@repka/ts",
   "version": "0.0.0",
+  "description": "Next generation build tools for monorepo: lint, bundle and package your TypeScript projects",
+  "keywords": [
+    "repka",
+    "monorepo",
+    "lint",
+    "build",
+    "declarations",
+    "TypeScript",
+    "ESM",
+    "ESModules"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zaripych/repka.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Rinat Zaripov",
+    "url": "https://github.com/zaripych"
+  },
   "type": "module",
   "exports": "./src/index.ts",
   "main": "./src/index.ts",
@@ -65,5 +85,8 @@
     "@types/node": "^18.0.0",
     "dts-bundle-generator": "workspace:*",
     "utility-types": "3.10.0"
+  },
+  "publishConfig": {
+    "directory": "dist"
   }
 }

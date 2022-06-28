@@ -1,6 +1,7 @@
 {
   "name": "@tooling-tests/todo-list-store",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
+  "private": true,
   "type": "module",
   "exports": "./src/index.ts",
   "types": "./src/index.ts",
