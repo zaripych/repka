@@ -11,19 +11,13 @@ const fs = require('fs');
 function main() {
 	const packageJsonPath = path.resolve(__dirname, '..', 'package.json');
 
-	const packageJson = JSON.parse(
-		fs.readFileSync(packageJsonPath, { encoding: 'utf-8' })
-	);
+	const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, { encoding: 'utf-8' }));
 
 	delete packageJson.private;
 	delete packageJson.devDependencies;
 	delete packageJson.scripts;
 
-	fs.writeFileSync(
-		packageJsonPath,
-		JSON.stringify(packageJson, null, 2) + '\n',
-		{ encoding: 'utf-8' }
-	);
+	fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n', { encoding: 'utf-8' });
 }
 
 if (require.main === module) {

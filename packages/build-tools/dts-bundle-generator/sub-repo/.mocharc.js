@@ -1,5 +1,7 @@
 const config = {
-	require: ['ts-node/register'],
+	require: [
+		'ts-node/register',
+	],
 	extension: ['ts'],
 	checkLeaks: true,
 	recursive: true,

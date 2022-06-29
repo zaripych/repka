@@ -1,56 +1,58 @@
 {
-	"private": true,
-	"name": "dts-bundle-generator",
-	"version": "6.11.0",
-	"description": "DTS Bundle Generator",
-	"main": "dist/bundle-generator.js",
-	"typings": "dist/bundle-generator.d.ts",
-	"bin": "dist/bin/dts-bundle-generator.js",
-	"files": [
-		"config-schema.d.ts",
-		"dist/**/*.d.ts",
-		"dist/**/*.js"
-	],
-	"author": "Evgeniy Timokhov",
-	"bugs": {
-		"url": "https://github.com/timocov/dts-bundle-generator/issues"
-	},
-	"homepage": "https://github.com/timocov/dts-bundle-generator",
-	"dependencies": {
-		"typescript": ">=3.0.1",
-		"yargs": "^17.2.1"
-	},
-	"devDependencies": {
-		"@types/mocha": "~9.0.0",
-		"@types/node": "~12.12.47",
-		"@types/yargs": "~17.0.5",
-		"mocha": "~9.1.3",
-		"npm-run-all": "~4.1.5",
-		"prettier": "2.6.2",
-		"rimraf": "~3.0.2",
-		"ts-compiler": "npm:typescript@4.6.3",
-		"ts-node": "~10.4.0"
-	},
-	"license": "MIT",
-	"readme": "README.md",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/timocov/dts-bundle-generator.git"
-	},
-	"engines": {
-		"node": ">=12.0.0"
-	},
-	"scripts": {
-		"clean": "rimraf dist/ dts-out/",
-		"lint": "eslint --format=unix --ext .ts ./",
-		"check-dts-config": "node ./node_modules/ts-compiler/bin/tsc --downlevelIteration --lib es2015 --allowJs --noEmit ./dts-config.js",
-		"bundle-dts": "npm run check-dts-config && node ./dist/bin/dts-bundle-generator.js --config dts-config.js --silent",
-		"tsc": "node ./node_modules/ts-compiler/bin/tsc --version && node ./node_modules/ts-compiler/bin/tsc -b ./tsconfig.json",
-		"verify": "npm-run-all clean tsc -p bundle-dts lint -s test",
-		"build:watch": "npm run clean && node ./node_modules/ts-compiler/bin/tsc -b ./tsconfig.json tsc --watch",
-		"prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml)' --write",
-		"prepare-release": "npm-run-all clean tsc bundle-dts && node scripts/clean-package-json.js",
-		"test": "mocha tests/unittests/**/*.spec.ts tests/e2e/all-test-cases.ts",
-		"build:tools": "npm-run-all clean tsc bundle-dts"
-	}
+  "private": true,
+  "name": "dts-bundle-generator",
+  "version": "6.12.0",
+  "description": "DTS Bundle Generator",
+  "main": "dist/bundle-generator.js",
+  "typings": "dist/bundle-generator.d.ts",
+  "bin": "dist/bin/dts-bundle-generator.js",
+  "files": [
+    "config-schema.d.ts",
+    "dist/**/*.d.ts",
+    "dist/**/*.js"
+  ],
+  "author": "Evgeniy Timokhov",
+  "bugs": {
+    "url": "https://github.com/timocov/dts-bundle-generator/issues"
+  },
+  "homepage": "https://github.com/timocov/dts-bundle-generator",
+  "dependencies": {
+    "typescript": ">=3.0.1",
+    "yargs": "^17.2.1"
+  },
+  "devDependencies": {
+    "@types/mocha": "~9.1.1",
+    "@types/node": "~12.12.47",
+    "@types/yargs": "~17.0.5",
+    "@typescript-eslint/eslint-plugin": "~5.28.0",
+    "@typescript-eslint/parser": "~5.28.0",
+    "eslint": "~8.18.0",
+    "eslint-plugin-import": "~2.26.0",
+    "eslint-plugin-prefer-arrow": "~1.2.1",
+    "eslint-plugin-unicorn": "~42.0.0",
+    "mocha": "~10.0.0",
+    "npm-run-all": "~4.1.5",
+    "rimraf": "~3.0.2",
+    "ts-compiler": "npm:typescript@4.7.4",
+    "ts-node": "~10.8.1"
+  },
+  "license": "MIT",
+  "readme": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timocov/dts-bundle-generator.git"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "scripts": {
+    "clean": "rimraf dist/ dts-out/",
+    "lint": "eslint --format=unix --ext .ts ./",
+    "check-dts-config": "node ./node_modules/ts-compiler/bin/tsc --lib es2015 --allowJs --noEmit ./dts-config.js",
+    "bundle-dts": "npm run check-dts-config && node ./dist/bin/dts-bundle-generator.js --config dts-config.js --silent",
+    "tsc": "node ./node_modules/ts-compiler/bin/tsc --version && node ./node_modules/ts-compiler/bin/tsc -b ./tsconfig.json",
+    "verify": "npm-run-all clean tsc -p bundle-dts lint -s test",
+    "prepare-release": "npm-run-all clean tsc bundle-dts && node scripts/clean-package-json.js",
+    "test": "mocha tests/unittests/**/*.spec.ts tests/e2e/all-test-cases.ts"
+  }
 }

@@ -24,50 +24,28 @@ function prepareString(str: string): string {
 }
 
 function getTestCases(): TestCase[] {
-	return fs
-		.readdirSync(testCasesDir)
+	return fs.readdirSync(testCasesDir)
 		.filter((filePath: string) => {
-			return (
-				isDirectory(filePath) && path.basename(filePath) !== 'node_modules'
-			);
+			return isDirectory(filePath) && path.basename(filePath) !== 'node_modules';
 		})
 		.map((directoryName: string) => {
 			const testCaseDir = path.resolve(testCasesDir, directoryName);
 			const outputFileName = path.resolve(testCaseDir, 'output.d.ts');
 
-			const tsFilePath = path.relative(
-				process.cwd(),
-				path.resolve(testCaseDir, 'input.ts')
-			);
-			const dtsFilePath = path.relative(
-				process.cwd(),
-				path.resolve(testCaseDir, 'input.d.ts')
-			);
+			const tsFilePath = path.relative(process.cwd(), path.resolve(testCaseDir, 'input.ts'));
+			const dtsFilePath = path.relative(process.cwd(), path.resolve(testCaseDir, 'input.d.ts'));
 
-			const inputFileName = fs.existsSync(tsFilePath)
-				? tsFilePath
-				: dtsFilePath;
+			const inputFileName = fs.existsSync(tsFilePath) ? tsFilePath : dtsFilePath;
 
-			assert(
-				fs.existsSync(inputFileName),
-				`Input file doesn't exist for ${directoryName}`
-			);
-			assert(
-				fs.existsSync(outputFileName),
-				`Output file doesn't exist for ${directoryName}`
-			);
+			assert(fs.existsSync(inputFileName), `Input file doesn't exist for ${directoryName}`);
+			assert(fs.existsSync(outputFileName), `Output file doesn't exist for ${directoryName}`);
 
 			const result: TestCase = {
 				name: directoryName,
 				inputFileName,
 				// eslint-disable-next-line @typescript-eslint/no-var-requires
-				config: require(path.resolve(
-					testCaseDir,
-					'config.ts'
-				)) as TestCaseConfig,
-				outputFileContent: prepareString(
-					fs.readFileSync(outputFileName, 'utf-8')
-				),
+				config: require(path.resolve(testCaseDir, 'config.ts')) as TestCaseConfig,
+				outputFileContent: prepareString(fs.readFileSync(outputFileName, 'utf-8')),
 			};
 
 			return result;
@@ -83,19 +61,17 @@ describe('Functional tests', () => {
 				outputOptions.noBanner = true;
 			}
 
-			const dtsResult = generateDtsBundle([
-				{
-					...testCase.config,
-					output: outputOptions,
-					filePath: testCase.inputFileName,
-				},
-			])[0];
+			const dtsResult = generateDtsBundle(
+				[
+					{
+						...testCase.config,
+						output: outputOptions,
+						filePath: testCase.inputFileName,
+					},
+				]
+			)[0];
 			const result = prepareString(dtsResult);
-			assert.strictEqual(
-				result,
-				testCase.outputFileContent,
-				'Output should be the same as expected'
-			);
+			assert.strictEqual(result, testCase.outputFileContent, 'Output should be the same as expected');
 		});
 	}
 });

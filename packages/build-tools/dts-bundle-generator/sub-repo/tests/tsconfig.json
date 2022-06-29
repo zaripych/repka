@@ -1,9 +1,11 @@
 {
-	"extends": "../tsconfig.options.json",
 	"compilerOptions": {
 		"composite": true,
 		"incremental": true
 	},
-	"references": [{ "path": "./e2e" }, { "path": "./unittests" }],
+	"references": [
+		{ "path": "./e2e" },
+		{ "path": "./unittests" }
+	],
 	"include": []
 }

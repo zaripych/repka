@@ -30,10 +30,7 @@ export interface OutputOptions {
 	noBanner?: boolean;
 }
 
-export function generateOutput(
-	params: OutputParams,
-	options: OutputOptions = {}
-): string {
+export function generateOutput(params: OutputParams, options: OutputOptions = {}): string {
 	let resultOutput = '';
 
 	if (!options.noBanner) {
@@ -41,22 +38,15 @@ export function generateOutput(
 	}
 
 	if (params.typesReferences.size !== 0) {
-		const header = generateReferenceTypesDirective(
-			Array.from(params.typesReferences)
-		);
+		const header = generateReferenceTypesDirective(Array.from(params.typesReferences));
 		resultOutput += `${header}\n\n`;
 	}
 
 	if (params.imports.size !== 0) {
 		// we need to have sorted imports of libraries to have more "stable" output
-		const sortedEntries = Array.from(params.imports.entries()).sort(
-			(
-				firstEntry: [string, ModuleImportsSet],
-				secondEntry: [string, ModuleImportsSet]
-			) => {
-				return firstEntry[0].localeCompare(secondEntry[0]);
-			}
-		);
+		const sortedEntries = Array.from(params.imports.entries()).sort((firstEntry: [string, ModuleImportsSet], secondEntry: [string, ModuleImportsSet]) => {
+			return firstEntry[0].localeCompare(secondEntry[0]);
+		});
 
 		const importsArray: string[] = [];
 		for (const [libraryName, libraryImports] of sortedEntries) {
@@ -68,9 +58,7 @@ export function generateOutput(
 		}
 	}
 
-	const statements = params.statements.map((statement: ts.Statement) =>
-		getStatementText(statement, params)
-	);
+	const statements = params.statements.map((statement: ts.Statement) => getStatementText(statement, params));
 
 	if (options.sortStatements) {
 		statements.sort(compareStatementText);
@@ -79,9 +67,7 @@ export function generateOutput(
 	resultOutput += statementsTextToString(statements, params);
 
 	if (params.renamedExports.length !== 0) {
-		resultOutput += `\n\nexport {\n\t${params.renamedExports
-			.sort()
-			.join(',\n\t')},\n};`;
+		resultOutput += `\n\nexport {\n\t${params.renamedExports.sort().join(',\n\t')},\n};`;
 	}
 
 	if (options.umdModuleName !== undefined) {
@@ -108,25 +94,13 @@ function statementTextToString(s: StatementText): string {
 	return `${s.leadingComment}\n${s.text}`;
 }
 
-function statementsTextToString(
-	statements: StatementText[],
-	helpers: OutputHelpers
-): string {
+function statementsTextToString(statements: StatementText[], helpers: OutputHelpers): string {
 	const statementsText = statements.map(statementTextToString).join('\n');
 	return spacesToTabs(prettifyStatementsText(statementsText, helpers));
 }
 
-function prettifyStatementsText(
-	statementsText: string,
-	helpers: OutputHelpers
-): string {
-	const sourceFile = ts.createSourceFile(
-		'output.d.ts',
-		statementsText,
-		ts.ScriptTarget.Latest,
-		false,
-		ts.ScriptKind.TS
-	);
+function prettifyStatementsText(statementsText: string, helpers: OutputHelpers): string {
+	const sourceFile = ts.createSourceFile('output.d.ts', statementsText, ts.ScriptTarget.Latest, false, ts.ScriptKind.TS);
 	const printer = ts.createPrinter(
 		{
 			newLine: ts.NewLineKind.LineFeed,
@@ -135,11 +109,7 @@ function prettifyStatementsText(
 		{
 			substituteNode: (hint: ts.EmitHint, node: ts.Node) => {
 				// `import('module').Qualifier` or `typeof import('module').Qualifier`
-				if (
-					ts.isImportTypeNode(node) &&
-					node.qualifier !== undefined &&
-					helpers.needStripImportFromImportTypeNode(node)
-				) {
+				if (ts.isImportTypeNode(node) && node.qualifier !== undefined && helpers.needStripImportFromImportTypeNode(node)) {
 					if (node.isTypeOf) {
 						// I personally don't like this solution because it spreads the logic of modifying nodes in the code
 						// I'd prefer to have it somewhere near getStatementText or so
@@ -170,17 +140,11 @@ function compareStatementText(a: StatementText, b: StatementText): number {
 	return 0;
 }
 
-function needAddDeclareKeyword(
-	statement: ts.Statement,
-	nodeText: string
-): boolean {
+function needAddDeclareKeyword(statement: ts.Statement, nodeText: string): boolean {
 	// for some reason TypeScript allows to not write `declare` keyword for ClassDeclaration, FunctionDeclaration and VariableDeclaration
 	// if it already has `export` keyword - so we need to add it
 	// to avoid TS1046: Top-level declarations in .d.ts files must start with either a 'declare' or 'export' modifier.
-	if (
-		ts.isClassDeclaration(statement) &&
-		(/^class\b/.test(nodeText) || /^abstract\b/.test(nodeText))
-	) {
+	if (ts.isClassDeclaration(statement) && (/^class\b/.test(nodeText) || /^abstract\b/.test(nodeText))) {
 		return true;
 	}
 
@@ -188,60 +152,36 @@ function needAddDeclareKeyword(
 		return true;
 	}
 
-	if (
-		ts.isVariableStatement(statement) &&
-		/^(const|let|var)\b/.test(nodeText)
-	) {
+	if (ts.isVariableStatement(statement) && /^(const|let|var)\b/.test(nodeText)) {
 		return true;
 	}
 
-	if (
-		ts.isEnumDeclaration(statement) &&
-		(/^(const)\b/.test(nodeText) || /^(enum)\b/.test(nodeText))
-	) {
+	if (ts.isEnumDeclaration(statement) && (/^(const)\b/.test(nodeText) || /^(enum)\b/.test(nodeText))) {
 		return true;
 	}
 
 	return false;
 }
 
-function getStatementText(
-	statement: ts.Statement,
-	helpers: OutputHelpers
-): StatementText {
-	const shouldStatementHasExportKeyword =
-		helpers.shouldStatementHasExportKeyword(statement);
-	const needStripDefaultKeyword =
-		helpers.needStripDefaultKeywordForStatement(statement);
-	const hasStatementExportKeyword =
-		ts.isExportAssignment(statement) ||
-		hasNodeModifier(statement, ts.SyntaxKind.ExportKeyword);
+function getStatementText(statement: ts.Statement, helpers: OutputHelpers): StatementText {
+	const shouldStatementHasExportKeyword = helpers.shouldStatementHasExportKeyword(statement);
+	const needStripDefaultKeyword = helpers.needStripDefaultKeywordForStatement(statement);
+	const hasStatementExportKeyword = ts.isExportAssignment(statement) || hasNodeModifier(statement, ts.SyntaxKind.ExportKeyword);
 
-	let nodeText = getTextAccordingExport(
-		statement.getText(),
-		hasStatementExportKeyword,
-		shouldStatementHasExportKeyword
-	);
+	let nodeText = getTextAccordingExport(statement.getText(), hasStatementExportKeyword, shouldStatementHasExportKeyword);
 
 	if (
-		ts.isEnumDeclaration(statement) &&
-		hasNodeModifier(statement, ts.SyntaxKind.ConstKeyword) &&
-		helpers.needStripConstFromConstEnum(statement)
-	) {
+		ts.isEnumDeclaration(statement)
+		&& hasNodeModifier(statement, ts.SyntaxKind.ConstKeyword)
+		&& helpers.needStripConstFromConstEnum(statement)) {
 		nodeText = nodeText.replace(/\bconst\s/, '');
 	}
 
 	// strip the `default` keyword from node
-	if (
-		hasNodeModifier(statement, ts.SyntaxKind.DefaultKeyword) &&
-		needStripDefaultKeyword
-	) {
+	if (hasNodeModifier(statement, ts.SyntaxKind.DefaultKeyword) && needStripDefaultKeyword) {
 		// we need just to remove `default` from any node except class node
 		// for classes we need to replace `default` with `declare` instead
-		nodeText = nodeText.replace(
-			/\bdefault\s/,
-			ts.isClassDeclaration(statement) ? 'declare ' : ''
-		);
+		nodeText = nodeText.replace(/\bdefault\s/, ts.isClassDeclaration(statement) ? 'declare ' : '');
 	}
 
 	if (needAddDeclareKeyword(statement, nodeText)) {
@@ -256,11 +196,7 @@ function getStatementText(
 	if (shouldStatementHasExportKeyword) {
 		const start = statement.getStart();
 		const jsDocStart = statement.getStart(undefined, true);
-		const nodeJSDoc = statement
-			.getSourceFile()
-			.getFullText()
-			.substring(jsDocStart, start)
-			.trim();
+		const nodeJSDoc = statement.getSourceFile().getFullText().substring(jsDocStart, start).trim();
 		if (nodeJSDoc.length !== 0) {
 			result.leadingComment = nodeJSDoc;
 		}
@@ -269,56 +205,30 @@ function getStatementText(
 	return result;
 }
 
-function generateImports(
-	libraryName: string,
-	imports: ModuleImportsSet
-): string[] {
+function generateImports(libraryName: string, imports: ModuleImportsSet): string[] {
 	const fromEnding = `from '${libraryName}';`;
 
 	const result: string[] = [];
 
 	// sort to make output more "stable"
-	Array.from(imports.starImports)
-		.sort()
-		.forEach((importName: string) =>
-			result.push(`import * as ${importName} ${fromEnding}`)
-		);
-	Array.from(imports.requireImports)
-		.sort()
-		.forEach((importName: string) =>
-			result.push(`import ${importName} = require('${libraryName}');`)
-		);
-	Array.from(imports.defaultImports)
-		.sort()
-		.forEach((importName: string) =>
-			result.push(`import ${importName} ${fromEnding}`)
-		);
+	Array.from(imports.starImports).sort().forEach((importName: string) => result.push(`import * as ${importName} ${fromEnding}`));
+	Array.from(imports.requireImports).sort().forEach((importName: string) => result.push(`import ${importName} = require('${libraryName}');`));
+	Array.from(imports.defaultImports).sort().forEach((importName: string) => result.push(`import ${importName} ${fromEnding}`));
 
 	if (imports.namedImports.size !== 0) {
-		result.push(
-			`import { ${Array.from(imports.namedImports)
-				.sort()
-				.join(', ')} } ${fromEnding}`
-		);
+		result.push(`import { ${Array.from(imports.namedImports).sort().join(', ')} } ${fromEnding}`);
 	}
 
 	return result;
 }
 
 function generateReferenceTypesDirective(libraries: string[]): string {
-	return libraries
-		.sort()
-		.map((library: string) => {
-			return `/// <reference types="${library}" />`;
-		})
-		.join('\n');
+	return libraries.sort().map((library: string) => {
+		return `/// <reference types="${library}" />`;
+	}).join('\n');
 }
 
-function getTextAccordingExport(
-	nodeText: string,
-	isNodeExported: boolean,
-	shouldNodeBeExported: boolean
-): string {
+function getTextAccordingExport(nodeText: string, isNodeExported: boolean, shouldNodeBeExported: boolean): string {
 	if (shouldNodeBeExported && !isNodeExported) {
 		return 'export ' + nodeText;
 	} else if (isNodeExported && !shouldNodeBeExported) {

@@ -12,51 +12,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: npm install
-      - run: npm run lint
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    - run: npm install
+    - run: npm run lint
 
   ts-min:
     name: Minimal TS
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: npm install
-      - run: npm install typescript@3.0.1
-      - run: npm run tsc
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    - run: npm install
+    - run: npm install typescript@3.0.1
+    - run: npm run tsc
 
   ts-current:
     name: Current TS
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: npm install
-      - run: npm run tsc
-      - run: npm run test
-      - run: npm run bundle-dts
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    - run: npm install
+    - run: npm run tsc
+    - run: npm run test
+    - run: npm run bundle-dts
 
   ts-next:
     name: The next TS
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: npm install
-      - run: npm install typescript@next
-      - run: npm run tsc
-      - run: npm run test
-      - run: npm run bundle-dts
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    - run: npm install
+    - run: npm install typescript@next
+    - run: npm run tsc
+    - run: npm run test
+    - run: npm run bundle-dts

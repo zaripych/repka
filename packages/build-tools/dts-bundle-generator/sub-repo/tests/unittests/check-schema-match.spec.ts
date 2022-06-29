@@ -1,10 +1,6 @@
 import * as assert from 'assert';
 
-import {
-	checkSchemaMatch,
-	schemaPrimitiveValues,
-	SchemeDescriptor,
-} from '../../src/config-file/check-schema-match';
+import { checkSchemaMatch, schemaPrimitiveValues, SchemeDescriptor } from '../../src/config-file/check-schema-match';
 
 interface TestObj {
 	foo: string;
@@ -24,11 +20,9 @@ const testSchema: SchemeDescriptor<TestInterface> = {
 	requiredBooleanProp: schemaPrimitiveValues.requiredBoolean,
 	stringProp: schemaPrimitiveValues.string,
 	requiredStringProp: schemaPrimitiveValues.requiredString,
-	testArray: [
-		{
-			foo: schemaPrimitiveValues.requiredString,
-		},
-	],
+	testArray: [{
+		foo: schemaPrimitiveValues.requiredString,
+	}],
 	stringArray: [schemaPrimitiveValues.string],
 };
 
@@ -46,11 +40,7 @@ describe('checkSchemaMatch', () => {
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			true,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), true, formatErrors(errors));
 	});
 
 	it('should return true if object is matched partially', () => {
@@ -61,11 +51,7 @@ describe('checkSchemaMatch', () => {
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			true,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), true, formatErrors(errors));
 	});
 
 	it('should return true if object contains only required values', () => {
@@ -75,11 +61,7 @@ describe('checkSchemaMatch', () => {
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			true,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), true, formatErrors(errors));
 	});
 
 	it('should return false if object contains exceeded property', () => {
@@ -90,11 +72,7 @@ describe('checkSchemaMatch', () => {
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			false,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), false, formatErrors(errors));
 	});
 
 	it('should return false if does not have required property', () => {
@@ -103,11 +81,7 @@ describe('checkSchemaMatch', () => {
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			false,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), false, formatErrors(errors));
 	});
 
 	it('should return false if both does not have required property and have exceeded property', () => {
@@ -117,11 +91,7 @@ describe('checkSchemaMatch', () => {
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			false,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), false, formatErrors(errors));
 	});
 
 	it('should return true for if value is empty array', () => {
@@ -133,11 +103,7 @@ describe('checkSchemaMatch', () => {
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			true,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), true, formatErrors(errors));
 	});
 
 	it('should return true if array contains only valid values', () => {
@@ -145,15 +111,14 @@ describe('checkSchemaMatch', () => {
 			requiredBooleanProp: false,
 			requiredStringProp: 'test',
 			stringArray: ['string1', 'string2'],
-			testArray: [{ foo: '3' }, { foo: '2' }],
+			testArray: [
+				{ foo: '3' },
+				{ foo: '2' },
+			],
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			true,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), true, formatErrors(errors));
 	});
 
 	it('should return false if array contains invalid primitive values', () => {
@@ -164,34 +129,26 @@ describe('checkSchemaMatch', () => {
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			false,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), false, formatErrors(errors));
 	});
 
 	it('should return false if array contains invalid objects', () => {
 		const obj = {
 			requiredBooleanProp: false,
 			requiredStringProp: 'test',
-			testArray: [{ bar: '3' }, { foo: '2' }, { check: 123 }],
+			testArray: [
+				{ bar: '3' },
+				{ foo: '2' },
+				{ check: 123 },
+			],
 		};
 
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(obj, testSchema, errors),
-			false,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(obj, testSchema, errors), false, formatErrors(errors));
 	});
 
 	it('should return false if root object is undefined', () => {
 		const errors: string[] = [];
-		assert.strictEqual(
-			checkSchemaMatch(undefined, testSchema, errors),
-			false,
-			formatErrors(errors)
-		);
+		assert.strictEqual(checkSchemaMatch(undefined, testSchema, errors), false, formatErrors(errors));
 	});
 });

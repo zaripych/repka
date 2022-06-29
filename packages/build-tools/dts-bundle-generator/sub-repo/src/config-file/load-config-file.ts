@@ -3,11 +3,7 @@ import * as path from 'path';
 import { errorLog, verboseLog } from '../logger';
 import { EntryPointConfig, CompilationOptions } from '../bundle-generator';
 import { getAbsolutePath } from '../helpers/get-absolute-path';
-import {
-	checkSchemaMatch,
-	SchemeDescriptor,
-	schemaPrimitiveValues,
-} from './check-schema-match';
+import { checkSchemaMatch, SchemeDescriptor, schemaPrimitiveValues } from './check-schema-match';
 
 export interface ConfigEntryPoint extends EntryPointConfig {
 	/**
@@ -27,7 +23,7 @@ export interface BundlerConfig {
 	compilationOptions?: CompilationOptions;
 }
 
-function validateConfig(possibleConfig: any, configPath?: string) {
+function validateConfig(possibleConfig: unknown, configPath?: string) {
 	const errors: string[] = [];
 	if (!checkSchemaMatch(possibleConfig, configScheme, errors)) {
 		errorLog(errors.join('\n'));
@@ -71,9 +67,7 @@ export function loadConfigFile(configPath: string): BundlerConfig {
 	return validateConfig(possibleConfig, configPath);
 }
 
-export async function tryReadingConfigFromStdIn(): Promise<
-	BundlerConfig | undefined
-> {
+export async function tryReadingConfigFromStdIn(): Promise<BundlerConfig | undefined> {
 	if (process.stdin.isTTY) {
 		return;
 	}

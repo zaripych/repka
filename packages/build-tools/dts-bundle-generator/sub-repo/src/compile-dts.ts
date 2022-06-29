@@ -5,21 +5,14 @@ import { verboseLog, warnLog } from './logger';
 
 import { getCompilerOptions } from './get-compiler-options';
 import { getAbsolutePath } from './helpers/get-absolute-path';
-import {
-	checkProgramDiagnosticsErrors,
-	checkDiagnosticsErrors,
-} from './helpers/check-diagnostics-errors';
+import { checkProgramDiagnosticsErrors, checkDiagnosticsErrors } from './helpers/check-diagnostics-errors';
 
 export interface CompileDtsResult {
 	program: ts.Program;
 	rootFilesRemapping: Map<string, string>;
 }
 
-export function compileDts(
-	rootFiles: readonly string[],
-	preferredConfigPath?: string,
-	followSymlinks: boolean = true
-): CompileDtsResult {
+export function compileDts(rootFiles: readonly string[], preferredConfigPath?: string, followSymlinks: boolean = true): CompileDtsResult {
 	const compilerOptions = getCompilerOptions(rootFiles, preferredConfigPath);
 
 	// currently we don't support these compiler options
@@ -31,9 +24,7 @@ export function compileDts(
 	compilerOptions.declarationDir = undefined;
 
 	if (compilerOptions.composite) {
-		warnLog(
-			`Composite projects aren't supported at the time. Prefer to use non-composite project to generate declarations instead or just ignore this message if everything works fine. See https://github.com/timocov/dts-bundle-generator/issues/93`
-		);
+		warnLog(`Composite projects aren't supported at the time. Prefer to use non-composite project to generate declarations instead or just ignore this message if everything works fine. See https://github.com/timocov/dts-bundle-generator/issues/93`);
 		compilerOptions.composite = undefined;
 	}
 
@@ -49,12 +40,7 @@ export function compileDts(
 
 	host.resolveModuleNames = (moduleNames: string[], containingFile: string) => {
 		return moduleNames.map((moduleName: string) => {
-			const resolvedModule = ts.resolveModuleName(
-				moduleName,
-				containingFile,
-				compilerOptions,
-				host
-			).resolvedModule;
+			const resolvedModule = ts.resolveModuleName(moduleName, containingFile, compilerOptions, host).resolvedModule;
 
 			if (resolvedModule && !resolvedModule.isExternalLibraryImport) {
 				const resolvedDtsFileName = changeExtensionToDts(
@@ -71,12 +57,17 @@ export function compileDts(
 					resolvedModule.resolvedFileName = resolvedDtsFileName;
 				}
 
-				if (!dtsFiles.get(resolvedDtsFileName)) {
+				if (!dtsFiles.has(resolvedDtsFileName) && !containingFile.endsWith('.d.ts')) {
+					verboseLog(
+						`Generating declarations from ${containingFile} because ${resolvedDtsFileName} is not in the .d.ts cache`
+					);
 					const extraDtsFiles = getDeclarationFiles(
 						[containingFile],
 						compilerOptions
 					);
-					for (const [key, value] of extraDtsFiles.entries()) {
+					const entries = Array.from(extraDtsFiles.entries());
+					for (let i = 0; i < entries.length; i += 1) {
+						const [key, value] = entries[i];
 						if (!dtsFiles.has(key)) {
 							dtsFiles.set(key, value);
 						}
@@ -89,11 +80,7 @@ export function compileDts(
 	};
 
 	const originalGetSourceFile = host.getSourceFile;
-	host.getSourceFile = (
-		fileName: string,
-		languageVersion: ts.ScriptTarget,
-		onError?: (message: string) => void
-	) => {
+	host.getSourceFile = (fileName: string, languageVersion: ts.ScriptTarget, onError?: (message: string) => void) => {
 		const absolutePath = getAbsolutePath(fileName);
 		const storedValue = dtsFiles.get(absolutePath);
 		if (storedValue !== undefined) {
@@ -132,10 +119,7 @@ function changeExtensionToDts(fileName: string): string {
 /**
  * @description Compiles source files into d.ts files and returns map of absolute path to file content
  */
-function getDeclarationFiles(
-	rootFiles: readonly string[],
-	compilerOptions: ts.CompilerOptions
-): Map<string, string> {
+function getDeclarationFiles(rootFiles: readonly string[], compilerOptions: ts.CompilerOptions): Map<string, string> {
 	// we must pass `declaration: true` and `noEmit: false` if we want to generate declaration files
 	// see https://github.com/microsoft/TypeScript/issues/24002#issuecomment-550549393
 	compilerOptions = {
@@ -145,17 +129,13 @@ function getDeclarationFiles(
 	};
 
 	const program = ts.createProgram(rootFiles, compilerOptions);
-	const allFilesAreDeclarations = program
-		.getSourceFiles()
-		.every((s: ts.SourceFile) => s.isDeclarationFile);
+	const allFilesAreDeclarations = program.getSourceFiles().every((s: ts.SourceFile) => s.isDeclarationFile);
 
 	const declarations = new Map<string, string>();
 	if (allFilesAreDeclarations) {
 		// if all files are declarations we don't need to compile the project twice
 		// so let's just return empty map to speed up
-		verboseLog(
-			'Skipping compiling the project to generate d.ts because all files in it are d.ts already'
-		);
+		verboseLog('Skipping compiling the project to generate d.ts because all files in it are d.ts already');
 		return declarations;
 	}
 
@@ -163,31 +143,23 @@ function getDeclarationFiles(
 
 	const emitResult = program.emit(
 		undefined,
-		(fileName: string, data: string) =>
-			declarations.set(getAbsolutePath(fileName), data),
+		(fileName: string, data: string) => declarations.set(getAbsolutePath(fileName), data),
 		undefined,
 		true
 	);
 
-	checkDiagnosticsErrors(
-		emitResult.diagnostics,
-		'Errors while emitting declarations'
-	);
+	checkDiagnosticsErrors(emitResult.diagnostics, 'Errors while emitting declarations');
 
 	return declarations;
 }
 
 function warnAboutTypeScriptFilesInProgram(program: ts.Program): void {
-	const nonDeclarationFiles = program
-		.getSourceFiles()
-		.filter((file: ts.SourceFile) => !file.isDeclarationFile);
+	const nonDeclarationFiles = program.getSourceFiles().filter((file: ts.SourceFile) => !file.isDeclarationFile);
 	if (nonDeclarationFiles.length !== 0) {
 		warnLog(`WARNING: It seems that some files in the compilation still are not declaration files.
 For more information see https://github.com/timocov/dts-bundle-generator/issues/53.
 If you think this is a mistake, feel free to open new issue or just ignore this warning.
-  ${nonDeclarationFiles
-		.map((file: ts.SourceFile) => file.fileName)
-		.join('\n  ')}
+  ${nonDeclarationFiles.map((file: ts.SourceFile) => file.fileName).join('\n  ')}
 `);
 	}
 }

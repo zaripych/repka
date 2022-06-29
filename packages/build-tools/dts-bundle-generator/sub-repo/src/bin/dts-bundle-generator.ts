@@ -4,12 +4,7 @@ import * as path from 'path';
 import * as ts from 'typescript';
 import * as yargs from 'yargs';
 
-import {
-	loadConfigFile,
-	BundlerConfig,
-	ConfigEntryPoint,
-	tryReadingConfigFromStdIn,
-} from '../config-file/load-config-file';
+import { loadConfigFile, BundlerConfig, ConfigEntryPoint, tryReadingConfigFromStdIn } from '../config-file/load-config-file';
 
 import { generateDtsBundle } from '../bundle-generator';
 import { checkProgramDiagnosticsErrors } from '../helpers/check-diagnostics-errors';
@@ -38,6 +33,7 @@ function toStringsArray(data: unknown): string[] | undefined {
 	return data.map(String);
 }
 
+/* eslint-disable @typescript-eslint/naming-convention */
 interface ParsedArgs extends yargs.Arguments {
 	sort: boolean;
 	silent: boolean;
@@ -60,14 +56,17 @@ interface ParsedArgs extends yargs.Arguments {
 	'external-imports': string[] | undefined;
 	'external-types': string[] | undefined;
 }
+/* eslint-enable @typescript-eslint/naming-convention */
 
 function parseArgs(): ParsedArgs {
 	return yargs
 		.parserConfiguration({
+			/* eslint-disable @typescript-eslint/naming-convention */
 			'boolean-negation': false,
 			'camel-case-expansion': false,
 			'dot-notation': false,
 			'short-option-groups': false,
+			/* eslint-enable @typescript-eslint/naming-convention */
 		})
 		.usage('Usage: $0 [options] <file(s)>')
 		.demandCommand(0)
@@ -98,35 +97,30 @@ function parseArgs(): ParsedArgs {
 		})
 		.option('external-inlines', {
 			type: 'array',
-			description:
-				'Array of package names from node_modules to inline typings from.\n' +
+			description: 'Array of package names from node_modules to inline typings from.\n' +
 				'Used types will be inlined into the output file',
 			coerce: toStringsArray,
 		})
 		.option('external-imports', {
 			type: 'array',
-			description:
-				'Array of package names from node_modules to import typings from.\n' +
+			description: 'Array of package names from node_modules to import typings from.\n' +
 				'Used types will be imported using "import { First, Second } from \'library-name\';".\n' +
 				'By default all libraries will be imported (except inlined libraries and libraries from @types)',
 			coerce: toStringsArray,
 		})
 		.option('external-types', {
 			type: 'array',
-			description:
-				'Array of package names from @types to import typings from via the triple-slash reference directive.\n' +
+			description: 'Array of package names from @types to import typings from via the triple-slash reference directive.\n' +
 				'By default all packages are allowed and will be used according to their usages',
 			coerce: toStringsArray,
 		})
 		.option('umd-module-name', {
 			type: 'string',
-			description:
-				'Name of the UMD module. If specified then `export as namespace ModuleName;` will be emitted',
+			description: 'Name of the UMD module. If specified then `export as namespace ModuleName;` will be emitted',
 		})
 		.option('project', {
 			type: 'string',
-			description:
-				'Path to the tsconfig.json file that will be used for the compilation',
+			description: 'Path to the tsconfig.json file that will be used for the compilation',
 		})
 		.option('sort', {
 			type: 'boolean',
@@ -136,32 +130,27 @@ function parseArgs(): ParsedArgs {
 		.option('inline-declare-global', {
 			type: 'boolean',
 			default: false,
-			description:
-				'Enables inlining of `declare global` statements contained in files which should be inlined (all local files and packages from `--external-inlines`)',
+			description: 'Enables inlining of `declare global` statements contained in files which should be inlined (all local files and packages from `--external-inlines`)',
 		})
 		.option('inline-declare-externals', {
 			type: 'boolean',
 			default: false,
-			description:
-				"Enables inlining of `declare module` statements of the global modules (e.g. `declare module 'external-module' {}`, but NOT `declare module './internal-module' {}`) contained in files which should be inlined (all local files and packages from inlined libraries)",
+			description: 'Enables inlining of `declare module` statements of the global modules (e.g. `declare module \'external-module\' {}`, but NOT `declare module \'./internal-module\' {}`) contained in files which should be inlined (all local files and packages from inlined libraries)',
 		})
 		.option('disable-symlinks-following', {
 			type: 'boolean',
 			default: false,
-			description:
-				'(EXPERIMENTAL) Disables resolving of symlinks to the original path. See https://github.com/timocov/dts-bundle-generator/issues/39 for more information',
+			description: '(EXPERIMENTAL) Disables resolving of symlinks to the original path. See https://github.com/timocov/dts-bundle-generator/issues/39 for more information',
 		})
 		.option('respect-preserve-const-enum', {
 			type: 'boolean',
 			default: false,
-			description:
-				'Enables stripping the `const` keyword from every direct-exported (or re-exported) from entry file `const enum`. See https://github.com/timocov/dts-bundle-generator/issues/110 for more information',
+			description: 'Enables stripping the `const` keyword from every direct-exported (or re-exported) from entry file `const enum`. See https://github.com/timocov/dts-bundle-generator/issues/110 for more information',
 		})
 		.option('export-referenced-types', {
 			type: 'boolean',
 			default: true,
-			description:
-				"By default all interfaces, types and const enums are marked as exported even if they aren't exported directly. This option allows you to disable this behavior so a node will be exported if it is exported from root source file only.",
+			description: 'By default all interfaces, types and const enums are marked as exported even if they aren\'t exported directly. This option allows you to disable this behavior so a node will be exported if it is exported from root source file only.',
 		})
 		.option('config', {
 			type: 'string',
@@ -170,15 +159,15 @@ function parseArgs(): ParsedArgs {
 		.option('no-banner', {
 			type: 'boolean',
 			default: false,
-			description:
-				'Allows remove "Generated by dts-bundle-generator" comment from the output',
+			description: 'Allows remove "Generated by dts-bundle-generator" comment from the output',
 		})
 		.version()
 		.strict()
 		.example('$0 path/to/your/entry-file.ts', '')
 		.example('$0 path/to/your/entry-file.ts path/to/your/entry-file-2.ts', '')
 		.example('$0 --external-types jquery react -- entry-file.ts', '')
-		.wrap(Math.min(100, yargs.terminalWidth())).argv as ParsedArgs;
+		.wrap(Math.min(100, yargs.terminalWidth()))
+		.argv as ParsedArgs;
 }
 
 function generateOutFileName(inputFilePath: string): string {
@@ -187,13 +176,11 @@ function generateOutFileName(inputFilePath: string): string {
 }
 
 // eslint-disable-next-line complexity
-function main(config?: BundlerConfig): void {
+function main(stdinConfig?: BundlerConfig): void {
 	const args = parseArgs();
 
 	if (args.silent && args.verbose) {
-		throw new Error(
-			'Cannot use both silent and verbose options at the same time'
-		);
+		throw new Error('Cannot use both silent and verbose options at the same time');
 	} else if (args.verbose) {
 		enableVerbose();
 	} else if (!args.silent) {
@@ -202,8 +189,8 @@ function main(config?: BundlerConfig): void {
 
 	let bundlerConfig: BundlerConfig;
 
-	if (config) {
-		bundlerConfig = config;
+	if (stdinConfig) {
+		bundlerConfig = stdinConfig;
 	} else if (args.config !== undefined) {
 		verboseLog(`Trying to load config from ${args.config} file...`);
 		bundlerConfig = loadConfigFile(args.config);
@@ -248,18 +235,12 @@ function main(config?: BundlerConfig): void {
 
 	verboseLog(`Total entries count=${bundlerConfig.entries.length}`);
 
-	const generatedDts = generateDtsBundle(
-		bundlerConfig.entries,
-		bundlerConfig.compilationOptions
-	);
+	const generatedDts = generateDtsBundle(bundlerConfig.entries, bundlerConfig.compilationOptions);
 
 	const outFilesToCheck: string[] = [];
 	for (let i = 0; i < bundlerConfig.entries.length; ++i) {
 		const entry = bundlerConfig.entries[i];
-		const outFile =
-			entry.outFile !== undefined
-				? entry.outFile
-				: generateOutFileName(entry.filePath);
+		const outFile = entry.outFile !== undefined ? entry.outFile : generateOutFileName(entry.filePath);
 
 		normalLog(`Writing ${entry.filePath} -> ${outFile}`);
 		ts.sys.writeFile(outFile, generatedDts[i]);
@@ -275,19 +256,11 @@ function main(config?: BundlerConfig): void {
 	}
 
 	normalLog('Checking generated files...');
-	const preferredConfigFile =
-		bundlerConfig.compilationOptions !== undefined
-			? bundlerConfig.compilationOptions.preferredConfigPath
-			: undefined;
-	const compilerOptions = getCompilerOptions(
-		outFilesToCheck,
-		preferredConfigFile
-	);
+	const preferredConfigFile = bundlerConfig.compilationOptions !== undefined ? bundlerConfig.compilationOptions.preferredConfigPath : undefined;
+	const compilerOptions = getCompilerOptions(outFilesToCheck, preferredConfigFile);
 	if (compilerOptions.skipLibCheck) {
 		compilerOptions.skipLibCheck = false;
-		warnLog(
-			'Compiler option "skipLibCheck" is disabled to properly check generated output'
-		);
+		warnLog('Compiler option "skipLibCheck" is disabled to properly check generated output');
 	}
 
 	const program = ts.createProgram(outFilesToCheck, compilerOptions);
@@ -295,7 +268,7 @@ function main(config?: BundlerConfig): void {
 }
 
 tryReadingConfigFromStdIn()
-	.then((config) => {
+	.then(config => {
 		try {
 			const executionTime = measureTime(() => {
 				main(config);
@@ -307,7 +280,7 @@ tryReadingConfigFromStdIn()
 			process.exit(1);
 		}
 	})
-	.catch((err) => {
+	.catch(err => {
 		normalLog('');
 		errorLog(`Error: ${(err as Error).message}`);
 		process.exit(1);

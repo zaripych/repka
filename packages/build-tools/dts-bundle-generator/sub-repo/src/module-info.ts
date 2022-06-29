@@ -1,6 +1,9 @@
 import * as path from 'path';
 
-import { getLibraryName, getTypesLibraryName } from './helpers/node-modules';
+import {
+	getLibraryName,
+	getTypesLibraryName,
+} from './helpers/node-modules';
 
 import { fixPath } from './helpers/fix-path';
 
@@ -36,11 +39,7 @@ export interface UsedForModulesModuleInfo extends UsedModuleInfoCommon {
 	isExternal: true;
 }
 
-export type ModuleInfo =
-	| InlinedModuleInfo
-	| ImportedModuleInfo
-	| ReferencedModuleInfo
-	| UsedForModulesModuleInfo;
+export type ModuleInfo = InlinedModuleInfo | ImportedModuleInfo | ReferencedModuleInfo | UsedForModulesModuleInfo;
 
 export interface ModuleCriteria {
 	inlinedLibraries: string[];
@@ -49,10 +48,7 @@ export interface ModuleCriteria {
 	typeRoots?: string[];
 }
 
-export function getModuleInfo(
-	fileName: string,
-	criteria: ModuleCriteria
-): ModuleInfo {
+export function getModuleInfo(fileName: string, criteria: ModuleCriteria): ModuleInfo {
 	return getModuleInfoImpl(fileName, fileName, criteria);
 }
 
@@ -61,11 +57,7 @@ export function getModuleInfo(
  * @param originalFileName Original file name of the module
  * @param criteria Criteria of module info
  */
-function getModuleInfoImpl(
-	currentFilePath: string,
-	originalFileName: string,
-	criteria: ModuleCriteria
-): ModuleInfo {
+function getModuleInfoImpl(currentFilePath: string, originalFileName: string, criteria: ModuleCriteria): ModuleInfo {
 	const npmLibraryName = getLibraryName(currentFilePath);
 	if (npmLibraryName === null) {
 		if (criteria.typeRoots !== undefined) {
@@ -74,81 +66,32 @@ function getModuleInfoImpl(
 				if (!relativePath.startsWith('../')) {
 					// relativePath is path relative to type root
 					// so we should treat it as "library from node_modules/@types/"
-					return getModuleInfoImpl(
-						remapToTypesFromNodeModules(relativePath),
-						originalFileName,
-						criteria
-					);
+					return getModuleInfoImpl(remapToTypesFromNodeModules(relativePath), originalFileName, criteria);
 				}
 			}
 		}
 
-		return {
-			type: ModuleType.ShouldBeInlined,
-			fileName: originalFileName,
-			isExternal: false,
-		};
+		return { type: ModuleType.ShouldBeInlined, fileName: originalFileName, isExternal: false };
 	}
 
 	const typesLibraryName = getTypesLibraryName(currentFilePath);
-	if (
-		shouldLibraryBeInlined(
-			npmLibraryName,
-			typesLibraryName,
-			criteria.inlinedLibraries
-		)
-	) {
-		return {
-			type: ModuleType.ShouldBeInlined,
-			fileName: originalFileName,
-			isExternal: true,
-		};
+	if (shouldLibraryBeInlined(npmLibraryName, typesLibraryName, criteria.inlinedLibraries)) {
+		return { type: ModuleType.ShouldBeInlined, fileName: originalFileName, isExternal: true };
 	}
 
-	if (
-		shouldLibraryBeImported(
-			npmLibraryName,
-			typesLibraryName,
-			criteria.importedLibraries,
-			criteria.allowedTypesLibraries
-		)
-	) {
-		return {
-			type: ModuleType.ShouldBeImported,
-			fileName: originalFileName,
-			isExternal: true,
-		};
+	if (shouldLibraryBeImported(npmLibraryName, typesLibraryName, criteria.importedLibraries, criteria.allowedTypesLibraries)) {
+		return { type: ModuleType.ShouldBeImported, fileName: originalFileName, isExternal: true };
 	}
 
-	if (
-		typesLibraryName !== null &&
-		isLibraryAllowed(typesLibraryName, criteria.allowedTypesLibraries)
-	) {
-		return {
-			type: ModuleType.ShouldBeReferencedAsTypes,
-			fileName: originalFileName,
-			typesLibraryName,
-			isExternal: true,
-		};
+	if (typesLibraryName !== null && isLibraryAllowed(typesLibraryName, criteria.allowedTypesLibraries)) {
+		return { type: ModuleType.ShouldBeReferencedAsTypes, fileName: originalFileName, typesLibraryName, isExternal: true };
 	}
 
-	return {
-		type: ModuleType.ShouldBeUsedForModulesOnly,
-		fileName: originalFileName,
-		isExternal: true,
-	};
+	return { type: ModuleType.ShouldBeUsedForModulesOnly, fileName: originalFileName, isExternal: true };
 }
 
-function shouldLibraryBeInlined(
-	npmLibraryName: string,
-	typesLibraryName: string | null,
-	inlinedLibraries: string[]
-): boolean {
-	return (
-		isLibraryAllowed(npmLibraryName, inlinedLibraries) ||
-		(typesLibraryName !== null &&
-			isLibraryAllowed(typesLibraryName, inlinedLibraries))
-	);
+function shouldLibraryBeInlined(npmLibraryName: string, typesLibraryName: string | null, inlinedLibraries: string[]): boolean {
+	return isLibraryAllowed(npmLibraryName, inlinedLibraries) || typesLibraryName !== null && isLibraryAllowed(typesLibraryName, inlinedLibraries);
 }
 
 function shouldLibraryBeImported(
@@ -164,20 +107,14 @@ function shouldLibraryBeImported(
 	// to be imported a library from types shouldn't be allowed to be references as types
 	// thus by default we treat all libraries as "should be imported"
 	// but if it is a @types library then it should be imported only if it is not marked as "should be referenced as types" explicitly
-	if (
-		allowedTypesLibraries === undefined ||
-		!isLibraryAllowed(typesLibraryName, allowedTypesLibraries)
-	) {
+	if (allowedTypesLibraries === undefined || !isLibraryAllowed(typesLibraryName, allowedTypesLibraries)) {
 		return isLibraryAllowed(typesLibraryName, importedLibraries);
 	}
 
 	return false;
 }
 
-function isLibraryAllowed(
-	libraryName: string,
-	allowedArray?: string[]
-): boolean {
+function isLibraryAllowed(libraryName: string, allowedArray?: string[]): boolean {
 	return allowedArray === undefined || allowedArray.indexOf(libraryName) !== -1;
 }
 

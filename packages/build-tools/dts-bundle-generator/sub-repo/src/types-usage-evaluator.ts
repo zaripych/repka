@@ -11,10 +11,7 @@ export type NodesParents = Map<ts.Symbol, Set<ts.Symbol>>;
 
 export class TypesUsageEvaluator {
 	private readonly typeChecker: ts.TypeChecker;
-	private readonly nodesParentsMap: NodesParents = new Map<
-		ts.Symbol,
-		Set<ts.Symbol>
-	>();
+	private readonly nodesParentsMap: NodesParents = new Map<ts.Symbol, Set<ts.Symbol>>();
 
 	public constructor(files: ts.SourceFile[], typeChecker: ts.TypeChecker) {
 		this.typeChecker = typeChecker;
@@ -22,22 +19,14 @@ export class TypesUsageEvaluator {
 	}
 
 	public isSymbolUsedBySymbol(symbol: ts.Symbol, by: ts.Symbol): boolean {
-		return this.isSymbolUsedBySymbolImpl(
-			this.getActualSymbol(symbol),
-			this.getActualSymbol(by),
-			new Set<ts.Symbol>()
-		);
+		return this.isSymbolUsedBySymbolImpl(this.getActualSymbol(symbol), this.getActualSymbol(by), new Set<ts.Symbol>());
 	}
 
 	public getSymbolsUsingSymbol(symbol: ts.Symbol): Set<ts.Symbol> | null {
 		return this.nodesParentsMap.get(this.getActualSymbol(symbol)) || null;
 	}
 
-	private isSymbolUsedBySymbolImpl(
-		fromSymbol: ts.Symbol,
-		toSymbol: ts.Symbol,
-		visitedSymbols: Set<ts.Symbol>
-	): boolean {
+	private isSymbolUsedBySymbolImpl(fromSymbol: ts.Symbol, toSymbol: ts.Symbol, visitedSymbols: Set<ts.Symbol>): boolean {
 		if (fromSymbol === toSymbol) {
 			return true;
 		}
@@ -70,11 +59,7 @@ export class TypesUsageEvaluator {
 	}
 
 	private computeUsageForNode(node: ts.Node): void {
-		if (
-			isDeclareModule(node) &&
-			node.body !== undefined &&
-			ts.isModuleBlock(node.body)
-		) {
+		if (isDeclareModule(node) && node.body !== undefined && ts.isModuleBlock(node.body)) {
 			for (const statement of node.body.statements) {
 				this.computeUsageForNode(statement);
 			}
@@ -88,10 +73,7 @@ export class TypesUsageEvaluator {
 		}
 	}
 
-	private computeUsagesRecursively(
-		parent: ts.Node,
-		parentSymbol: ts.Symbol
-	): void {
+	private computeUsagesRecursively(parent: ts.Node, parentSymbol: ts.Symbol): void {
 		const queue = parent.getChildren();
 		for (const child of queue) {
 			if (child.kind === ts.SyntaxKind.JSDocComment) {
@@ -108,10 +90,7 @@ export class TypesUsageEvaluator {
 					continue;
 				}
 
-				const childSymbols = splitTransientSymbol(
-					this.getSymbol(child),
-					this.typeChecker
-				);
+				const childSymbols = splitTransientSymbol(this.getSymbol(child), this.typeChecker);
 
 				for (const childSymbol of childSymbols) {
 					let symbols = this.nodesParentsMap.get(childSymbol);

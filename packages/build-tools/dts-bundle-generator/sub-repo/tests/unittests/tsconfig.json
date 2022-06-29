@@ -5,6 +5,10 @@
 		"incremental": true,
 		"outDir": "./.tsc-out"
 	},
-	"references": [{ "path": "../../src" }],
-	"include": ["**/*.ts"]
+	"references": [
+		{ "path": "../../src" },
+	],
+	"include": [
+		"**/*.ts"
+	]
 }
