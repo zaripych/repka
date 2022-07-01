@@ -6,6 +6,8 @@
   "scripts": {
     "build:all": "pnpm turbo run build",
     "build:changed": "pnpm turbo run build --filter='...[HEAD]'",
+    "ci:publish": "pnpm turbo run build && changeset publish",
+    "ci:version": "changeset version && pnpm install",
     "integration": "pnpm turbo run integration",
     "integration:all": "pnpm turbo run integration",
     "integration:changed": "pnpm turbo run integration --filter='...[HEAD]'",
