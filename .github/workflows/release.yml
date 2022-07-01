@@ -7,9 +7,6 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
-env:
-  PNPM_CACHE_FOLDER: /home/runner/work/.pnpm-store
-
 jobs:
   release:
     name: Release
@@ -23,18 +20,27 @@ jobs:
       - name: Get Node Version
         run: |
           echo "NODE_VERSION=$(jq -r .engines.node package.json)" >> $GITHUB_ENV
-          echo "PNPM_VERSION=$(jq -r .engines.pnpm package.json)" >> $GITHUB_ENV
 
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install pnpm
-        run: npm i pnpm@${{ env.PNPM_VERSION }} -g
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
 
-      - name: Setup pnpm Config
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+      - name: Get pnpm store directory
+        id: pnpm-store
+        run: |
+          echo "PNPM_STORE_DIR=$(pnpm store path)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.PNPM_STORE_DIR }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install Dependencies
         run: pnpm install
