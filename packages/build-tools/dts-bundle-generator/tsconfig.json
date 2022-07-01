@@ -1,0 +1,10 @@
+{
+  "extends": "./sub-repo/tsconfig.options.json",
+  "compilerOptions": {
+    "outDir": ".tsc-out",
+    "tsBuildInfoFile": ".tsc-out/.tsbuildinfo",
+    "incremental": true,
+    "composite": true
+  },
+  "include": ["src", "sub-repo/src"]
+}

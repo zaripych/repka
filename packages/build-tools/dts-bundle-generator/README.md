@@ -1,0 +1,1 @@
+[The fork](https://github.com/zaripych/dts-bundle-generator) is maintained as a [subrepo](https://github.com/ingydotnet/git-subrepo), which is located in the sub-directory [./sub-repo](./sub-repo/) and isolated from our `monorepo` to an extend that is needed to maintain clean contribution history upstream.

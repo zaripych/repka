@@ -44,8 +44,8 @@ const eslintCommand = (filenames, pack) => {
   const files = filenames.map((file) => relative(pack, file)).join(' ');
   return [
     filenames.length < ESLINT_MAX_FILES
-      ? `pnpm -C ${pack} lint ${files}`
-      : `pnpm -C ${pack} lint`,
+      ? `pnpm run -C ${pack} lint ${files}`
+      : `pnpm run -C ${pack} lint`,
   ];
 };
 

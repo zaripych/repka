@@ -5,5 +5,10 @@
     "tsBuildInfoFile": ".tsc-out/.tsbuildinfo"
   },
   "include": ["src"],
-  "exclude": ["src/__integration__/test-cases"]
+  "exclude": ["src/__integration__/test-cases"],
+  "references": [
+    {
+      "path": "../dts-bundle-generator"
+    }
+  ]
 }

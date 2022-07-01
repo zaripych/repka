@@ -1,0 +1,21 @@
+{
+  "name": "@build-tools/dts-bundle-generator",
+  "version": "0.0.0-development",
+  "private": true,
+  "description": "Based of fork of dts-bundle-generator by @timokov",
+  "type": "commonjs",
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "echo \"No linting in this package! It's linted via TypeScript as part of @repka/ts package.\""
+  },
+  "dependencies": {
+    "typescript": "4.7.4",
+    "yargs": "17.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.0.0",
+    "@types/yargs": "17.0.10"
+  }
+}
