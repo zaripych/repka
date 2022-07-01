@@ -13,6 +13,7 @@
     "lint:changed": "pnpm turbo run lint --filter='...[HEAD]'",
     "prepare": "husky install",
     "prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml|yaml)' --write",
+    "publish:beta": "pnpm turbo run build:tools && pnpm publish -r --tag beta --access public",
     "test": "pnpm turbo run test",
     "test:all": "pnpm turbo run test",
     "test:changed": "pnpm turbo run test --filter='...[HEAD]'"
