@@ -23,6 +23,7 @@ jobs:
       - name: Get Node Version
         run: |
           echo "NODE_VERSION=$(jq -r .engines.node package.json)" >> $GITHUB_ENV
+          echo "PNPM_VERSION=$(jq -r .engines.pnpm package.json)" >> $GITHUB_ENV
 
       - name: Setup Node
         uses: actions/setup-node@v2
@@ -30,7 +31,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install pnpm
-        run: npm i pnpm@latest -g
+        run: npm i pnpm@${{ env.PNPM_VERSION }} -g
 
       - name: Setup pnpm Config
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
