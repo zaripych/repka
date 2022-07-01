@@ -53,3 +53,4 @@ jobs:
           publish: pnpm turbo run build && changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: NOT_SPECIFIED_ON_PURPOSE
