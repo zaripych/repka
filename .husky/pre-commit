@@ -1,7 +1,7 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-if [ $DISABLE_LINT_STAGED != "" ]; then
+if [ "$DISABLE_LINT_STAGED" != "" ]; then
   echo "Lint staged disabled via env var DISABLE_LINT_STAGED";
   exit 0;
 fi;

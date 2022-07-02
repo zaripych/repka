@@ -30,7 +30,8 @@ const stashIncludeUntrackedKeepIndex = async () => {
       'ls-files --others --exclude-standard --full-name'.split(' ')
     ).then(split),
   ]);
-  const didStash = modified.length > 0 || untracked.length > 0;
+  const didStash =
+    staged.length > 0 && (modified.length > 0 || untracked.length > 0);
   if (didStash) {
     await spawnWithOutputWhenFailed(
       'git',
