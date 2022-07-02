@@ -61,7 +61,7 @@ importers:
       rollup-plugin-analyzer: 4.0.0
       rollup-plugin-generate-package-json: 3.2.0
       tsx: 3.6.0
-      turbo: 1.3.1
+      turbo: 1.3.2-canary.0
       typescript: 4.7.4
       utility-types: 3.10.0
     dependencies:
@@ -91,7 +91,7 @@ importers:
       rollup-plugin-analyzer: 4.0.0
       rollup-plugin-generate-package-json: 3.2.0_rollup@2.75.7
       tsx: 3.6.0
-      turbo: 1.3.1
+      turbo: 1.3.2-canary.0
       typescript: 4.7.4
     devDependencies:
       '@build-tools/dts-bundle-generator': link:../dts-bundle-generator
@@ -5734,137 +5734,137 @@ packages:
       yargs: 17.5.1
     dev: true
 
-  /turbo-android-arm64/1.3.1:
-    resolution: {integrity: sha512-JcnZh9tLbZDpKaXaao/s/k4qXt3TbNEc1xEYYXurVWnqiMueGeS7QAtThVB85ZSqzj7djk+ngSrZabPy5RG25Q==}
+  /turbo-android-arm64/1.3.2-canary.0:
+    resolution: {integrity: sha512-evvbGErGZxdRvZXV4DoY0nHAbRqELUIWi9CLRJIvKAFEArhu4AD2bj2ZZ2ArN0RVDHzuXGSzFXlh7TlGt71L1A==}
     cpu: [arm64]
     os: [android]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-darwin-64/1.3.1:
-    resolution: {integrity: sha512-TIGDradVFoGck86VIuM38KaDeNxdKaP2ti93UpQeFw26ZhPIeTAa6wUgnz4DQP6bjIvQmXlYJ16ETZb4tFYygg==}
+  /turbo-darwin-64/1.3.2-canary.0:
+    resolution: {integrity: sha512-+G2frEjK15gxN54oq3xTovbbva5CwobBRiG5F9eiMomW13v0xbn/ISLM8+MKPbnnTiZdBifhpcwaUVpnSphLIQ==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-darwin-arm64/1.3.1:
-    resolution: {integrity: sha512-aLBq8KiMMmop7uKBkvDt/y+eER2UzxZyUzh1KWcZ7DZB5tFZnknEUyf2qggY2vd2WcDVfQ1EUjZ0MFxhhVaVzA==}
+  /turbo-darwin-arm64/1.3.2-canary.0:
+    resolution: {integrity: sha512-OO50h/IZN7pBaII16kVGgolxbqQx6w2eoEdqv1YhQjr9prO+mGyqBsmGP+chlfZsNOjbY7nF7B55Bht2vt0KCw==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-freebsd-64/1.3.1:
-    resolution: {integrity: sha512-BOr/ifmxjlBeuDkDQLUJtzqzXQ2zPHHcI14U9Ys+z4Mza1uzQn/oSJqQvU5RuyRBVai7noMrpPS7QuKtDz0Cyg==}
+  /turbo-freebsd-64/1.3.2-canary.0:
+    resolution: {integrity: sha512-16aGmwCGhj9aW9TR3dDn0ChMl8cZUFHSPXd5d4tbNFrNQ3rLQso1Y9j0Qbwf/kOCm4/mU5boylKuuGEpYVob2w==}
     cpu: [x64]
     os: [freebsd]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-freebsd-arm64/1.3.1:
-    resolution: {integrity: sha512-bHPZjK4xnGLz6/oxl5XmWhdYOdtBMSadrGhptWSZ0wBGNn/gQzDTeZAkQeqhh25AD0eM1hzDe8QUz8GlS43lrA==}
+  /turbo-freebsd-arm64/1.3.2-canary.0:
+    resolution: {integrity: sha512-nnj/WIGowIGn00t8t5qcZOrEu1q7b3hrHF82lKjxi3MXpBs1BKfxz3DGafhzc2DmW+4a9OVUbmZSOqQfx3io0Q==}
     cpu: [arm64]
     os: [freebsd]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-linux-32/1.3.1:
-    resolution: {integrity: sha512-c5okimusfvivu9wS8MKSr+rXpQAV+M4TyR9JX+spIK8B1I7AjfECAqiK2D5WFWO1bQ33bUAuxXOEpUuLpgEm+g==}
+  /turbo-linux-32/1.3.2-canary.0:
+    resolution: {integrity: sha512-MvaCUBCnN2pwYP4pNUgBaICwa1AwesRCxvZLQ4GHJ1EGL2dwZvbdeMoBt2thY0eKaNyLers3CcV3nrn8rlBbuQ==}
     cpu: [ia32]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-linux-64/1.3.1:
-    resolution: {integrity: sha512-O0pNX+N5gbmRcyZT+jsCPUNCN3DpIZHqNN35j7MT5nr0IkZa83CGbZnrEc+7Qws//jFJ26EngqD/JyRB2E8nwQ==}
+  /turbo-linux-64/1.3.2-canary.0:
+    resolution: {integrity: sha512-z2LcVOaSF6UNe/L6vTyB/HTv2bVnt5kpI6pgBVPcEtF2SABn6Cc8+/fS6hPJ+S1no/WZsx2di2tPRt5S3ciFhA==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-linux-arm/1.3.1:
-    resolution: {integrity: sha512-f+r6JIwv/7ylxxJtgVi8cVw+6oNoD/r1IMTU6ejH8bfyMZZko4kkNwH9VYribQ44KDkJEgzdltnzFG5f6Hz10g==}
+  /turbo-linux-arm/1.3.2-canary.0:
+    resolution: {integrity: sha512-CRhsZ+4WdkaE+zzI+uWvjP9ou11W7vatSvw7ObghoJqnpQVx/bLZZvhbUVwZfrwdM0RVOw5Fs+5SdyjTJ3p2Mg==}
     cpu: [arm]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-linux-arm64/1.3.1:
-    resolution: {integrity: sha512-D6+1MeS/x+/VCCooHPU4NIpB8qI/eW70eMRA79bqTPaxxluP0g2CaxXgucco05P51YtNsSxeVcH7X76iadON6Q==}
+  /turbo-linux-arm64/1.3.2-canary.0:
+    resolution: {integrity: sha512-+Ij++o5C9u9lCCvG3ooCmuvlHuTKVRfqrRY1BxhN7LHdqvct8P69FtA1iMBfAgq9fNV4/723IXzPLZJ3MgroDw==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-linux-mips64le/1.3.1:
-    resolution: {integrity: sha512-yL64jgwVCziOpBcdpMxIsczkgwwOvmaqKObFKWyCNlk/LOl5NKODLwXEaryLaALtpwUAoS4ltMSI64gKqmLrOA==}
+  /turbo-linux-mips64le/1.3.2-canary.0:
+    resolution: {integrity: sha512-pQvFIZsrKHu6Os9a4wRwmSOZC0rTh/qfnaYir8xG3eljHGggY0DDNExmDyyIdPVc2ydUV9O/g6xrt/cNtCHWYw==}
     cpu: [mips64el]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-linux-ppc64le/1.3.1:
-    resolution: {integrity: sha512-tjnM+8RosykS1lBpOPLDXGOz/Po2h796ty17uBd7IFslWPOI16a/akFOFoLH8PCiGGJMe3CYgRhEKn4sPWNxFA==}
+  /turbo-linux-ppc64le/1.3.2-canary.0:
+    resolution: {integrity: sha512-WCWK5P/Bu8hEFf7u7v8KbwiS/MfIjNYadNxPYhchjljayXP1/nH7ZENhRe4zHTPCJMH128hoyvIa65MeMfyUQg==}
     cpu: [ppc64]
     os: [linux]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-windows-32/1.3.1:
-    resolution: {integrity: sha512-Snnv+TVigulqwK6guHKndMlrLw88NXj8BtHRGrEksPR0QkyuHlwLf+tHYB4HmvpUl4W9lnXQf4hsljWP64BEdw==}
+  /turbo-windows-32/1.3.2-canary.0:
+    resolution: {integrity: sha512-d3jYrRQbea8vBDWV+JEbiFT764ZMmifa+i7XElpXK0UxgLsxR/KgQbiEc9+LlwqODHKv714HSNm05qgHMTzWgg==}
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-windows-64/1.3.1:
-    resolution: {integrity: sha512-gLeohHG07yIhON1Pp0YNE00i/yzip2GFhkA6HdJaK95uE5bKULpqxuO414hOS/WzGwrGVXBKCImfe24XXh5T+Q==}
+  /turbo-windows-64/1.3.2-canary.0:
+    resolution: {integrity: sha512-FwHsVnLeCNncqTNjQbqBmbbhzZ9fItlRdNGtYaT2HY5MN6aapihNlDbKH7GH7sJQJrxtk+kZ2FfcjBg8C6MEuQ==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo-windows-arm64/1.3.1:
-    resolution: {integrity: sha512-0MWcHLvYgs/qdcoTFZ55nu8HhrpeiwXEMw9cbNfgqTlzy3OsrAsovYEJFyQ8KSxeploiD+QJlCdvhxx+5C0tlA==}
+  /turbo-windows-arm64/1.3.2-canary.0:
+    resolution: {integrity: sha512-uZc0YBLDMMJUszIXn42xG1VQwjNcLZQL81Wy0xgxYNgDiuK7QfiE5jjVqd9KA34wKhZyh8f1fyWe5HADNO0ahw==}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
     dev: false
     optional: true
 
-  /turbo/1.3.1:
-    resolution: {integrity: sha512-DXckoGKlZgvTn/PrHpBI/57aeXR7tfyPf2dK+4LmBczt24ELA3o6eYHeA7KzfpSYhB2LE9qveYFQ6mJ1OzGjjg==}
+  /turbo/1.3.2-canary.0:
+    resolution: {integrity: sha512-pYuJJi+xgC7dtOHrTgijap2HRhZ2EvQoNFJAbBWGA3/ITtqJ3ANMHCD4FK8hds/0XXU8YIwitDdnbjOgv39pCg==}
     hasBin: true
     requiresBuild: true
     optionalDependencies:
-      turbo-android-arm64: 1.3.1
-      turbo-darwin-64: 1.3.1
-      turbo-darwin-arm64: 1.3.1
-      turbo-freebsd-64: 1.3.1
-      turbo-freebsd-arm64: 1.3.1
-      turbo-linux-32: 1.3.1
-      turbo-linux-64: 1.3.1
-      turbo-linux-arm: 1.3.1
-      turbo-linux-arm64: 1.3.1
-      turbo-linux-mips64le: 1.3.1
-      turbo-linux-ppc64le: 1.3.1
-      turbo-windows-32: 1.3.1
-      turbo-windows-64: 1.3.1
-      turbo-windows-arm64: 1.3.1
+      turbo-android-arm64: 1.3.2-canary.0
+      turbo-darwin-64: 1.3.2-canary.0
+      turbo-darwin-arm64: 1.3.2-canary.0
+      turbo-freebsd-64: 1.3.2-canary.0
+      turbo-freebsd-arm64: 1.3.2-canary.0
+      turbo-linux-32: 1.3.2-canary.0
+      turbo-linux-64: 1.3.2-canary.0
+      turbo-linux-arm: 1.3.2-canary.0
+      turbo-linux-arm64: 1.3.2-canary.0
+      turbo-linux-mips64le: 1.3.2-canary.0
+      turbo-linux-ppc64le: 1.3.2-canary.0
+      turbo-windows-32: 1.3.2-canary.0
+      turbo-windows-64: 1.3.2-canary.0
+      turbo-windows-arm64: 1.3.2-canary.0
     dev: false
 
   /type-check/0.4.0:

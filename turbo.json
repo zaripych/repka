@@ -8,6 +8,8 @@
         "src/*.ts",
         "src/*/*.ts",
         "src/**/*.ts",
+        ":!:src/__integration__",
+        ":!:src/__tests__/**/*.test.ts",
         "configs",
         "build.ts",
         "package.json"
@@ -21,6 +23,8 @@
         "src/*.ts",
         "src/*/*.ts",
         "src/**/*.ts",
+        ":!:src/__integration__",
+        ":!:src/__tests__/**/*.test.ts",
         "build.ts",
         "package.json"
       ],
@@ -71,6 +75,7 @@
         "src/*.ts",
         "src/*/*.ts",
         "src/**/*.ts",
+        "src/__integration__/*/*.*",
         "src/__integration__/**/*.*",
         "integration.ts",
         "package.json"
