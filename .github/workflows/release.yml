@@ -51,6 +51,9 @@ jobs:
       - name: Integration
         run: pnpm turbo run integration
 
+      - name: Access To Node Bins
+        run: echo "${GITHUB_WORKSPACE}/node_modules/.bin" >> $GITHUB_PATH
+
       - name: Create and Publish Versions
         uses: changesets/action@v1.3.0
         with:
