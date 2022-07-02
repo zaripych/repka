@@ -22,14 +22,16 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@changesets/changelog-github": "0.4.5",
     "@changesets/cli": "2.23.0",
     "@repka-kit/ts": "workspace:*",
     "husky": "8.0.1"
   },
-  "packageManager": "pnpm@7.3.0",
+  "packageManager": "pnpm@7.4.1",
   "engines": {
     "node": "16",
-    "npm": "8",
-    "pnpm": "7.3.0"
+    "npm": "👻 please-use-pnpm 👻",
+    "yarn": "👻 please-use-pnpm 👻",
+    "pnpm": "7.4.1"
   }
 }
