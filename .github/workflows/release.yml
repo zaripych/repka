@@ -52,7 +52,7 @@ jobs:
         run: pnpm turbo run integration
 
       - name: Create and Publish Versions
-        uses: changesets/action@master
+        uses: changesets/action@v1.3.0
         with:
           commit: 'chore: update versions'
           title: 'chore: update versions'
