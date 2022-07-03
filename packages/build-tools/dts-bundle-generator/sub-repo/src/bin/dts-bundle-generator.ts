@@ -276,12 +276,12 @@ tryReadingConfigFromStdIn()
 			normalLog(`Done in ${(executionTime / 1000).toFixed(2)}s`);
 		} catch (ex) {
 			normalLog('');
-			errorLog(`Error: ${(ex as Error).stack}`);
+			errorLog(`Error: ${(ex as Error).message}`);
 			process.exit(1);
 		}
 	})
 	.catch(err => {
 		normalLog('');
-		errorLog(`Error: ${(err as Error).stack}`);
+		errorLog(`Error: ${(err as Error).message}`);
 		process.exit(1);
 	});
