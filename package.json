@@ -18,7 +18,8 @@
     "publish:beta": "pnpm turbo run build && pnpm publish -r --tag beta --access public",
     "test": "pnpm turbo run test",
     "test:all": "pnpm turbo run test",
-    "test:changed": "pnpm turbo run test --filter='...[HEAD]'"
+    "test:changed": "pnpm turbo run test --filter='...[HEAD]'",
+    "turbo": "turbo"
   },
   "dependencies": {},
   "devDependencies": {
@@ -31,7 +32,7 @@
   "engines": {
     "node": "16",
     "npm": "👻 please-use-pnpm 👻",
-    "yarn": "👻 please-use-pnpm 👻",
-    "pnpm": "7.4.1"
+    "pnpm": "7.4.1",
+    "yarn": "👻 please-use-pnpm 👻"
   }
 }

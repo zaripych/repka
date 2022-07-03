@@ -12,10 +12,11 @@
         ":!:src/__tests__/**/*.test.ts",
         "configs",
         "build.ts",
-        "package.json"
+        "package.json",
+        "tsconfig.json"
       ],
       "outputs": ["dist"],
-      "outputMode": "none"
+      "outputMode": "new-only"
     },
     "build": {
       "dependsOn": ["^build:tools"],
@@ -26,7 +27,8 @@
         ":!:src/__integration__",
         ":!:src/__tests__/**/*.test.ts",
         "build.ts",
-        "package.json"
+        "package.json",
+        "tsconfig.json"
       ],
       "outputs": ["dist"]
     },
@@ -37,7 +39,8 @@
         "src/*/*.ts",
         "src/**/*.ts",
         "lint.ts",
-        "package.json"
+        "package.json",
+        "tsconfig.json"
       ],
       "outputs": [".tsc-out"]
     },
