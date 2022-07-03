@@ -1,3 +1,4 @@
+import type { BundlerConfig } from '@build-tools/dts-bundle-generator';
 import { spawn } from 'child_process';
 import { join } from 'path';
 
@@ -17,7 +18,7 @@ export async function declarationsViaDtsBundleGenerator() {
 
   const entryPoints = Object.values(parseEntryPoints(packageJson.exports));
 
-  const dtsBundleGeneratorConfigFile = {
+  const dtsBundleGeneratorConfigFile: BundlerConfig = {
     compilationOptions: {
       preferredConfigPath: './tsconfig.json',
     },

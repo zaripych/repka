@@ -1,3 +1,2 @@
 import '@build-tools/dts-bundle-generator';
-
-export {};
+export type { BundlerConfig } from '@build-tools/dts-bundle-generator';
