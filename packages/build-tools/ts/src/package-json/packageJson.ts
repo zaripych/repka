@@ -42,6 +42,7 @@ export type PackageJson = {
   typings?: string;
   main?: string;
   exports?: PackageJsonExports;
+  bin?: string | Record<string, string>;
 
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
