@@ -1,11 +1,11 @@
 import { logger } from '../logger/logger';
-import type { ExtraSpawnResultOpts } from './spawnResult';
+import type { SpawnResultOpts } from './spawnResult';
 import { spawnResult } from './spawnResult';
 import type { SpawnParameterMix } from './spawnToPromise';
 import { spawnWithSpawnParameters } from './spawnToPromise';
 
 export async function spawnOutput(
-  ...parameters: SpawnParameterMix<ExtraSpawnResultOpts>
+  ...parameters: SpawnParameterMix<SpawnResultOpts>
 ): Promise<string> {
   const { child, opts } = spawnWithSpawnParameters(parameters);
   const result = await spawnResult(child, {
@@ -16,12 +16,26 @@ export async function spawnOutput(
 }
 
 export async function spawnWithOutputWhenFailed(
-  ...parameters: SpawnParameterMix<ExtraSpawnResultOpts>
+  ...parameters: SpawnParameterMix<
+    SpawnResultOpts & {
+      outputWhenExitCodesNotIn?: number[];
+    }
+  >
 ) {
-  const result = await spawnResult(...parameters);
+  const { child, opts } = spawnWithSpawnParameters(parameters);
+  const result = await spawnResult(child, {
+    ...opts,
+  });
   if (result.error) {
     logger.error(result.output.join(''));
     return Promise.reject(result.error);
+  } else if (
+    opts?.outputWhenExitCodesNotIn &&
+    typeof result.status === 'number' &&
+    !opts.outputWhenExitCodesNotIn.includes(result.status)
+  ) {
+    logger.error(result.output.join(''));
+    return Promise.resolve(result);
   }
   return Promise.resolve(result);
 }

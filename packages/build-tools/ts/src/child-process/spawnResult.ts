@@ -1,12 +1,12 @@
 import { assert } from 'console';
 
-import type { SpawnParameterMix, SpawnToPromiseExtra } from './spawnToPromise';
+import type { SpawnParameterMix, SpawnToPromiseOpts } from './spawnToPromise';
 import { spawnWithSpawnParameters } from './spawnToPromise';
 import { spawnToPromise } from './spawnToPromise';
 
-export type ExtraSpawnResultOpts = {
+export type SpawnResultOpts = {
   output?: ['stdout' | 'stderr', ...Array<'stdout' | 'stderr'>];
-} & SpawnToPromiseExtra;
+} & SpawnToPromiseOpts;
 
 type SpawnResultReturn = {
   pid?: number;
@@ -19,7 +19,7 @@ type SpawnResultReturn = {
 };
 
 export async function spawnResult(
-  ...parameters: SpawnParameterMix<ExtraSpawnResultOpts>
+  ...parameters: SpawnParameterMix<SpawnResultOpts>
 ): Promise<SpawnResultReturn> {
   const { child, opts } = spawnWithSpawnParameters(parameters);
   const combinedData: string[] = [];

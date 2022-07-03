@@ -6,7 +6,7 @@ import type { Assign } from 'utility-types';
 import { logger } from '../logger/logger';
 import { captureStackTrace } from '../utils/stackTrace';
 
-export type SpawnToPromiseExtra = {
+export type SpawnToPromiseOpts = {
   exitCodes?: number[] | 'inherit' | 'any';
 };
 
@@ -18,10 +18,10 @@ type SpawnArgs<E extends object> = [
   options?: Assign<SpawnOptions, E>
 ];
 
-export type SpawnOptionsWithExtra<E extends object = SpawnToPromiseExtra> =
+export type SpawnOptionsWithExtra<E extends object = SpawnToPromiseOpts> =
   Assign<SpawnOptions, E>;
 
-export type SpawnParameterMix<E extends object = SpawnToPromiseExtra> =
+export type SpawnParameterMix<E extends object = SpawnToPromiseOpts> =
   | [cp: ChildProcess, extraOpts?: Assign<E, SharedOpts>]
   | SpawnArgs<E>;
 
