@@ -3,19 +3,27 @@
   "version": "0.0.0-development",
   "private": true,
   "description": "Based of fork of dts-bundle-generator by @timokov",
-  "type": "commonjs",
-  "exports": "./src/index.ts",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "type": "module",
+  "exports": "./dist/dist/main.es.js",
+  "main": "./dist/dist/main.es.js",
+  "types": "./dist/dist/main.es.d.ts",
   "scripts": {
+    "build": "tsx ./build.ts",
+    "build:tools": "turbo run build declarations",
+    "declarations": "tsx ./declarations.ts",
     "lint": "echo \"No linting in this package! It's linted via TypeScript as part of @repka/ts package.\""
   },
   "dependencies": {
-    "typescript": "4.7.4",
-    "yargs": "17.2.1"
+    "typescript": "4.7.4"
   },
   "devDependencies": {
+    "@build-tools/ts": "npm:@repka-kit/ts@1.0.0-beta.0",
+    "@rollup/plugin-replace": "4.0.0",
+    "@rollup/plugin-virtual": "2.1.0",
     "@types/node": "18.0.0",
-    "@types/yargs": "17.0.10"
+    "@types/yargs": "17.0.10",
+    "@utils/ts": "workspace:*",
+    "rollup": "2.75.7",
+    "yargs": "17.2.1"
   }
 }
