@@ -2,6 +2,20 @@ export function includesAnyOf(target: string[], hasAnyOfArgs: string[]) {
   return hasAnyOfArgs.some((variant) => target.includes(variant));
 }
 
+export function insertAfterAnyOf(
+  target: string[],
+  insert: string[],
+  hasAnyOfArgs: string[]
+) {
+  const index = target.findIndex((value) => hasAnyOfArgs.includes(value));
+  if (index === -1) {
+    return target;
+  }
+  const result = [...target];
+  result.splice(index + 1, 0, ...insert);
+  return result;
+}
+
 export function removeArgsFrom(
   target: string[],
   args: Array<string | RegExp>,
@@ -23,10 +37,10 @@ export function removeInputArgs(
   args: Array<string | RegExp>,
   opts?: { numValues: number }
 ) {
-  return (value: CliArgs) => {
+  return (state: CliArgs) => {
     return {
-      ...value,
-      inputArgs: removeArgsFrom(value.inputArgs, args, opts),
+      ...state,
+      inputArgs: removeArgsFrom(state.inputArgs, args, opts),
     };
   };
 }
@@ -34,21 +48,25 @@ export function removeInputArgs(
 export function setDefaultArgs(
   args: [string, ...string[]],
   values: string[] = [],
-  condition?: (args: CliArgs) => boolean
+  condition?: (state: CliArgs) => boolean,
+  apply?: (args: string[], state: CliArgs) => CliArgs
 ) {
-  return (value: CliArgs) => {
+  return (state: CliArgs) => {
     if (condition) {
-      if (!condition(value)) {
-        return value;
+      if (!condition(state)) {
+        return state;
       }
     }
-    if (includesAnyOf(value.inputArgs, args)) {
-      return value;
+    if (includesAnyOf(state.inputArgs, args)) {
+      return state;
     }
-    return {
-      ...value,
-      preArgs: [...value.preArgs, args[0], ...values],
-    };
+    const set: NonNullable<typeof apply> = apply
+      ? apply
+      : (args, to) => ({
+          ...to,
+          preArgs: [...state.preArgs, ...args],
+        });
+    return set([args[0], ...values], state);
   };
 }
 
@@ -68,7 +86,7 @@ export type CliArgs = {
   postArgs: string[];
 };
 
-export type CliArgsTransform = (opts: CliArgs) => CliArgs;
+export type CliArgsTransform = (state: CliArgs) => CliArgs;
 
 export function cliArgsPipe(
   transforms: CliArgsTransform[],
