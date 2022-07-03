@@ -55,7 +55,7 @@ it('should build', async () => {
       "src/index.ts",
     ]
   `);
-  expect(sanitize(await runBin('tsx', './build.ts', '--verbosity', 'error')))
+  expect(sanitize(await runBin('tsx', './build.ts', '--log-level', 'error')))
     .toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,

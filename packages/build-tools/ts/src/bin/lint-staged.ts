@@ -1,23 +1,9 @@
-import { spawnOutput } from '../child-process';
+import { spawnOutput, spawnWithOutputWhenFailed } from '../child-process';
 import { spawnResult } from '../child-process/spawnResult';
 import { runBin } from './runBin';
 
 const lintStaged = async () => {
-  await runBin(
-    'lint-staged',
-    process.argv.slice(2).filter((arg) => arg !== '--dry-run')
-  );
-};
-
-const spawnWithOutputWhenFailed = async (
-  ...parameters: Parameters<typeof spawnResult>
-) => {
-  const result = await spawnResult(...parameters);
-  if (result.error) {
-    console.error(result.output.join(''));
-    return Promise.reject(result.error);
-  }
-  return Promise.resolve(result);
+  await runBin('lint-staged');
 };
 
 const stashIncludeUntrackedKeepIndex = async () => {
@@ -30,9 +16,9 @@ const stashIncludeUntrackedKeepIndex = async () => {
       'ls-files --others --exclude-standard --full-name'.split(' ')
     ).then(split),
   ]);
-  const didStash =
+  const shouldStash =
     staged.length > 0 && (modified.length > 0 || untracked.length > 0);
-  if (didStash) {
+  if (shouldStash) {
     await spawnWithOutputWhenFailed(
       'git',
       'commit --no-verify -m "lint-staged-temporary"'.split(' '),
@@ -55,7 +41,7 @@ const stashIncludeUntrackedKeepIndex = async () => {
       });
     }
   }
-  return { staged, modified, untracked, didStash };
+  return { staged, modified, untracked, didStash: shouldStash };
 };
 
 const applyStashed = async () => spawnResult('git', 'stash pop'.split(' '));

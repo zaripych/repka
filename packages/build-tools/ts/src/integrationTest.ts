@@ -6,7 +6,7 @@ export function integrationTest() {
     name: 'integration',
     args: undefined,
     execute: async () => {
-      await jestIntegrationTests(process.argv.slice(2));
+      await jestIntegrationTests();
     },
   });
 }

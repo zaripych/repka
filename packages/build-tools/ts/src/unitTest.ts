@@ -6,7 +6,7 @@ export function unitTest() {
     name: 'test',
     args: undefined,
     execute: async () => {
-      await jestUnitTests(process.argv.slice(2));
+      await jestUnitTests();
     },
   });
 }

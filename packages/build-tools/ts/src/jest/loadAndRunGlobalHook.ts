@@ -31,7 +31,7 @@ async function loadStandardGlobalHook(
           }
         | undefined;
       if (!result || !result.default) {
-        logger.log(`⚠️ No default export found in "${script}"`);
+        logger.warn(`⚠️ No default export found in "${script}"`);
         return;
       }
       await Promise.resolve(result.default(globalConfig, projectConfig));
@@ -61,11 +61,21 @@ async function loadCustomGlobalHook(script: string) {
       ) {
         await runTurboTasks({
           tasks: ['setup:integration'],
+          spawnOpts: {
+            env: {
+              ...process.env,
+              LOG_LEVEL: logger.logLevel,
+            },
+          },
         });
       } else {
         await spawnToPromise('tsx', [location], {
           stdio: 'inherit',
           exitCodes: [0],
+          env: {
+            ...process.env,
+            LOG_LEVEL: logger.logLevel,
+          },
         });
       }
     },
@@ -83,7 +93,7 @@ export async function loadAndRunGlobalHook(
     loadCustomGlobalHook(`${script}.ts`),
   ]);
   if (!custom.hasHook && tip) {
-    logger.log(tip);
+    logger.tip(tip);
   }
   await standard.execute();
   await custom.execute();

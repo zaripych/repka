@@ -1,4 +1,6 @@
-import { spawnToPromise } from './child-process/spawnToPromise';
+import type { SpawnOptionsWithExtra } from './child-process';
+import { spawnWithOutputWhenFailed } from './child-process';
+import type { ExtraSpawnResultOpts } from './child-process/spawnResult';
 import { modulesBinPath } from './utils/modulesBinPath';
 import { monorepoRootPath } from './utils/monorepoRootPath';
 
@@ -21,20 +23,21 @@ const turboPath = () => modulesBinPath('turbo');
 export async function runTurboTasks(opts: {
   tasks: [TaskTypes, ...TaskTypes[]];
   packageDir?: string;
+  spawnOpts?: Omit<SpawnOptionsWithExtra<ExtraSpawnResultOpts>, 'cwd'>;
 }) {
   const rootDir = opts.packageDir ?? process.cwd();
-  const root = await monorepoRootPath();
-  await spawnToPromise(
+  const cwd = await monorepoRootPath();
+  await spawnWithOutputWhenFailed(
     turboPath(),
     [
       'run',
       ...opts.tasks,
-      '--filter=' + rootDir.replace(root, '.'),
+      '--filter=' + rootDir.replace(cwd, '.'),
       '--output-logs=new-only',
     ],
     {
-      stdio: 'inherit',
-      cwd: root,
+      ...opts.spawnOpts,
+      cwd,
     }
   );
 }

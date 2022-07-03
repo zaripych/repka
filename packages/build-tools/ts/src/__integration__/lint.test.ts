@@ -50,7 +50,7 @@ it('should lint', async () => {
       "src/index.ts",
     ]
   `);
-  expect(sanitize(await runBin('tsx', './lint.ts', '--verbosity', 'error')))
+  expect(sanitize(await runBin('tsx', './lint.ts', '--log-level', 'error')))
     .toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,

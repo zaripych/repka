@@ -18,6 +18,9 @@ type SpawnArgs<E extends object> = [
   options?: Assign<SpawnOptions, E>
 ];
 
+export type SpawnOptionsWithExtra<E extends object = SpawnToPromiseExtra> =
+  Assign<SpawnOptions, E>;
+
 export type SpawnParameterMix<E extends object = SpawnToPromiseExtra> =
   | [cp: ChildProcess, extraOpts?: Assign<E, SharedOpts>]
   | SpawnArgs<E>;
@@ -67,7 +70,7 @@ export async function spawnToPromise(
 
   const cmd = () => [command, ...(args ? args : [])].join(' ');
 
-  logger.log(['>', cmd()].join(' '), ...(cwd ? [`in ${cwd}`] : []));
+  logger.debug(['>', cmd()].join(' '), ...(cwd ? [`in ${cwd}`] : []));
 
   await new Promise<void>((res, rej) =>
     child

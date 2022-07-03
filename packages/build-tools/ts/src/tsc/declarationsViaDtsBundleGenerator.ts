@@ -1,10 +1,12 @@
 import { spawn } from 'child_process';
 import { join } from 'path';
 
-import { spawnToPromise } from '../child-process';
+import { spawnWithOutputWhenFailed } from '../child-process';
+import { logger } from '../logger/logger';
 import { parseEntryPoints } from '../package-json/parseEntryPoints';
 import { readCwdPackageJson } from '../package-json/readPackageJson';
 import { validatePackageJson } from '../package-json/validatePackageJson';
+import { isTruthy } from '../utils/isTruthy';
 import { moduleRootDirectory } from '../utils/moduleRootDirectory';
 
 const generatorPath = () =>
@@ -34,10 +36,21 @@ export async function declarationsViaDtsBundleGenerator() {
     }),
   };
 
-  const child = spawn(process.execPath, [generatorPath(), '--silent'], {
-    cwd: process.cwd(),
-    stdio: ['pipe', 'inherit', 'inherit'],
-  });
+  const child = spawn(
+    process.execPath,
+    [
+      generatorPath(),
+      ['warn', 'error', 'fatal'].includes(logger.logLevel)
+        ? '--silent'
+        : logger.logLevel === 'debug'
+        ? '--verbose'
+        : undefined,
+    ].filter(isTruthy),
+    {
+      cwd: process.cwd(),
+      stdio: 'pipe',
+    }
+  );
   child.stdin.setDefaultEncoding('utf-8');
   const writeToStdin = () =>
     new Promise<void>((res, rej) => {
@@ -51,7 +64,7 @@ export async function declarationsViaDtsBundleGenerator() {
     });
   await Promise.all([
     writeToStdin(),
-    spawnToPromise(child, {
+    spawnWithOutputWhenFailed(child, {
       cwd: process.cwd(),
     }),
   ]);

@@ -2,9 +2,10 @@ import { spawn } from 'node:child_process';
 
 import { filterAndPrint } from '../child-process/filterAndPrint';
 import { spawnToPromise } from '../child-process/spawnToPromise';
+import { includesAnyOf, setDefaultArgs } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
 import { modulesBinPath } from '../utils/modulesBinPath';
-import { processArgsBuilder } from '../utils/processArgsBuilder';
+import { taskArgsPipe } from '../utils/taskArgsPipe';
 
 const jestPath = () => modulesBinPath('jest');
 
@@ -32,39 +33,26 @@ const jest = async (args: string[]) => {
 const jestUnitTestConfigPath = () =>
   configFilePath('./jest/jest.unit.config.mjs');
 
-export const jestUnitTests = async (args: string[] = []) =>
-  jest(
-    processArgsBuilder(args)
-      .defaultArg(
-        ['--color', '--colors'],
-        [],
-        (args) => !args.hasArg('--no-color', '--noColor')
-      )
-      .defaultArg(['-c', '--config'], [jestUnitTestConfigPath()])
-      .defaultArg(
-        ['--rootDir', '--root-dir'],
-        [jestRootDir()],
-        (args) => !args.hasArg('-c', '--config')
-      )
-      .buildResult()
-  );
+const jestArgsPipe = (configFilePath: string) =>
+  taskArgsPipe([
+    setDefaultArgs(
+      ['--color', '--colors'],
+      [],
+      (args) => !includesAnyOf(args.inputArgs, ['--no-color', '--noColor'])
+    ),
+    setDefaultArgs(['-c', '--config'], [configFilePath]),
+    setDefaultArgs(
+      ['--rootDir', '--root-dir'],
+      [jestRootDir()],
+      (args) => !includesAnyOf(args.inputArgs, ['-c', '--config'])
+    ),
+  ]);
+
+export const jestUnitTests = async () =>
+  jest(jestArgsPipe(jestUnitTestConfigPath()));
 
 const jestIntegrationTestConfigPath = () =>
   configFilePath('./jest/jest.integration.config.mjs');
 
-export const jestIntegrationTests = async (args: string[] = []) =>
-  jest(
-    processArgsBuilder(args)
-      .defaultArg(
-        ['--color', '--colors'],
-        [],
-        (args) => !args.hasArg('--no-color', '--noColor')
-      )
-      .defaultArg(['-c', '--config'], [jestIntegrationTestConfigPath()])
-      .defaultArg(
-        ['--rootDir', '--root-dir'],
-        [jestRootDir()],
-        (args) => !args.hasArg('-c', '--config')
-      )
-      .buildResult()
-  );
+export const jestIntegrationTests = async () =>
+  jest(jestArgsPipe(jestIntegrationTestConfigPath()));

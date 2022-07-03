@@ -1,5 +1,6 @@
 import type { TaskTypes } from '@repka-kit/ts';
-import { runTurboTasks, spawnToPromise } from '@repka-kit/ts';
+import { runTurboTasks, spawnWithOutputWhenFailed } from '@repka-kit/ts';
+import { logger } from '@repka-kit/ts';
 import assert from 'node:assert';
 import { mkdir, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
@@ -53,7 +54,7 @@ export function packageInstallTemplate(opts?: {
     rootDirectory,
     packageUnderTest,
     create: async () => {
-      console.log('Template root directory is', rootDirectory);
+      logger.debug('Template root directory is', rootDirectory);
 
       await runTurboTasks({
         tasks: opts?.buildTasks ?? ['build', 'declarations'],
@@ -93,12 +94,11 @@ export function packageInstallTemplate(opts?: {
         writePnpmWorkspaceYaml(rootDirectory),
       ]);
 
-      await spawnToPromise(
+      await spawnWithOutputWhenFailed(
         'pnpm',
         ['install', '--force', '--virtual-store-dir', '../.pnpm'],
         {
           cwd: rootDirectory,
-          stdio: 'inherit',
         }
       );
     },

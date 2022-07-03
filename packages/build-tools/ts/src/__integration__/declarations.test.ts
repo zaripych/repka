@@ -56,7 +56,7 @@ it('should generate TypeScript declarations', async () => {
     ]
   `);
   expect(
-    sanitize(await runBin('tsx', './declarations.ts', '--verbosity', 'error'))
+    sanitize(await runBin('tsx', './declarations.ts', '--log-level', 'error'))
   ).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,

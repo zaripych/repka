@@ -33,7 +33,6 @@ const mainTaskNames: Array<AllTaskTypes['name']> = [
 export async function pipeline<Args extends [Task, ...Task[]]>(
   ...tasks: Args
 ): Promise<void> {
-  logger.log('Running in', process.cwd());
   const start = performance.now();
   try {
     enableSourceMapsSupport();

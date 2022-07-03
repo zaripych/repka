@@ -7,9 +7,13 @@ type LogLevel = typeof levels[number];
 type Params = Parameters<typeof console.log>;
 
 type Logger = {
+  logLevel: LogLevel;
   debug(...params: Params): void;
   info(...params: Params): void;
+  // alias for info
   log(...params: Params): void;
+  // special treatment, disabled on CI/TTY
+  tip(...params: Params): void;
   warn(...params: Params): void;
   error(...params: Params): void;
   fatal(...params: Params): void;
@@ -30,22 +34,39 @@ const isLevel = (level?: string): level is LogLevel => {
   return levels.includes(level as LogLevel);
 };
 
-const verbosityOpt = (args = process.argv): LogLevel | 'off' => {
-  const index = args.findIndex((value) => value === '--verbosity');
+const verbosityFromProcessArgs = (
+  args = process.argv
+): LogLevel | 'off' | undefined => {
+  const index = args.findIndex((value) => value === '--log-level');
   if (index === -1) {
-    return 'info';
+    return undefined;
   }
   const level = args[index + 1];
   if (level === 'silent' || level === 'off') {
     return 'off';
   }
   if (!isLevel(level)) {
-    return 'info';
+    return undefined;
   }
   return level;
 };
 
-const enabledLevels = once(() => enabledLevelsAfter(verbosityOpt()));
+const verbosityFromEnv = (): LogLevel | 'off' | undefined => {
+  const level = process.env['LOG_LEVEL'];
+  if (level === 'silent' || level === 'off') {
+    return 'off';
+  }
+  if (!isLevel(level)) {
+    return undefined;
+  }
+  return level;
+};
+
+const getVerbosityConfig = () => {
+  const argsLevel = verbosityFromProcessArgs();
+  const envLevel = verbosityFromEnv();
+  return argsLevel ?? envLevel ?? 'info';
+};
 
 const noop = (..._args: Params) => {
   return;
@@ -59,22 +80,87 @@ const error = (...args: Params) => {
   console.error(...args);
 };
 
-const createLogger = (enabled = enabledLevels()) => {
+const shouldEnableTip = () => !process.env['CI'] && !process.stdout.isTTY;
+
+export const createLogger = (
+  deps = { getVerbosityConfig, log, error, shouldEnableTip }
+) => {
+  const logLevel = deps.getVerbosityConfig();
+  const enabled = enabledLevelsAfter(logLevel);
   return levels.reduce(
     (acc, lvl) => {
       return {
         ...acc,
         [lvl]: enabled.includes(lvl)
           ? ['fatal', 'error'].includes(lvl)
-            ? error
-            : log
+            ? deps.error
+            : deps.log
           : noop,
       };
     },
     {
-      log: enabled.includes('info') ? log : noop,
+      logLevel,
+      log: enabled.includes('info') ? deps.log : noop,
+      tip: enabled.includes('info') && deps.shouldEnableTip() ? deps.log : noop,
     } as Logger
   );
 };
 
-export const logger: Logger = Object.freeze(createLogger());
+const createDelegatingLogger = (opts: { parent: Logger }): Logger =>
+  Object.freeze({
+    get logLevel() {
+      return opts.parent.logLevel;
+    },
+    debug(...params: Params): void {
+      opts.parent.debug(...params);
+    },
+    info(...params: Params): void {
+      opts.parent.info(...params);
+    },
+    log(...params: Params): void {
+      opts.parent.log(...params);
+    },
+    tip(...params: Params): void {
+      opts.parent.tip(...params);
+    },
+    warn(...params: Params): void {
+      opts.parent.warn(...params);
+    },
+    error(...params: Params): void {
+      opts.parent.error(...params);
+    },
+    fatal(...params: Params): void {
+      opts.parent.fatal(...params);
+    },
+  });
+
+let defaultLoggerFactory: (() => Logger) | null;
+
+export const configureDefaultLogger = (factory: () => Logger) => {
+  if (defaultLoggerFactory) {
+    const error = {
+      stack: '',
+    };
+    Error.captureStackTrace(error);
+    logger.debug('Cannot override default logger multiple times', error.stack);
+    return;
+  }
+  defaultLoggerFactory = factory;
+};
+
+const defaultLogger = once(() => {
+  let factory = defaultLoggerFactory;
+  if (!factory) {
+    factory = () => createLogger();
+  }
+  return factory();
+});
+
+/**
+ * Default logger instance can be configured once at startup
+ */
+export const logger: Logger = createDelegatingLogger({
+  get parent() {
+    return defaultLogger();
+  },
+});
