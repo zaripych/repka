@@ -1,9 +1,8 @@
 import virtual from '@rollup/plugin-virtual';
-import { readdir } from 'fs/promises';
 import type { RollupWatchOptions } from 'rollup';
 
-import type { PackageJson } from '../package-json/packageJson';
 import { isTruthy } from '../utils/isTruthy';
+import { UnreachableError } from '../utils/unreachableError';
 import type { RollupOptionsBuilderOpts } from './standardRollupConfig';
 
 function buildBinInputs(bins: string[]): { [entryAlias: string]: string } {
@@ -14,89 +13,6 @@ function buildBinInputs(bins: string[]): { [entryAlias: string]: string } {
     }),
     {}
   );
-}
-
-async function validatePackageJsonBins({
-  packageJson,
-}: {
-  packageJson: PackageJson;
-}) {
-  const bin = (packageJson['bin'] || {}) as Record<string, string>;
-  const binEntries = Object.entries(bin);
-  if (binEntries.length === 0) {
-    return;
-  }
-
-  for (const [key, value] of binEntries) {
-    const allowed = [`./bin/${key}.gen.cjs`, `./bin/${key}.gen.mjs`];
-    if (!allowed.includes(value)) {
-      throw new Error(
-        `package.json "bin" prop is invalid: the entry "${key}" ` +
-          `value can only be ${allowed
-            .map((value) => `"${value}"`)
-            .join(' or ')}`
-      );
-    }
-  }
-
-  const [srcBinContents, nodeModulesBinContents] = await Promise.all([
-    readdir('./src/bin').catch(() => [] as string[]),
-    readdir('./node_modules/.bin').catch(() => [] as string[]),
-  ]);
-
-  const { ourBins, mirroredBins, cjsBins, mjsBins, invalidBins } =
-    binEntries.reduce<{
-      ourBins: string[];
-      mirroredBins: string[];
-      invalidBins: string[];
-      cjsBins: string[];
-      mjsBins: string[];
-    }>(
-      (acc, [bin, value]) => {
-        if (srcBinContents.includes(`${bin}.ts`)) {
-          acc.ourBins.push(bin);
-        } else {
-          if (!nodeModulesBinContents.includes(bin)) {
-            acc.invalidBins.push(bin);
-          } else {
-            acc.mirroredBins.push(bin);
-          }
-        }
-        if (value.endsWith('.cjs')) {
-          acc.cjsBins.push(bin);
-        } else if (value.endsWith('.mjs')) {
-          acc.mjsBins.push(bin);
-        }
-        return acc;
-      },
-      {
-        ourBins: [],
-        mirroredBins: [],
-        invalidBins: [],
-        cjsBins: [],
-        mjsBins: [],
-      }
-    );
-
-  if (invalidBins.length > 0) {
-    throw new Error(
-      'package.json "bin" prop is invalid: it has keys ' +
-        `${invalidBins
-          .map((key) => `"${key}"`)
-          .join(', ')} that do not have corresponding ` +
-        `source files in "./src/bin/*", eg "./src/bin/${String(
-          invalidBins[0]
-        )}.ts"`
-    );
-  }
-
-  return {
-    bin,
-    ourBins,
-    mirroredBins,
-    cjsBins,
-    mjsBins,
-  };
 }
 
 function buildBinsPlugins({ mirroredBins }: { mirroredBins: string[] }) {
@@ -136,22 +52,43 @@ cp.on("close", (code, signal) => {
   };
 }
 
-export async function buildBinsBundleConfig({
-  packageJson,
-  defaultConfig,
-}: RollupOptionsBuilderOpts): Promise<RollupWatchOptions[]> {
-  const result = await validatePackageJsonBins({
-    packageJson,
-  });
-  if (!result) {
+export function buildBinsBundleConfig({
+  config,
+  defaultRollupConfig,
+}: RollupOptionsBuilderOpts): RollupWatchOptions[] {
+  if (config.binEntryPoints.length === 0) {
     return [];
   }
-  const { cjsBins, mjsBins, mirroredBins } = result;
+  const { cjsBins, mjsBins, mirroredBins } = config.binEntryPoints.reduce<{
+    cjsBins: string[];
+    mjsBins: string[];
+    mirroredBins: string[];
+  }>(
+    (acc, next) => {
+      switch (next.format) {
+        case 'cjs': {
+          acc.cjsBins.push(next.binName);
+          break;
+        }
+        case 'esm': {
+          acc.mjsBins.push(next.binName);
+          break;
+        }
+        default:
+          throw new UnreachableError(next.format);
+      }
+      if (next.binEntryType === 'dependency-bin') {
+        acc.mirroredBins.push(next.binName);
+      }
+      return acc;
+    },
+    { cjsBins: [], mjsBins: [], mirroredBins: [] }
+  );
   const { plugins } = buildBinsPlugins({
     mirroredBins,
   });
 
-  const standard = defaultConfig();
+  const standard = defaultRollupConfig();
 
   const shared: RollupWatchOptions = {
     ...standard,

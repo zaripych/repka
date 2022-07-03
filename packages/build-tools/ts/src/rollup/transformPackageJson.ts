@@ -1,13 +1,13 @@
 import assert from 'assert';
 
+import type { PackageExportsEntryPoint } from '../config/nodePackageConfig';
 import type { JsonType } from '../package-json/packageJson';
-import type { PackageExportsEntryPoint } from '../package-json/parseEntryPoints';
 
 export function transformPackageJson(
-  entryPoints: Record<string, PackageExportsEntryPoint>
+  entryPoints: Array<PackageExportsEntryPoint>
 ) {
   const entries = Object.values(entryPoints);
-  const main = entryPoints['main'];
+  const main = entryPoints.find((entry) => entry.chunkName === 'main');
   assert(!!main);
   return (packageJson: Record<string, JsonType>): Record<string, JsonType> => {
     const license = packageJson['license'];
@@ -29,17 +29,17 @@ export function transformPackageJson(
         bin,
       }),
       ...('main' in packageJson && {
-        main: `./dist/${main.name}.es.js`,
+        main: `./dist/${main.chunkName}.es.js`,
       }),
       ...(entries.length === 1
         ? {
-            exports: `./dist/${main.name}.es.js`,
+            exports: `./dist/${main.chunkName}.es.js`,
           }
         : {
             exports: entries.reduce(
               (acc, entry) => ({
                 ...acc,
-                [entry.key]: `./dist/${entry.name}.es.js`,
+                [entry.entryPoint]: `./dist/${entry.chunkName}.es.js`,
               }),
               {}
             ),

@@ -2,13 +2,13 @@
 
 import generatePackageJsonPlugin from 'rollup-plugin-generate-package-json';
 
+import type { PackageExportsEntryPoint } from '../config/nodePackageConfig';
 import type { JsonType } from '../package-json/packageJson';
-import type { PackageExportsEntryPoint } from '../package-json/parseEntryPoints';
 import { transformPackageJson } from './transformPackageJson';
 
 export type PackageJsonOpts = {
   outDir: string;
-  entryPoints: Record<string, PackageExportsEntryPoint>;
+  entryPoints: Array<PackageExportsEntryPoint>;
   externals?: string[];
   packageJson?: (
     packageJson: Record<string, JsonType>

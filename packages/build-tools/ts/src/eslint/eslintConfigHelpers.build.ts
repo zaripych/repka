@@ -3,9 +3,9 @@ import type { RollupWatchOptions } from 'rollup';
 import type { RollupOptionsBuilderOpts } from '../rollup/standardRollupConfig';
 
 export const buildEslintConfigHelpers = ({
-  defaultConfig,
+  defaultRollupConfig,
 }: RollupOptionsBuilderOpts): RollupWatchOptions => {
-  const standard = defaultConfig();
+  const standard = defaultRollupConfig();
   return {
     ...standard,
     output: {

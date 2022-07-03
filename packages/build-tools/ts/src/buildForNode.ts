@@ -2,10 +2,9 @@
 
 import type { Plugin, RollupWatchOptions } from 'rollup';
 
+import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
+import { loadNodePackageConfigs } from './config/loadNodePackageConfigs';
 import { rmrfDist } from './file-system/rmrfDist';
-import { parseEntryPoints } from './package-json/parseEntryPoints';
-import { readCwdPackageJson } from './package-json/readPackageJson';
-import { validatePackageJson } from './package-json/validatePackageJson';
 import { buildBinsBundleConfig } from './rollup/buildBinsBundleConfig';
 import { rollupBuild } from './rollup/rollupBuild';
 import { rollupPackageJsonPlugin } from './rollup/rollupPackageJsonPlugin';
@@ -63,6 +62,11 @@ export type BuildOpts = {
    * Rollup plugins to inject into every bundle config
    */
   plugins?: Plugin[];
+
+  /**
+   * Override core configuration options that are normally read from package.json
+   */
+  packageConfig?: PackageConfigBuilder;
 };
 
 const externalsFromDependencies = (
@@ -78,16 +82,13 @@ export function buildForNode(opts?: BuildOpts) {
     name: 'build',
     args: opts,
     execute: async () => {
-      const packageJson = validatePackageJson(await readCwdPackageJson());
+      const config = await loadNodePackageConfigs(opts);
 
       await rmrfDist();
 
-      const entryPoints = parseEntryPoints(packageJson.exports);
+      const entryPoints = config.entryPoints;
 
-      const allExternals = externalsFromDependencies(
-        packageJson.dependencies,
-        opts
-      );
+      const allExternals = externalsFromDependencies(config.dependencies, opts);
       const baseOpts: DefaultRollupConfigBuildOpts = {
         external: allExternals,
         resolveId: opts?.resolveId,
@@ -99,16 +100,16 @@ export function buildForNode(opts?: BuildOpts) {
           combineDefaultRollupConfigBuildOpts(baseOpts, opts)
         );
 
-      const binConfigs = await buildBinsBundleConfig({
-        packageJson,
-        defaultConfig,
+      const binConfigs = buildBinsBundleConfig({
+        config,
+        defaultRollupConfig: defaultConfig,
       });
 
       const extraConfigs = opts?.extraRollupConfigs
         ? await Promise.resolve(
             opts.extraRollupConfigs({
-              packageJson,
-              defaultConfig,
+              config,
+              defaultRollupConfig: defaultConfig,
             })
           )
         : [];
@@ -120,7 +121,9 @@ export function buildForNode(opts?: BuildOpts) {
         return {
           ...config,
           input: Object.fromEntries(
-            Object.values(entryPoints).map(({ name, value }) => [name, value])
+            Object.values(entryPoints).map(
+              ({ chunkName: name, sourcePath: value }) => [name, value]
+            )
           ),
           output: {
             ...config.output,
@@ -139,8 +142,8 @@ export function buildForNode(opts?: BuildOpts) {
       const exportsConfig = opts?.buildExportsConfig
         ? await Promise.resolve(
             opts.buildExportsConfig({
-              packageJson,
-              defaultConfig: buildExportsConfig,
+              config,
+              defaultRollupConfig: buildExportsConfig,
             })
           )
         : [buildExportsConfig()];

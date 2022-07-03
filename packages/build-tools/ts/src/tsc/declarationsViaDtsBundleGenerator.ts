@@ -3,40 +3,51 @@ import { spawn } from 'child_process';
 import { join } from 'path';
 
 import { spawnWithOutputWhenFailed } from '../child-process';
+import type { PackageConfigBuilder } from '../config/loadNodePackageConfigs';
+import { loadNodePackageConfigs } from '../config/loadNodePackageConfigs';
 import { logger } from '../logger/logger';
-import { parseEntryPoints } from '../package-json/parseEntryPoints';
-import { readCwdPackageJson } from '../package-json/readPackageJson';
-import { validatePackageJson } from '../package-json/validatePackageJson';
 import { isTruthy } from '../utils/isTruthy';
 import { moduleRootDirectory } from '../utils/moduleRootDirectory';
 
 const generatorPath = () =>
   join(moduleRootDirectory(), './bin/dts-bundle-generator.gen.cjs');
 
-export async function declarationsViaDtsBundleGenerator() {
-  const packageJson = validatePackageJson(await readCwdPackageJson());
+export type DeclarationsOpts = {
+  /**
+   * Override core configuration options that are normally read from package.json
+   */
+  packageConfig?: PackageConfigBuilder;
+};
 
-  const entryPoints = Object.values(parseEntryPoints(packageJson.exports));
+export async function declarationsViaDtsBundleGenerator(
+  opts?: DeclarationsOpts
+) {
+  const packageConfig = await loadNodePackageConfigs(opts);
+
+  const entryPoints = packageConfig.entryPoints;
 
   const dtsBundleGeneratorConfigFile: BundlerConfig = {
     compilationOptions: {
       preferredConfigPath: './tsconfig.json',
     },
     entries: entryPoints.map((entry) => {
-      const input = join(entry.value);
-      const output = join('./dist/dist', entry.name + '.es.d.ts');
+      const input = join(entry.sourcePath);
+      const output = join('./dist/dist', entry.chunkName + '.es.d.ts');
       return {
         filePath: input,
         outFile: output,
         libraries: {
-          inlinedLibraries: Object.keys(
-            packageJson.devDependencies || {}
-          ).filter((f) => !f.startsWith('@types')),
+          inlinedLibraries: Object.keys(packageConfig.devDependencies).filter(
+            (f) => !f.startsWith('@types')
+          ),
         },
       };
     }),
   };
+  await runDtsBundleGeneratorViaStdIn(dtsBundleGeneratorConfigFile);
+}
 
+async function runDtsBundleGeneratorViaStdIn(config: BundlerConfig) {
   const child = spawn(
     process.execPath,
     [
@@ -55,7 +66,7 @@ export async function declarationsViaDtsBundleGenerator() {
   child.stdin.setDefaultEncoding('utf-8');
   const writeToStdin = () =>
     new Promise<void>((res, rej) => {
-      child.stdin.write(JSON.stringify(dtsBundleGeneratorConfigFile), (err) => {
+      child.stdin.write(JSON.stringify(config), (err) => {
         if (err) {
           rej(err);
         } else {
@@ -67,6 +78,8 @@ export async function declarationsViaDtsBundleGenerator() {
     writeToStdin(),
     spawnWithOutputWhenFailed(child, {
       cwd: process.cwd(),
+      exitCodes: 'inherit',
+      outputWhenExitCodesNotIn: [0],
     }),
   ]);
 }

@@ -6,7 +6,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import type { Plugin, RollupWatchOptions } from 'rollup';
 import analyze from 'rollup-plugin-analyzer';
 
-import type { PackageJson } from '../package-json/packageJson';
+import type { NodePackageConfig } from '../config/nodePackageConfig';
 import { isTruthy } from '../utils/isTruthy';
 import { resolveNodeBuiltinsPlugin } from './resolveNodeBuiltinsPlugin';
 import { esbuild } from './rollupPluginEsbuild';
@@ -30,8 +30,10 @@ export type RollupOptionsBuilder = (
 ) => Promise<RollupWatchOptions[]> | RollupWatchOptions[];
 
 export type RollupOptionsBuilderOpts = {
-  packageJson: PackageJson;
-  defaultConfig: (opts?: DefaultRollupConfigBuildOpts) => RollupWatchOptions;
+  config: NodePackageConfig;
+  defaultRollupConfig: (
+    opts?: DefaultRollupConfigBuildOpts
+  ) => RollupWatchOptions;
 };
 
 type FalsyMix<T> = NonNullable<T> | null | false | undefined;
