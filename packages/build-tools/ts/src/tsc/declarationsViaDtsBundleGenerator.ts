@@ -1,5 +1,8 @@
-import type { BundlerConfig } from '@build-tools/dts-bundle-generator';
-import { spawn } from 'child_process';
+import type {
+  CompilationOptions,
+  EntryPointConfig,
+} from 'dts-bundle-generator';
+import { writeFile } from 'node:fs/promises';
 import { join } from 'path';
 
 import { spawnToPromise } from '../child-process';
@@ -7,16 +10,19 @@ import type { PackageConfigBuilder } from '../config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from '../config/loadNodePackageConfigs';
 import { logger } from '../logger/logger';
 import { isTruthy } from '../utils/isTruthy';
-import { moduleRootDirectory } from '../utils/moduleRootDirectory';
-
-const generatorPath = () =>
-  join(moduleRootDirectory(), './bin/dts-bundle-generator.gen.cjs');
+import { modulesBinPath } from '../utils/modulesBinPath';
 
 export type DeclarationsOpts = {
   /**
    * Override core configuration options that are normally read from package.json
    */
   packageConfig?: PackageConfigBuilder;
+};
+
+// not exported unfortunately
+type BundlerConfig = {
+  compilationOptions: CompilationOptions;
+  entries: EntryPointConfig[];
 };
 
 export async function declarationsViaDtsBundleGenerator(
@@ -44,14 +50,16 @@ export async function declarationsViaDtsBundleGenerator(
       };
     }),
   };
-  await runDtsBundleGeneratorViaStdIn(dtsBundleGeneratorConfigFile);
-}
-
-async function runDtsBundleGeneratorViaStdIn(config: BundlerConfig) {
-  const child = spawn(
-    process.execPath,
+  const configFilePath = join(process.cwd(), 'dts-config.json');
+  await writeFile(
+    join(process.cwd(), 'dts-config.json'),
+    JSON.stringify(dtsBundleGeneratorConfigFile)
+  );
+  await spawnToPromise(
+    modulesBinPath('dts-bundle-generator'),
     [
-      generatorPath(),
+      '--config',
+      configFilePath,
       ['warn', 'error', 'fatal'].includes(logger.logLevel)
         ? '--silent'
         : logger.logLevel === 'debug'
@@ -63,22 +71,4 @@ async function runDtsBundleGeneratorViaStdIn(config: BundlerConfig) {
       stdio: ['pipe', 'inherit', 'inherit'],
     }
   );
-  child.stdin.setDefaultEncoding('utf-8');
-  const writeToStdin = () =>
-    new Promise<void>((res, rej) => {
-      child.stdin.write(JSON.stringify(config), (err) => {
-        if (err) {
-          rej(err);
-        } else {
-          child.stdin.end(res);
-        }
-      });
-    });
-  await Promise.all([
-    writeToStdin(),
-    spawnToPromise(child, {
-      cwd: process.cwd(),
-      exitCodes: 'inherit',
-    }),
-  ]);
 }
