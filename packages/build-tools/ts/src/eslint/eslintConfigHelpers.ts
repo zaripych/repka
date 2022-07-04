@@ -1,3 +1,5 @@
+import type { PromiseType } from 'utility-types';
+
 import { asyncToSync } from '../utils/async-to-sync';
 import { monorepoRootPath } from '../utils/monorepoRootPath';
 import { once } from '../utils/once';
@@ -20,5 +22,9 @@ export const eslintConfigHelpers = async () => {
 };
 
 export const syncEslintConfigHelpers = once(() => {
-  return asyncToSync<string>(import.meta.url, 'eslintConfigHelpers', []);
+  return asyncToSync<PromiseType<ReturnType<typeof eslintConfigHelpers>>>(
+    import.meta.url,
+    'eslintConfigHelpers',
+    []
+  );
 });

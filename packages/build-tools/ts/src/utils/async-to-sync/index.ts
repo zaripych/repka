@@ -28,6 +28,7 @@ export function asyncToSync<T>(module: string, fn: string, args: unknown[]) {
       encoding: 'utf-8',
       cwd: process.cwd(),
       env: {
+        ELECTRON_RUN_AS_NODE: '1',
         [key]: JSON.stringify({
           module: fileURLToPath(module),
           fn,
