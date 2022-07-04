@@ -8,9 +8,7 @@
   "main": "./dist/dist/main.es.js",
   "types": "./dist/dist/main.es.d.ts",
   "scripts": {
-    "build": "tsx ./build.ts",
-    "build:tools": "turbo run build declarations",
-    "declarations": "tsx ./declarations.ts",
+    "build:tools": "tsx ./build.ts",
     "lint": "echo \"No linting in this package! It's linted via TypeScript as part of @repka/ts package.\""
   },
   "dependencies": {

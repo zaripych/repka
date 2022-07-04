@@ -1,4 +1,4 @@
-import { buildForNode, pipeline } from '@build-tools/ts';
+import { buildForNode, declarations, pipeline } from '@build-tools/ts';
 
 import { dtsBundleGeneratorBuildPlugins } from './src/dts-bundle-generator.build';
 
@@ -15,5 +15,17 @@ await pipeline(
       ],
     }),
     plugins: [...dtsBundleGeneratorBuildPlugins()],
+  }),
+  declarations({
+    packageConfig: (deps) => ({
+      ...deps,
+      buildEntryPoints: () => [
+        {
+          entryPoint: '.',
+          sourcePath: './src/index.ts',
+          chunkName: 'main',
+        },
+      ],
+    }),
   })
 );
