@@ -1,4 +1,4 @@
-import { assert } from 'console';
+import assert from 'assert';
 
 import type { SpawnParameterMix, SpawnToPromiseOpts } from './spawnToPromise';
 import { spawnWithSpawnParameters } from './spawnToPromise';
@@ -31,8 +31,8 @@ export async function spawnResult(
       !!child.stdout,
       'Expected ".stdout" to be defined, which will only be defined if child process is spawned with correct parameters'
     );
-    child.stdout?.setEncoding('utf-8');
-    child.stdout?.on('data', (data: string) => {
+    child.stdout.setEncoding('utf-8');
+    child.stdout.on('data', (data: string) => {
       combinedData.push(data);
       stdoutData.push(data);
     });
@@ -42,8 +42,8 @@ export async function spawnResult(
       !!child.stderr,
       'Expected ".stderr" to be defined, which will only be defined if child process is spawned with correct parameters'
     );
-    child.stderr?.setEncoding('utf-8');
-    child.stderr?.on('data', (data: string) => {
+    child.stderr.setEncoding('utf-8');
+    child.stderr.on('data', (data: string) => {
       combinedData.push(data);
       stderrData.push(data);
     });

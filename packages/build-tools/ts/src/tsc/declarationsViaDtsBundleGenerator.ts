@@ -2,7 +2,7 @@ import type { BundlerConfig } from '@build-tools/dts-bundle-generator';
 import { spawn } from 'child_process';
 import { join } from 'path';
 
-import { spawnWithOutputWhenFailed } from '../child-process';
+import { spawnToPromise } from '../child-process';
 import type { PackageConfigBuilder } from '../config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from '../config/loadNodePackageConfigs';
 import { logger } from '../logger/logger';
@@ -60,7 +60,7 @@ async function runDtsBundleGeneratorViaStdIn(config: BundlerConfig) {
     ].filter(isTruthy),
     {
       cwd: process.cwd(),
-      stdio: 'pipe',
+      stdio: ['pipe', 'inherit', 'inherit'],
     }
   );
   child.stdin.setDefaultEncoding('utf-8');
@@ -76,10 +76,9 @@ async function runDtsBundleGeneratorViaStdIn(config: BundlerConfig) {
     });
   await Promise.all([
     writeToStdin(),
-    spawnWithOutputWhenFailed(child, {
+    spawnToPromise(child, {
       cwd: process.cwd(),
       exitCodes: 'inherit',
-      outputWhenExitCodesNotIn: [0],
     }),
   ]);
 }
