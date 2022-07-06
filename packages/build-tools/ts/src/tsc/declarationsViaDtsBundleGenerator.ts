@@ -6,7 +6,6 @@ import { spawnToPromise } from '../child-process';
 import type { PackageConfigBuilder } from '../config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from '../config/loadNodePackageConfigs';
 import { logger } from '../logger/logger';
-import { isTruthy } from '../utils/isTruthy';
 import { moduleRootDirectory } from '../utils/moduleRootDirectory';
 
 const generatorPath = () =>
@@ -29,6 +28,12 @@ export async function declarationsViaDtsBundleGenerator(
   const dtsBundleGeneratorConfigFile: BundlerConfig = {
     compilationOptions: {
       preferredConfigPath: './tsconfig.json',
+      compilerOptions: {
+        baseUrl: '.',
+        paths: {
+          '@tooling-tests/todo-list-store': ['../todo-list-store/.tsc-out'],
+        },
+      },
     },
     entries: entryPoints.map((entry) => {
       const input = join(entry.sourcePath);
@@ -48,21 +53,14 @@ export async function declarationsViaDtsBundleGenerator(
 }
 
 async function runDtsBundleGeneratorViaStdIn(config: BundlerConfig) {
-  const child = spawn(
-    process.execPath,
-    [
-      generatorPath(),
-      ['warn', 'error', 'fatal'].includes(logger.logLevel)
-        ? '--silent'
-        : logger.logLevel === 'debug'
-        ? '--verbose'
-        : undefined,
-    ].filter(isTruthy),
-    {
-      cwd: process.cwd(),
-      stdio: ['pipe', 'inherit', 'inherit'],
-    }
-  );
+  const child = spawn(process.execPath, [generatorPath()], {
+    cwd: process.cwd(),
+    stdio: ['pipe', 'inherit', 'inherit'],
+    env: {
+      ...process.env,
+      LOG_LEVEL: logger.logLevel,
+    },
+  });
   child.stdin.setDefaultEncoding('utf-8');
   const writeToStdin = () =>
     new Promise<void>((res, rej) => {
