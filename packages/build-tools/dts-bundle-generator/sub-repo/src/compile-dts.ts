@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 
 import { verboseLog, warnLog } from './logger';
 
-import { getCompilerOptions } from './get-compiler-options';
+import { getCompilerOptions, GetCompilerOptionsOpts } from './get-compiler-options';
 import { getAbsolutePath } from './helpers/get-absolute-path';
 import { checkProgramDiagnosticsErrors, checkDiagnosticsErrors } from './helpers/check-diagnostics-errors';
 
@@ -12,8 +12,14 @@ export interface CompileDtsResult {
 	rootFilesRemapping: Map<string, string>;
 }
 
-export function compileDts(rootFiles: readonly string[], preferredConfigPath?: string, followSymlinks: boolean = true): CompileDtsResult {
-	const compilerOptions = getCompilerOptions(rootFiles, preferredConfigPath);
+export interface CompileDtsOpts extends GetCompilerOptionsOpts {
+	followSymlinks?: boolean;
+}
+
+export function compileDts(opts: CompileDtsOpts): CompileDtsResult {
+	const rootFiles = opts.inputFileNames;
+	const followSymlinks = opts.followSymlinks ?? true;
+	const compilerOptions = getCompilerOptions(opts);
 
 	// currently we don't support these compiler options
 	// and removing them shouldn't affect generated code
@@ -41,38 +47,12 @@ export function compileDts(rootFiles: readonly string[], preferredConfigPath?: s
 	host.resolveModuleNames = (moduleNames: string[], containingFile: string) => {
 		return moduleNames.map((moduleName: string) => {
 			const resolvedModule = ts.resolveModuleName(moduleName, containingFile, compilerOptions, host).resolvedModule;
+			if (resolvedModule && !resolvedModule.isExternalLibraryImport && resolvedModule.extension !== ts.Extension.Dts) {
+				resolvedModule.extension = ts.Extension.Dts;
 
-			if (resolvedModule && !resolvedModule.isExternalLibraryImport) {
-				const resolvedDtsFileName = changeExtensionToDts(
-					resolvedModule.resolvedFileName
-				);
+				verboseLog(`Change module from .ts to .d.ts: ${resolvedModule.resolvedFileName}`);
 
-				if (resolvedModule.extension !== ts.Extension.Dts) {
-					resolvedModule.extension = ts.Extension.Dts;
-
-					verboseLog(
-						`Change module from .ts to .d.ts: ${resolvedModule.resolvedFileName}`
-					);
-
-					resolvedModule.resolvedFileName = resolvedDtsFileName;
-				}
-
-				if (!dtsFiles.has(resolvedDtsFileName) && !containingFile.endsWith('.d.ts')) {
-					verboseLog(
-						`Generating declarations from ${containingFile} because ${resolvedDtsFileName} is not in the .d.ts cache`
-					);
-					const extraDtsFiles = getDeclarationFiles(
-						[containingFile],
-						compilerOptions
-					);
-					const entries = Array.from(extraDtsFiles.entries());
-					for (let i = 0; i < entries.length; i += 1) {
-						const [key, value] = entries[i];
-						if (!dtsFiles.has(key)) {
-							dtsFiles.set(key, value);
-						}
-					}
-				}
+				resolvedModule.resolvedFileName = changeExtensionToDts(resolvedModule.resolvedFileName);
 			}
 
 			return resolvedModule as ts.ResolvedModule;
