@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 
 import type { TaskOpts } from './tasks/declareTask';
-
-type BivarianceHack<Args extends unknown[], Result> = {
-  bivarianceHack(...args: Args): Result;
-}['bivarianceHack'];
+import { BivarianceHack } from './utils/bivarianceHack';
 
 type TaskOf<T extends BivarianceHack<unknown[], TaskOpts<string, unknown>>> =
   ReturnType<T>;
