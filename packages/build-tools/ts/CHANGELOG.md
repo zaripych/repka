@@ -1,5 +1,11 @@
 # @repka-kit/ts
 
+## 1.0.0-beta.2
+
+### Minor Changes
+
+- [`e844c9d`](https://github.com/zaripych/repka/commit/e844c9dc9367067978c59daba502080f2217e6e3) Thanks [@zaripych](https://github.com/zaripych)! - fix(declarations): revert back to less hacky fork of dts-bundle-generator which now relies on .d.ts files as input which are generated from "tsc --build tsconfig.json" command - supposed to be faster as well due to incremental compilation
+
 ## 1.0.0-beta.1
 
 ### Patch Changes
