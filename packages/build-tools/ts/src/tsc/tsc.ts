@@ -17,5 +17,8 @@ const tsc = async (args: string[]) =>
 // building composite has an advantage of caching and incremental builds
 // it has to write something to the disk though
 
+export const tscCompositeTypeCheckAt = async (packageDirectory: string) =>
+  tsc(['--build', join(packageDirectory, './tsconfig.json')]);
+
 export const tscCompositeTypeCheck = async () =>
-  tsc(['--build', join(process.cwd(), './tsconfig.json')]);
+  tscCompositeTypeCheckAt(process.cwd());

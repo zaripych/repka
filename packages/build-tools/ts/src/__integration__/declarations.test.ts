@@ -65,6 +65,11 @@ it('should generate TypeScript declarations', async () => {
   `);
   expect(await sortedDirectoryContents(rootDirectory)).toMatchInlineSnapshot(`
     Array [
+      ".tsc-out/",
+      ".tsc-out/.tsbuildinfo",
+      ".tsc-out/src/",
+      ".tsc-out/src/index.d.ts",
+      ".tsc-out/src/index.js",
       "declarations.ts",
       "dist/",
       "dist/dist/",
