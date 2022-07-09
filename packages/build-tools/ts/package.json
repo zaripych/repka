@@ -30,6 +30,7 @@
     "jest": "./bin/jest.gen.mjs",
     "lint-staged": "./bin/lint-staged.gen.mjs",
     "prettier": "./bin/prettier.gen.mjs",
+    "repka": "./bin/repka.gen.mjs",
     "tsc": "./bin/tsc.gen.mjs",
     "tsx": "./bin/tsx.gen.mjs",
     "turbo": "./bin/turbo.gen.mjs"
@@ -68,7 +69,6 @@
     "jest": "28.1.2",
     "js-yaml": "4.1.0",
     "lint-staged": "13.0.3",
-    "picocolors": "1.0.0",
     "prettier": "2.7.1",
     "rollup": "2.75.7",
     "rollup-plugin-analyzer": "4.0.0",
@@ -84,6 +84,8 @@
     "@types/jest": "28.1.4",
     "@types/js-yaml": "4.0.5",
     "@types/node": "18.0.0",
+    "commander": "9.2.0",
+    "picocolors": "1.0.0",
     "utility-types": "3.10.0"
   },
   "publishConfig": {
