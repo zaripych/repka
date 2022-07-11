@@ -1,6 +1,6 @@
 import { spawnOutput, spawnWithOutputWhenFailed } from '../child-process';
 import { spawnResult } from '../child-process/spawnResult';
-import { runBin } from './runBin';
+import { runBin } from '../utils/runBin';
 
 const lintStaged = async () => {
   await runBin('lint-staged');

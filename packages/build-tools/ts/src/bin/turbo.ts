@@ -7,7 +7,7 @@ import {
   setDefaultArgs,
 } from '../utils/cliArgsPipe';
 import { monorepoRootPath } from '../utils/monorepoRootPath';
-import { runBin } from './runBin';
+import { runBin } from '../utils/runBin';
 
 const runTurbo = async () => {
   const root = await monorepoRootPath();
