@@ -86,7 +86,7 @@ export function buildForNode(opts?: BuildOpts) {
 
       await rmrfDist();
 
-      const entryPoints = config.entryPoints;
+      const { entryPoints } = config;
 
       const allExternals = externalsFromDependencies(config.dependencies, opts);
       const baseOpts: DefaultRollupConfigBuildOpts = {
@@ -100,7 +100,7 @@ export function buildForNode(opts?: BuildOpts) {
           combineDefaultRollupConfigBuildOpts(baseOpts, opts)
         );
 
-      const binConfigs = buildBinsBundleConfig({
+      const { binConfigs, bundledEsmBinsInputs } = buildBinsBundleConfig({
         config,
         defaultRollupConfig: defaultConfig,
       });
@@ -120,11 +120,15 @@ export function buildForNode(opts?: BuildOpts) {
         const config = defaultConfig(opts);
         return {
           ...config,
-          input: Object.fromEntries(
-            Object.values(entryPoints).map(
-              ({ chunkName: name, sourcePath: value }) => [name, value]
-            )
-          ),
+          input: {
+            ...Object.fromEntries(
+              Object.values(entryPoints).map(
+                ({ chunkName: name, sourcePath: value }) =>
+                  [name, value] as const
+              )
+            ),
+            ...bundledEsmBinsInputs,
+          },
           output: {
             ...config.output,
             dir: './dist/dist',
