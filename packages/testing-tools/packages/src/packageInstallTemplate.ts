@@ -12,6 +12,7 @@ import { copyFiles } from './helpers/copyFiles';
 import { randomText } from './helpers/randomText';
 import { writePackageJson } from './helpers/writePackageJson';
 import { writePnpmWorkspaceYaml } from './helpers/writePnpmWorkspaceYaml';
+import { sortedDirectoryContents } from './sortedDirectoryContents';
 
 /**
  * Creates a synthetic npm package with the package under test
@@ -63,6 +64,10 @@ export function packageInstallTemplate(opts?: {
         tasks: opts?.buildTasks ?? ['build', 'declarations'],
       });
 
+      if (logger.logLevel === 'debug') {
+        logger.debug('"dist" after build', sortedDirectoryContents('./dist'));
+      }
+
       await rm(rootDirectory, { recursive: true }).catch(() => {
         return;
       });
@@ -104,6 +109,18 @@ export function packageInstallTemplate(opts?: {
           cwd: rootDirectory,
         }
       );
+
+      if (logger.logLevel === 'debug') {
+        logger.debug(
+          '"./.integration/template" after setup:integration',
+          sortedDirectoryContents('./.integration/template', [
+            '**',
+            '!node_modules/**',
+            '!.git/**',
+            `node_modules/${packageUnderTest}`,
+          ])
+        );
+      }
     },
     copyTo: async (destination: string) => {
       await copyFiles({
