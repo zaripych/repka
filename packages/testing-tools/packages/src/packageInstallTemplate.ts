@@ -65,7 +65,10 @@ export function packageInstallTemplate(opts?: {
       });
 
       if (logger.logLevel === 'debug') {
-        logger.debug('"dist" after build', sortedDirectoryContents('./dist'));
+        logger.debug(
+          '"dist" after build',
+          await sortedDirectoryContents('./dist')
+        );
       }
 
       await rm(rootDirectory, { recursive: true }).catch(() => {
@@ -113,7 +116,7 @@ export function packageInstallTemplate(opts?: {
       if (logger.logLevel === 'debug') {
         logger.debug(
           '"./.integration/template" after setup:integration',
-          sortedDirectoryContents('./.integration/template', [
+          await sortedDirectoryContents('./.integration/template', [
             '**',
             '!node_modules/**',
             '!.git/**',
