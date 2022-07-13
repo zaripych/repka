@@ -5,7 +5,7 @@ import { join } from 'path';
 import { spawnToPromise } from '../child-process';
 import { logger } from '../logger/logger';
 import { readPackageJson } from '../package-json/readPackageJson';
-import { runTurboTasks } from '../runTurboTasks';
+import { runTurboTasksForSinglePackage } from '../turbo';
 
 async function loadStandardGlobalHook(
   script: string,
@@ -56,10 +56,9 @@ async function loadCustomGlobalHook(script: string) {
       if (
         script.endsWith('setup.ts') &&
         typeof packageJson['scripts'] === 'object' &&
-        packageJson['scripts'] !== null &&
         packageJson['scripts']['setup:integration'] === `tsx ${script}`
       ) {
-        await runTurboTasks({
+        await runTurboTasksForSinglePackage({
           tasks: ['setup:integration'],
           spawnOpts: {
             env: {

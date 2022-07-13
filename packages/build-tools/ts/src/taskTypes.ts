@@ -22,3 +22,12 @@ export type AllTaskTypes =
   | IntegrationTestTask
   | DeclarationsTask
   | CopyTask;
+
+export const taskTypes: Array<AllTaskTypes['name']> = [
+  'build',
+  'copy',
+  'declarations',
+  'integration',
+  'lint',
+  'test',
+];

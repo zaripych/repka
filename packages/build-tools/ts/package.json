@@ -44,9 +44,9 @@
     "build:tools": "tsx ./build.ts",
     "declarations": "tsx ./declarations.ts",
     "integration": "tsx ./integration.ts",
-    "lint": "tsx ./lint.ts",
+    "lint": "repka lint",
     "setup:integration": "tsx ./src/__integration__/setup.ts",
-    "test": "tsx ./test.ts"
+    "test": "repka test"
   },
   "dependencies": {
     "@rollup/plugin-commonjs": "22.0.1",

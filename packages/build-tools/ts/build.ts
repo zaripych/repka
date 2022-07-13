@@ -10,7 +10,7 @@ await pipeline(
     ],
   }),
   copy({
-    include: ['configs/**/*', 'bin/**/*'],
+    include: ['configs/**/*'],
     destination: './dist/',
   })
 );

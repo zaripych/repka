@@ -7,5 +7,5 @@ export * from './integrationTest';
 export * from './lint';
 export * from './logger/logger';
 export * from './pipeline';
-export * from './runTurboTasks';
+export * from './turbo';
 export * from './unitTest';

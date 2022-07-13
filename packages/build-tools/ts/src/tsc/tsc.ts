@@ -18,7 +18,7 @@ const tsc = async (args: string[]) =>
 // it has to write something to the disk though
 
 export const tscCompositeTypeCheckAt = async (packageDirectory: string) =>
-  tsc(['--build', join(packageDirectory, './tsconfig.json')]);
+  tsc(['--build', join(packageDirectory, './tsconfig.json'), '--pretty']);
 
 export const tscCompositeTypeCheck = async () =>
   tscCompositeTypeCheckAt(process.cwd());

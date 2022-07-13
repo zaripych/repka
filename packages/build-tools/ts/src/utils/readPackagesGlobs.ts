@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { logger } from '../logger/logger';
+import { monorepoRootPath } from './monorepoRootPath';
+import { onceAsync } from './onceAsync';
 
 /**
  * Determine monorepo packages glob by reading one of the supported
@@ -25,3 +27,12 @@ export const readPackagesGlobs = async (monorepoRoot: string) => {
     return [];
   }
 };
+
+export const readMonorepoPackagesGlobs = onceAsync(async () => {
+  const root = await monorepoRootPath();
+  const packagesGlobs = await readPackagesGlobs(root);
+  return {
+    root,
+    packagesGlobs,
+  };
+});

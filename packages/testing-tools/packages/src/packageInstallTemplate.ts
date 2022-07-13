@@ -1,5 +1,8 @@
 import type { TaskTypes } from '@repka-kit/ts';
-import { runTurboTasks, spawnWithOutputWhenFailed } from '@repka-kit/ts';
+import {
+  runTurboTasksForSinglePackage,
+  spawnWithOutputWhenFailed,
+} from '@repka-kit/ts';
 import { logger } from '@repka-kit/ts';
 import assert from 'node:assert';
 import { mkdir, rm } from 'node:fs/promises';
@@ -56,7 +59,7 @@ export function packageInstallTemplate(opts?: {
     create: async () => {
       logger.debug('Template root directory is', rootDirectory);
 
-      await runTurboTasks({
+      await runTurboTasksForSinglePackage({
         tasks: opts?.buildTasks ?? ['build', 'declarations'],
       });
 
