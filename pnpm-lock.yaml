@@ -96,7 +96,6 @@ importers:
       jest: 28.1.2_@types+node@18.0.0
       js-yaml: 4.1.0
       lint-staged: 13.0.3
-      picocolors: 1.0.0
       prettier: 2.7.1
       rollup: 2.75.7
       rollup-plugin-analyzer: 4.0.0
@@ -112,13 +111,11 @@ importers:
       '@types/js-yaml': 4.0.5
       '@types/node': 18.0.0
       commander: 9.2.0
+      picocolors: 1.0.0
       utility-types: 3.10.0
 
   packages/templates/ts-package:
-    specifiers:
-      '@repka-kit/ts': workspace:*
-    devDependencies:
-      '@repka-kit/ts': link:../../build-tools/ts
+    specifiers: {}
 
   packages/testing-tools/packages:
     specifiers:
@@ -1935,7 +1932,7 @@ packages:
     resolution: {integrity: sha512-Rd3se6QB+sO1TwqZjscQrurpEPIfO0/yYnSin6Q/rD3mOutHvUrCAhJub3r90uNb+SESBuE0QYoB90YdfatsRg==}
 
   /concat-map/0.0.1:
-    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
 
   /convert-source-map/1.8.0:
     resolution: {integrity: sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA==}
@@ -3370,7 +3367,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   /isarray/1.0.0:
-    resolution: {integrity: sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ==}
+    resolution: {integrity: sha1-u5NdSFgsuhaMBoNJV6VKPgcSTxE=}
 
   /isexe/2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
