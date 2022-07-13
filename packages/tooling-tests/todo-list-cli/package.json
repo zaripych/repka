@@ -10,11 +10,11 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "build": "tsx ./build.ts",
+    "build": "repka build:node",
     "cli": "tsx ./src/index.ts",
-    "declarations": "tsx ./declarations.ts",
-    "integration": "tsx ./integration.ts",
-    "lint": "tsx ./lint.ts"
+    "declarations": "repka declarations",
+    "integration": "repka integration",
+    "lint": "repka lint"
   },
   "dependencies": {},
   "devDependencies": {

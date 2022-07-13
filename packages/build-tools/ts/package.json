@@ -41,9 +41,9 @@
     "configs"
   ],
   "scripts": {
-    "build:tools": "tsx ./build.ts",
-    "declarations": "tsx ./declarations.ts",
-    "integration": "tsx ./integration.ts",
+    "build:tools": "repka build:node",
+    "declarations": "repka declarations",
+    "integration": "repka integration",
     "lint": "repka lint",
     "setup:integration": "tsx ./src/__integration__/setup.ts",
     "test": "repka test"

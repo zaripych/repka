@@ -7,10 +7,8 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "lint": "tsx ./lint.ts"
+    "lint": "repka lint"
   },
   "dependencies": {},
-  "devDependencies": {
-    "@repka-kit/ts": "workspace:*"
-  }
+  "devDependencies": {}
 }
