@@ -22,7 +22,7 @@ async function ensureEslintTsConfigExists() {
   await writeFile(
     expected,
     text.replace(
-      'GLOBS',
+      '["GLOBS"]',
       JSON.stringify([
         ...new Set(
           globs.map((glob) => (glob !== '*' ? `${glob}/*.ts` : `*.ts`))
