@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 
 import { filterAndPrint } from '../child-process/filterAndPrint';
 import { spawnToPromise } from '../child-process/spawnToPromise';
+import { logger } from '../logger/logger';
 import { includesAnyOf, setDefaultArgs } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
 import { modulesBinPath } from '../utils/modulesBinPath';
@@ -18,6 +19,7 @@ const jest = async (args: string[]) => {
     env: {
       ...process.env,
       NODE_OPTIONS: `--experimental-vm-modules`,
+      LOG_LEVEL: logger.logLevel,
     },
   });
   filterAndPrint(child, [
