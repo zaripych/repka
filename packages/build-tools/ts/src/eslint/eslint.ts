@@ -6,6 +6,7 @@ import {
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
 import { modulesBinPath } from '../utils/modulesBinPath';
+import { monorepoRootPath } from '../utils/monorepoRootPath';
 import { taskArgsPipe } from '../utils/taskArgsPipe';
 
 const eslintPath = () => modulesBinPath('eslint');
@@ -27,6 +28,10 @@ export const eslint = async (processArgs?: string[]) =>
           ['--fix'],
           [],
           (args) => !includesAnyOf(args.inputArgs, ['--no-fix'])
+        ),
+        setDefaultArgs(
+          ['--resolve-plugins-relative-to'],
+          [await monorepoRootPath()]
         ),
         // remove non-standard --no-fix parameter
         removeInputArgs(['--no-fix']),

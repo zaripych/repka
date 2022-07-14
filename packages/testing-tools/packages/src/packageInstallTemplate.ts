@@ -83,11 +83,30 @@ export function packageInstallTemplate(opts?: {
         ? opts.packageJson
         : (opt: Record<string, unknown>) => opt;
 
+      // avoid having to --force install and make it look like
+      // we have a new package every time
+      const source = resolve(
+        opts?.packageUnderTestPublishDirectory || './dist'
+      );
+      const randomId = randomText(8);
+      const cacheBustedLocation = join(
+        process.cwd(),
+        './.integration',
+        `.${randomId}`
+      );
+      await mkdir(cacheBustedLocation, { recursive: true });
+
+      await copyFiles({
+        source,
+        include: ['**'],
+        destination: cacheBustedLocation,
+      });
+
       await Promise.all([
         writePackageJson(
           rootDirectory,
           transform({
-            name: `package-${randomText(8)}`,
+            name: `package-${randomId}`,
             version: '1.0.0',
             description: '',
             main: 'index.js',
@@ -99,9 +118,7 @@ export function packageInstallTemplate(opts?: {
             license: 'ISC',
             type: 'module',
             dependencies: {
-              [`${packageUnderTest}`]: `file:${resolve(
-                opts?.packageUnderTestPublishDirectory || './dist'
-              )}`,
+              [`${packageUnderTest}`]: `file:${cacheBustedLocation}`,
             },
           })
         ),
@@ -110,7 +127,7 @@ export function packageInstallTemplate(opts?: {
 
       await spawnOutputConditional(
         'pnpm',
-        ['install', '--force', '--virtual-store-dir', '../.pnpm'],
+        ['install', '--virtual-store-dir', '../.pnpm'],
         {
           cwd: rootDirectory,
           exitCodes: [0],
@@ -128,6 +145,10 @@ export function packageInstallTemplate(opts?: {
           ])
         );
       }
+
+      await rm(cacheBustedLocation, { recursive: true }).catch(() => {
+        return;
+      });
     },
     copyTo: async (destination: string) => {
       await copyFiles({
