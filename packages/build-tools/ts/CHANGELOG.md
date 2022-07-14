@@ -1,5 +1,11 @@
 # @repka-kit/ts
 
+## 1.0.0-beta.3
+
+### Minor Changes
+
+- [`7d81d3b`](https://github.com/zaripych/repka/commit/7d81d3bd924e22165ac034853631e88d8565f7ee) Thanks [@zaripych](https://github.com/zaripych)! - repka now has cli which allows you to lint, test and build packages via CLI without having to create a TypeScript script - while the script still remains as means to configure and go beyond default settings
+
 ## 1.0.0-beta.2
 
 ### Minor Changes
