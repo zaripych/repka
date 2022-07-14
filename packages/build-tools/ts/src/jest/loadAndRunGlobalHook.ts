@@ -2,7 +2,7 @@ import type { Config } from '@jest/types';
 import { stat } from 'fs/promises';
 import { join } from 'path';
 
-import { spawnWithOutputWhenFailed } from '../child-process';
+import { spawnOutputConditional } from '../child-process';
 import { logger } from '../logger/logger';
 import { readPackageJson } from '../package-json/readPackageJson';
 import { runTurboTasksForSinglePackage } from '../turbo';
@@ -53,6 +53,7 @@ async function loadCustomGlobalHook(script: string) {
       const packageJson = await readPackageJson(
         join(process.cwd(), 'package.json')
       );
+
       if (
         script.endsWith('setup.ts') &&
         typeof packageJson['scripts'] === 'object' &&
@@ -69,7 +70,7 @@ async function loadCustomGlobalHook(script: string) {
           },
         });
       } else {
-        await spawnWithOutputWhenFailed('tsx', [location], {
+        await spawnOutputConditional('tsx', [location], {
           exitCodes: [0],
           env: {
             ...process.env,

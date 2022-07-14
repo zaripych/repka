@@ -2,7 +2,7 @@ import { stat } from 'fs/promises';
 import { join } from 'path';
 
 import type { SpawnOptionsWithExtra } from './child-process';
-import { spawnWithOutputWhenFailed } from './child-process';
+import { spawnOutputConditional } from './child-process';
 import type { SpawnResultOpts } from './child-process/spawnResult';
 import { modulesBinPath } from './utils/modulesBinPath';
 import { monorepoRootPath } from './utils/monorepoRootPath';
@@ -37,7 +37,7 @@ export async function runTurboTasksForSinglePackage(opts: {
 }) {
   const rootDir = opts.packageDir ?? process.cwd();
   const cwd = await monorepoRootPath();
-  await spawnWithOutputWhenFailed(
+  return await spawnOutputConditional(
     turboPath(),
     [
       'run',

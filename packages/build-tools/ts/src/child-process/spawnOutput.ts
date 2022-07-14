@@ -1,5 +1,5 @@
 import { logger } from '../logger/logger';
-import type { SpawnResultOpts } from './spawnResult';
+import type { SpawnResultOpts, SpawnResultReturn } from './spawnResult';
 import { spawnResult } from './spawnResult';
 import type { SpawnParameterMix } from './spawnToPromise';
 import { spawnWithSpawnParameters } from './spawnToPromise';
@@ -12,25 +12,26 @@ export async function spawnOutput(
   return result.output.join('');
 }
 
-export async function spawnWithOutputWhenFailed(
+const defaultShouldOutput = (result: SpawnResultReturn) => {
+  return result.error || result.status !== 0 || logger.logLevel === 'debug';
+};
+
+export async function spawnOutputConditional(
   ...parameters: SpawnParameterMix<
     SpawnResultOpts & {
-      outputWhenExitCodesNotIn?: number[];
+      /**
+       * By default will output to `stderr` when spawn result failed with an error, when
+       * status code is not zero or when `Logger.logLevel` is `debug`
+       */
+      shouldOutput?: (result: SpawnResultReturn) => boolean;
     }
   >
 ) {
   const { child, opts } = spawnWithSpawnParameters(parameters);
   const result = await spawnResult(child, opts);
-  if (result.error) {
+  const shouldOutput = opts.shouldOutput ?? defaultShouldOutput;
+  if (shouldOutput(result)) {
     logger.error(result.output.join(''));
-    return Promise.reject(result.error);
-  } else if (
-    opts.outputWhenExitCodesNotIn &&
-    typeof result.status === 'number' &&
-    !opts.outputWhenExitCodesNotIn.includes(result.status)
-  ) {
-    logger.error(result.output.join(''));
-    return Promise.resolve(result);
   }
   return Promise.resolve(result);
 }

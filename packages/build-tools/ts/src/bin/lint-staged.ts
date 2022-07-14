@@ -1,4 +1,4 @@
-import { spawnOutput, spawnWithOutputWhenFailed } from '../child-process';
+import { spawnOutput, spawnOutputConditional } from '../child-process';
 import { spawnResult } from '../child-process/spawnResult';
 import { runBin } from '../utils/runBin';
 import { taskArgsPipe } from '../utils/taskArgsPipe';
@@ -33,7 +33,7 @@ const stashIncludeUntrackedKeepIndex = async () => {
   const shouldStash =
     staged.length > 0 && (modified.length > 0 || untracked.length > 0);
   if (shouldStash) {
-    await spawnWithOutputWhenFailed(
+    await spawnOutputConditional(
       'git',
       'commit --no-verify -m "lint-staged-temporary"'.split(' '),
       {
@@ -41,7 +41,7 @@ const stashIncludeUntrackedKeepIndex = async () => {
       }
     );
     try {
-      await spawnWithOutputWhenFailed(
+      await spawnOutputConditional(
         'git',
         'stash push -u --message lint-staged-temporary'.split(' '),
         {
@@ -50,7 +50,7 @@ const stashIncludeUntrackedKeepIndex = async () => {
       );
     } finally {
       // if stashing failed, reset anyway
-      await spawnWithOutputWhenFailed('git', 'reset --soft HEAD~1'.split(' '), {
+      await spawnOutputConditional('git', 'reset --soft HEAD~1'.split(' '), {
         exitCodes: [0],
       });
     }

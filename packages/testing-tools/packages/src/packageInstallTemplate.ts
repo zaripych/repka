@@ -1,7 +1,7 @@
 import type { TaskTypes } from '@repka-kit/ts';
 import {
   runTurboTasksForSinglePackage,
-  spawnWithOutputWhenFailed,
+  spawnOutputConditional,
 } from '@repka-kit/ts';
 import { logger } from '@repka-kit/ts';
 import assert from 'node:assert';
@@ -108,7 +108,7 @@ export function packageInstallTemplate(opts?: {
         writePnpmWorkspaceYaml(rootDirectory),
       ]);
 
-      await spawnWithOutputWhenFailed(
+      await spawnOutputConditional(
         'pnpm',
         ['install', '--force', '--virtual-store-dir', '../.pnpm'],
         {

@@ -8,7 +8,7 @@ export type SpawnResultOpts = {
   output?: ['stdout' | 'stderr', ...Array<'stdout' | 'stderr'>];
 } & SpawnToPromiseOpts;
 
-type SpawnResultReturn = {
+export type SpawnResultReturn = {
   pid?: number;
   output: string[];
   stdout: string;
