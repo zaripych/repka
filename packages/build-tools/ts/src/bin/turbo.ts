@@ -1,5 +1,6 @@
 import { relative } from 'node:path';
 
+import { inheritTurboForceArgFromEnv, passTurboForceEnv } from '../turbo';
 import {
   cliArgsPipe,
   includesAnyOf,
@@ -25,12 +26,17 @@ const runTurbo = async () => {
             inputArgs: insertAfterAnyOf(state.inputArgs, args, ['run']),
           })
         ),
+        inheritTurboForceArgFromEnv(),
       ],
       process.argv.slice(2)
     ),
     {
       cwd: root,
       exitCodes: 'inherit',
+      env: {
+        ...process.env,
+        ...passTurboForceEnv(process.argv),
+      },
     }
   );
 };
