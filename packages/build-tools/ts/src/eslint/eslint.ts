@@ -40,5 +40,6 @@ export const eslint = async (processArgs?: string[]) =>
     ),
     {
       stdio: 'inherit',
+      exitCodes: 'inherit',
     }
   );

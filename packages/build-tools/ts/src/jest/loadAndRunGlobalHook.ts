@@ -2,7 +2,7 @@ import type { Config } from '@jest/types';
 import { stat } from 'fs/promises';
 import { join } from 'path';
 
-import { spawnToPromise } from '../child-process';
+import { spawnWithOutputWhenFailed } from '../child-process';
 import { logger } from '../logger/logger';
 import { readPackageJson } from '../package-json/readPackageJson';
 import { runTurboTasksForSinglePackage } from '../turbo';
@@ -61,6 +61,7 @@ async function loadCustomGlobalHook(script: string) {
         await runTurboTasksForSinglePackage({
           tasks: ['setup:integration'],
           spawnOpts: {
+            exitCodes: [0],
             env: {
               ...process.env,
               LOG_LEVEL: logger.logLevel,
@@ -68,8 +69,7 @@ async function loadCustomGlobalHook(script: string) {
           },
         });
       } else {
-        await spawnToPromise('tsx', [location], {
-          stdio: 'inherit',
+        await spawnWithOutputWhenFailed('tsx', [location], {
           exitCodes: [0],
           env: {
             ...process.env,

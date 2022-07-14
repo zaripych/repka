@@ -30,6 +30,7 @@ const runTurbo = async () => {
     ),
     {
       cwd: root,
+      exitCodes: 'inherit',
     }
   );
 };

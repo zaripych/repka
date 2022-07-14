@@ -71,7 +71,9 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
         cwd: rootDirectory,
       });
       return {
-        output: await spawnOutput(cp),
+        output: await spawnOutput(cp, {
+          exitCodes: 'any',
+        }),
         exitCode: cp.exitCode,
       };
     },

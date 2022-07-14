@@ -1,19 +1,33 @@
 import { spawnOutput, spawnWithOutputWhenFailed } from '../child-process';
 import { spawnResult } from '../child-process/spawnResult';
 import { runBin } from '../utils/runBin';
+import { taskArgsPipe } from '../utils/taskArgsPipe';
 
 const lintStaged = async () => {
-  await runBin('lint-staged');
+  await runBin('lint-staged', taskArgsPipe([]), {
+    // this is the command we wrap
+    exitCodes: 'inherit',
+  });
 };
 
 const stashIncludeUntrackedKeepIndex = async () => {
   const split = (out: string) => out.split('\n').filter(Boolean);
   const [staged, modified, untracked] = await Promise.all([
-    spawnOutput('git', 'diff --name-only --cached'.split(' ')).then(split),
-    spawnOutput('git', 'diff --name-only'.split(' ')).then(split),
+    spawnOutput('git', 'diff --name-only --cached'.split(' '), {
+      // fail if non-zero
+      exitCodes: [0],
+    }).then(split),
+    spawnOutput('git', 'diff --name-only'.split(' '), {
+      // fail if non-zero
+      exitCodes: [0],
+    }).then(split),
     spawnOutput(
       'git',
-      'ls-files --others --exclude-standard --full-name'.split(' ')
+      'ls-files --others --exclude-standard --full-name'.split(' '),
+      {
+        // fail if non-zero
+        exitCodes: [0],
+      }
     ).then(split),
   ]);
   const shouldStash =
@@ -44,7 +58,11 @@ const stashIncludeUntrackedKeepIndex = async () => {
   return { staged, modified, untracked, didStash: shouldStash };
 };
 
-const applyStashed = async () => spawnResult('git', 'stash pop'.split(' '));
+const applyStashed = async () =>
+  spawnResult('git', 'stash pop'.split(' '), {
+    // we handle the status later in the code
+    exitCodes: [0],
+  });
 
 const run = async () => {
   const { didStash, staged } = await stashIncludeUntrackedKeepIndex();

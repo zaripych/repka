@@ -25,7 +25,7 @@ export async function spawnResult(
   const combinedData: string[] = [];
   const stdoutData: string[] = [];
   const stderrData: string[] = [];
-  const output = opts?.output ?? ['stdout', 'stderr'];
+  const output = opts.output ?? ['stdout', 'stderr'];
   if (output.includes('stdout')) {
     assert(
       !!child.stdout,
@@ -48,12 +48,7 @@ export async function spawnResult(
       stderrData.push(data);
     });
   }
-  const [result] = await Promise.allSettled([
-    spawnToPromise(child, {
-      exitCodes: opts?.exitCodes ?? 'any',
-      cwd: opts?.cwd,
-    }),
-  ]);
+  const [result] = await Promise.allSettled([spawnToPromise(child, opts)]);
   return {
     pid: child.pid,
     signal: child.signalCode,

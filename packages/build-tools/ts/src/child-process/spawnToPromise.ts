@@ -7,22 +7,32 @@ import { logger } from '../logger/logger';
 import { captureStackTrace } from '../utils/stackTrace';
 
 export type SpawnToPromiseOpts = {
-  exitCodes?: number[] | 'inherit' | 'any';
+  /**
+   * Specify exit codes which should not result in throwing an error when
+   * the process has finished, e.g. specifying `[0]` means if process finished
+   * with zero exit code then the promise will resolve instead of rejecting.
+   *
+   * Alternatively, specify `inherit` to save status code to the current `process.exitCode`
+   *
+   * Alternatively, completely ignore the exit code (e.g. you follow up and interrogate
+   * the process code manually afterwards)
+   */
+  exitCodes: number[] | 'inherit' | 'any';
 };
 
 type SharedOpts = Pick<SpawnOptions, 'cwd'>;
 
 type SpawnArgs<E extends object> = [
   command: string,
-  args?: ReadonlyArray<string>,
-  options?: Assign<SpawnOptions, E>
+  args: ReadonlyArray<string>,
+  options: Assign<SpawnOptions, E>
 ];
 
 export type SpawnOptionsWithExtra<E extends object = SpawnToPromiseOpts> =
   Assign<SpawnOptions, E>;
 
 export type SpawnParameterMix<E extends object = SpawnToPromiseOpts> =
-  | [cp: ChildProcess, extraOpts?: Assign<E, SharedOpts>]
+  | [cp: ChildProcess, extraOpts: Assign<E, SharedOpts>]
   | SpawnArgs<E>;
 
 export function isSpawnArgs<E extends object>(
@@ -61,14 +71,11 @@ export async function spawnToPromise(
   const { child, command, args, opts } = spawnWithSpawnParameters(parameters);
   const { prepareForRethrow } = captureStackTrace();
 
-  // by default we do not throw if exit code is non-zero
-  // and instead just inherit the exit code into the main
-  // process
-  const exitCodes = opts?.exitCodes || 'inherit';
+  const exitCodes = opts.exitCodes;
 
-  const cwd = opts?.cwd ? opts.cwd.toString() : undefined;
+  const cwd = opts.cwd ? opts.cwd.toString() : undefined;
 
-  const cmd = () => [command, ...(args ? args : [])].join(' ');
+  const cmd = () => [command, ...args].join(' ');
 
   logger.debug(['>', cmd()].join(' '), ...(cwd ? [`in ${cwd}`] : []));
 

@@ -29,7 +29,9 @@ const jest = async (args: string[]) => {
       replaceWith: undefined,
     },
   ]);
-  await spawnToPromise(child);
+  await spawnToPromise(child, {
+    exitCodes: 'inherit',
+  });
 };
 
 const jestUnitTestConfigPath = () =>

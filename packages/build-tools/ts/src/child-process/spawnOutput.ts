@@ -8,10 +8,7 @@ export async function spawnOutput(
   ...parameters: SpawnParameterMix<SpawnResultOpts>
 ): Promise<string> {
   const { child, opts } = spawnWithSpawnParameters(parameters);
-  const result = await spawnResult(child, {
-    ...opts,
-    exitCodes: opts?.exitCodes ?? [0],
-  });
+  const result = await spawnResult(child, opts);
   return result.output.join('');
 }
 
@@ -23,14 +20,12 @@ export async function spawnWithOutputWhenFailed(
   >
 ) {
   const { child, opts } = spawnWithSpawnParameters(parameters);
-  const result = await spawnResult(child, {
-    ...opts,
-  });
+  const result = await spawnResult(child, opts);
   if (result.error) {
     logger.error(result.output.join(''));
     return Promise.reject(result.error);
   } else if (
-    opts?.outputWhenExitCodesNotIn &&
+    opts.outputWhenExitCodesNotIn &&
     typeof result.status === 'number' &&
     !opts.outputWhenExitCodesNotIn.includes(result.status)
   ) {

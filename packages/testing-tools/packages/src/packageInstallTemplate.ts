@@ -62,6 +62,9 @@ export function packageInstallTemplate(opts?: {
 
       await runTurboTasksForSinglePackage({
         tasks: opts?.buildTasks ?? ['build', 'declarations'],
+        spawnOpts: {
+          exitCodes: [0],
+        },
       });
 
       if (logger.logLevel === 'debug') {
@@ -110,6 +113,7 @@ export function packageInstallTemplate(opts?: {
         ['install', '--force', '--virtual-store-dir', '../.pnpm'],
         {
           cwd: rootDirectory,
+          exitCodes: [0],
         }
       );
 
