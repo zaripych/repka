@@ -6,6 +6,7 @@ import {
 import { logger } from '@repka-kit/ts';
 import assert from 'node:assert';
 import { mkdir, rm } from 'node:fs/promises';
+import { symlink, unlink } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 import { copyFiles } from './helpers/copyFiles';
@@ -94,13 +95,7 @@ export function packageInstallTemplate(opts?: {
         './.integration',
         `.${randomId}`
       );
-      await mkdir(cacheBustedLocation, { recursive: true });
-
-      await copyFiles({
-        source,
-        include: ['**'],
-        destination: cacheBustedLocation,
-      });
+      await symlink(source, cacheBustedLocation);
 
       await Promise.all([
         writePackageJson(
@@ -146,9 +141,7 @@ export function packageInstallTemplate(opts?: {
         );
       }
 
-      await rm(cacheBustedLocation, { recursive: true }).catch(() => {
-        return;
-      });
+      await unlink(cacheBustedLocation);
     },
     copyTo: async (destination: string) => {
       await copyFiles({

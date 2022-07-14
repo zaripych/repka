@@ -28,11 +28,11 @@
     "@repka-kit/ts": "workspace:*",
     "husky": "8.0.1"
   },
-  "packageManager": "pnpm@7.5.0",
+  "packageManager": "pnpm@7.5.1",
   "engines": {
     "node": "16",
     "npm": "👻 please-use-pnpm 👻",
-    "pnpm": "7.5.0",
+    "pnpm": "7.5.1",
     "yarn": "👻 please-use-pnpm 👻"
   }
 }
