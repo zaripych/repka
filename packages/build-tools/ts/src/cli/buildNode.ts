@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import colors from 'picocolors';
 
-import { lint } from '../lint';
+import { buildForNode } from '../buildForNode';
 import { pipeline } from '../pipeline';
 import { commandTemplate } from './commandTemplate';
 
@@ -20,7 +20,7 @@ export const buildNodeCommand = () =>
         turboTask: 'build',
         command,
         run: async () => {
-          await pipeline(lint({ processArgs: command.args }));
+          await pipeline(buildForNode());
         },
       });
     });
