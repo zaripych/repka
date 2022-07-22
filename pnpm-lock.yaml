@@ -119,12 +119,14 @@ importers:
 
   packages/testing-tools/packages:
     specifiers:
-      '@repka-kit/ts': workspace:*
+      '@build-tools/ts': workspace:@repka-kit/ts@*
+      '@utils/ts': workspace:*
       fast-glob: 3.2.11
     dependencies:
       fast-glob: 3.2.11
     devDependencies:
-      '@repka-kit/ts': link:../../build-tools/ts
+      '@build-tools/ts': link:../../build-tools/ts
+      '@utils/ts': link:../../utils/ts
 
   packages/tooling-tests/todo-list-cli:
     specifiers:

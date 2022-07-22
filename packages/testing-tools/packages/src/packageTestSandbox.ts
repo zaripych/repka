@@ -1,20 +1,25 @@
-import { spawnOutput } from '@repka-kit/ts';
-import { rm } from 'fs/promises';
+import { spawnOutput } from '@build-tools/ts';
 import assert from 'node:assert';
 import { spawn } from 'node:child_process';
-import { isAbsolute } from 'node:path';
-import { join } from 'path';
+import { rm } from 'node:fs/promises';
+import { isAbsolute, join } from 'node:path';
 
 import type { CopyGlobOpts } from './helpers/copyFiles';
 import { copyFiles } from './helpers/copyFiles';
+import { findPackageUnderTest } from './helpers/findPackageUnderTest';
+import { randomText } from './helpers/randomText';
+import type { ReplaceTextOpts } from './helpers/replaceTextInFiles';
+import { replaceTextInFiles } from './helpers/replaceTextInFiles';
 import { readPackageJson, writePackageJson } from './helpers/writePackageJson';
-import { packageInstallTemplate } from './packageInstallTemplate';
 
 export type BuildSandboxOpts = {
   tag: string;
+  templateLocation?: string;
+  packageUnderTest?: string;
   copyFiles?: Array<
     Omit<CopyGlobOpts, 'destination'> & { destination?: string }
   >;
+  replaceTextInFiles?: Array<ReplaceTextOpts>;
   packageJson?:
     | ((entries: Record<string, unknown>) => Record<string, unknown>)
     | undefined;
@@ -31,26 +36,47 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
     `sandbox-${opts.tag}`
   );
 
-  const installTemplate = packageInstallTemplate();
+  const packageUnderTest = async () => {
+    const result = opts.packageUnderTest ?? (await findPackageUnderTest());
+    assert(
+      !!result,
+      'Name of the package under test should be in the environment variables or provided'
+    );
+    return result;
+  };
 
-  const packageUnderTestPath = () =>
-    join(rootDirectory, 'node_modules', installTemplate.packageUnderTest);
+  const templateLocation =
+    opts.templateLocation ?? join(process.cwd(), './.integration', `template`);
+
+  const packageUnderTestPath = async () =>
+    join(rootDirectory, 'node_modules', await packageUnderTest());
 
   return {
     rootDirectory,
-    packageUnderTest: installTemplate.packageUnderTest,
+    packageUnderTest,
     packageUnderTestPath,
     create: async () => {
       await rm(rootDirectory, { recursive: true }).catch(() => {
         // ignore
       });
-      await installTemplate.copyTo(rootDirectory);
+      await copyFiles({
+        source: templateLocation,
+        include: ['**/*'],
+        exclude: ['.turbo'],
+        destination: rootDirectory,
+        options: {
+          dot: true,
+          // create symlinks instead of copying
+          // symlinked content
+          followSymbolicLinks: false,
+        },
+      });
       if (opts.copyFiles) {
         assert(
           !opts.copyFiles.some(
             (opt) => opt.destination && isAbsolute(opt.destination)
           ),
-          'destination copy paths cannot be absolute'
+          'destination copy paths cannot be absolute, please specify directory relative to the sandbox'
         );
         await Promise.all(
           opts.copyFiles.map((copyOpts) =>
@@ -61,15 +87,42 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
           )
         );
       }
-      if (opts.packageJson) {
-        const json = await readPackageJson(rootDirectory);
-        await writePackageJson(rootDirectory, opts.packageJson(json));
+      if (opts.replaceTextInFiles) {
+        assert(
+          !opts.replaceTextInFiles.some(
+            (opt) => opt.target && isAbsolute(opt.target)
+          ),
+          'replace target paths cannot be absolute, please specify directory relative to the sandbox'
+        );
+        await Promise.all(
+          opts.replaceTextInFiles.map((replaceOpts) =>
+            replaceTextInFiles({
+              ...replaceOpts,
+              target: join(rootDirectory, replaceOpts.target || './'),
+            })
+          )
+        );
       }
+      const json = await readPackageJson(rootDirectory);
+      const modified = opts.packageJson
+        ? opts.packageJson({
+            ...json,
+            name: `package-${randomText(8)}`,
+          })
+        : {
+            ...json,
+            name: `package-${randomText(8)}`,
+          };
+      await writePackageJson(rootDirectory, modified);
     },
     runMain: async (...args: string[]) => {
-      const cp = spawn(process.execPath, [packageUnderTestPath(), ...args], {
-        cwd: rootDirectory,
-      });
+      const cp = spawn(
+        process.execPath,
+        [await packageUnderTestPath(), ...args],
+        {
+          cwd: rootDirectory,
+        }
+      );
       return {
         output: await spawnOutput(cp, {
           exitCodes: 'any',

@@ -1,9 +1,9 @@
-import type { TaskTypes } from '@repka-kit/ts';
+import type { TaskTypes } from '@build-tools/ts';
 import {
   runTurboTasksForSinglePackage,
   spawnOutputConditional,
-} from '@repka-kit/ts';
-import { logger } from '@repka-kit/ts';
+} from '@build-tools/ts';
+import { logger } from '@build-tools/ts';
 import assert from 'node:assert';
 import { mkdir, rm } from 'node:fs/promises';
 import { symlink, unlink } from 'node:fs/promises';
@@ -16,13 +16,13 @@ import { writePnpmWorkspaceYaml } from './helpers/writePnpmWorkspaceYaml';
 import { sortedDirectoryContents } from './sortedDirectoryContents';
 
 /**
- * Creates a synthetic npm package with the package under test
+ * Creates a temporary npm package directory with the package under test
  * in dependencies, this will create:
  * ```
  * package.json
  * pnpm-workspace.yaml
  * ```
- * and install all dependencies in `../../../.temporary/template`
+ * and install all dependencies in `.integration/template`
  * directory which later can be copied over to a sandbox location
  * before running actual tests on those sandboxes.
  */
@@ -142,19 +142,6 @@ export function packageInstallTemplate(opts?: {
       }
 
       await unlink(cacheBustedLocation);
-    },
-    copyTo: async (destination: string) => {
-      await copyFiles({
-        source: rootDirectory,
-        include: ['**/*'],
-        destination,
-        options: {
-          dot: true,
-          // create symlinks instead of copying
-          // symlinked content
-          followSymbolicLinks: false,
-        },
-      });
     },
     cleanup: async () => {
       await rm(rootDirectory, { recursive: true });
