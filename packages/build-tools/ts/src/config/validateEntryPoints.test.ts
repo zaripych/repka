@@ -4,7 +4,7 @@ describe('validateEntryPoints', () => {
   it(`doesn't fail on empty exports`, () => {
     const result = validateEntryPoints({});
     expect(result).toEqual({
-      entryPoints: {},
+      entryPoints: [],
       ignored: {},
     });
   });
@@ -98,7 +98,7 @@ describe('validateEntryPoints', () => {
         },
       })
     ).toEqual({
-      entryPoints: {},
+      entryPoints: [],
       ignored: {
         node: {
           ['.']: './src/index.ts',
@@ -115,7 +115,7 @@ describe('validateEntryPoints', () => {
       },
     });
     expect(result).toEqual({
-      entryPoints: {},
+      entryPoints: [],
       ignored: {
         ['.']: {
           node: './src/index.ts',
