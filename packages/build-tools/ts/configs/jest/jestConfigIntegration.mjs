@@ -1,9 +1,14 @@
 import { join } from 'path';
 
-import { commonConfig, extensions } from './common.mjs';
+import {
+  commonConfig,
+  extensions,
+  jestTransformConfigProp,
+} from './common.mjs';
+import { jestPluginRoot } from './jestConfigHelpers.gen.mjs';
 
 const roots = [''];
-const integrationTestGlobs = ['<rootDir>/__integration__/**'];
+const integrationTestGlobs = ['<rootDir>/src/__integration__/**'];
 const exts = extensions.join(',');
 const integrationTestMatch = integrationTestGlobs
   .flatMap((glob) =>
@@ -14,7 +19,7 @@ const integrationTestMatch = integrationTestGlobs
 export default {
   testMatch: integrationTestMatch,
   testTimeout: 1_000 * 60 * 5,
-  coverageDirectory: '../.coverage-integration',
+  coverageDirectory: '.coverage-integration',
   globalSetup: join(
     new URL('.', import.meta.url).pathname,
     './integrationSetup.mjs'
@@ -24,4 +29,5 @@ export default {
     './integrationTeardown.mjs'
   ),
   ...commonConfig,
+  ...jestTransformConfigProp(await jestPluginRoot()),
 };

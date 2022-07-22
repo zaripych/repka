@@ -70,6 +70,9 @@ export function setDefaultArgs(
   };
 }
 
+export const removeLogLevelOption = () =>
+  removeInputArgs(['--log-level'], { numValues: 1 });
+
 export type CliArgs = {
   /**
    * Extra arguments that go before arguments passed in by the user

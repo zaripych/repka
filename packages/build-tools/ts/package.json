@@ -22,11 +22,15 @@
     "url": "https://github.com/zaripych"
   },
   "type": "module",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./configs/*": "./configs/*"
+  },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "bin": {
     "dts-bundle-generator": "./bin/dts-bundle-generator.gen.cjs",
+    "eslint": "./bin/eslint.gen.mjs",
     "jest": "./bin/jest.gen.mjs",
     "lint-staged": "./bin/lint-staged.gen.mjs",
     "prettier": "./bin/prettier.gen.mjs",
@@ -80,6 +84,7 @@
   "devDependencies": {
     "@build-tools/dts-bundle-generator": "workspace:*",
     "@jest/types": "28.1.1",
+    "@testing-tools/packages": "workspace:*",
     "@types/eslint": "8.4.5",
     "@types/jest": "28.1.4",
     "@types/js-yaml": "4.0.5",

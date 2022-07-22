@@ -4,8 +4,7 @@ import { dirname, join } from 'node:path';
 import { logger } from '../logger/logger';
 import { readPackageJson } from '../package-json/readPackageJson';
 import type { BivarianceHack } from './bivarianceHack';
-import { monorepoRootPath } from './monorepoRootPath';
-import { readPackagesGlobs } from './readPackagesGlobs';
+import { readMonorepoPackagesGlobs } from './readPackagesGlobs';
 
 /**
  * Extract real package name from dependency - should match name
@@ -52,11 +51,10 @@ type MonorepoDependency = {
 export async function loadMonorepoDependencies(
   packageDirectory: string = process.cwd()
 ): Promise<MonorepoDependency[]> {
-  const root = await monorepoRootPath();
-  const [packagesGlobs, packageJson] = await Promise.all([
-    readPackagesGlobs(root),
-    readPackageJson(join(packageDirectory, 'package.json')),
-  ]);
+  const { root, packagesGlobs } = await readMonorepoPackagesGlobs();
+  const packageJson = await readPackageJson(
+    join(packageDirectory, 'package.json')
+  );
   if (packagesGlobs.length === 0) {
     return [];
   }

@@ -2,7 +2,7 @@ import { join, relative } from 'node:path';
 
 import { spawnToPromise } from '../child-process/spawnToPromise';
 import { modulesBinPath } from '../utils/modulesBinPath';
-import { monorepoRootPath } from '../utils/monorepoRootPath';
+import { repositoryRootPath } from '../utils/repositoryRootPath';
 
 const tscPath = () => modulesBinPath('tsc');
 
@@ -11,7 +11,7 @@ const tsc = async (args: string[]) =>
     stdio: 'inherit',
     // based on the monorepo "packages/*/*" directory structure
     // for full paths in TypeScript errors just do this:
-    cwd: relative(process.cwd(), await monorepoRootPath()),
+    cwd: relative(process.cwd(), await repositoryRootPath()),
     exitCodes: 'inherit',
   });
 

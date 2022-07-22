@@ -31,5 +31,5 @@
   },
   "javascript.preferences.importModuleSpecifier": "relative",
   "typescript.preferences.importModuleSpecifier": "relative",
-  "cSpell.words": ["repka"]
+  "cSpell.words": ["Pnpm", "repka"]
 }

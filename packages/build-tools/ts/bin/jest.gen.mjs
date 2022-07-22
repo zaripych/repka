@@ -2,7 +2,7 @@
 // NOTE: This file is bundled up from './src/bin/*' and needs to be committed
 import { spawn } from 'node:child_process';
 
-const cp = spawn(new URL("../node_modules/.bin/jest", import.meta.url).pathname, process.argv.slice(2), { stdio: "inherit" });
+const cp = spawn(new URL("../node_modules/.bin/tsx", import.meta.url).pathname, [new URL("../src/bin/jest.ts", import.meta.url).pathname, ...process.argv.slice(2)], { stdio: "inherit" });
 cp.on("error", (err) => {
   console.error(err);
   process.exitCode = 1;

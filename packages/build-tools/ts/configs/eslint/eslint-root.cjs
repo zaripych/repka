@@ -14,6 +14,14 @@ module.exports = {
       env: {
         jest: true,
       },
+      rules: {
+        '@typescript-eslint/ban-ts-comment': [
+          'error',
+          {
+            'ts-expect-error': false,
+          },
+        ],
+      },
     },
     {
       files: ['**/*.json', '*.json'],

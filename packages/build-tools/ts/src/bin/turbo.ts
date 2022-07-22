@@ -7,11 +7,11 @@ import {
   insertAfterAnyOf,
   setDefaultArgs,
 } from '../utils/cliArgsPipe';
-import { monorepoRootPath } from '../utils/monorepoRootPath';
+import { repositoryRootPath } from '../utils/repositoryRootPath';
 import { runBin } from '../utils/runBin';
 
 const runTurbo = async () => {
-  const root = await monorepoRootPath();
+  const root = await repositoryRootPath();
   await runBin(
     'turbo',
     cliArgsPipe(

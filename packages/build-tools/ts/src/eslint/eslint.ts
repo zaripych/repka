@@ -1,24 +1,25 @@
 import { spawnToPromise } from '../child-process';
 import {
+  cliArgsPipe,
   includesAnyOf,
   removeInputArgs,
+  removeLogLevelOption,
   setDefaultArgs,
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
 import { modulesBinPath } from '../utils/modulesBinPath';
-import { monorepoRootPath } from '../utils/monorepoRootPath';
-import { taskArgsPipe } from '../utils/taskArgsPipe';
+import { repositoryRootPath } from '../utils/repositoryRootPath';
 
 const eslintPath = () => modulesBinPath('eslint');
 
 const eslintConfigPath = () => configFilePath('./eslint/eslint-root.cjs');
 
-export const eslint = async (processArgs?: string[]) =>
+export const eslint = async (processArgs: string[]) =>
   spawnToPromise(
     eslintPath(),
-    taskArgsPipe(
+    cliArgsPipe(
       [
-        setDefaultArgs(['--format'], ['unix']),
+        removeLogLevelOption(),
         setDefaultArgs(
           ['--ext'],
           [['.ts', '.tsx', '.js', '.jsx', '.cjs', '.json'].join(',')]
@@ -31,7 +32,7 @@ export const eslint = async (processArgs?: string[]) =>
         ),
         setDefaultArgs(
           ['--resolve-plugins-relative-to'],
-          [await monorepoRootPath()]
+          [await repositoryRootPath()]
         ),
         // remove non-standard --no-fix parameter
         removeInputArgs(['--no-fix']),

@@ -38,7 +38,7 @@ export function lint(opts?: { processArgs: string[] }) {
       }
       await allFulfilled([
         ensureTsConfigExists().then(() => tscCompositeTypeCheck()),
-        ensureEslintConfigFilesExist().then(() => eslint(opts?.processArgs)),
+        ensureEslintConfigFilesExist().then(() => eslint(args)),
       ]);
     },
   });

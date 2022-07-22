@@ -5,7 +5,7 @@ import { dirname, join } from 'path';
 import { isTruthy } from './isTruthy';
 import { onceAsync } from './onceAsync';
 
-const getMonorepoRootScanCandidates = (currentDirectory: string) => {
+const getRepositoryRootScanCandidates = (currentDirectory: string) => {
   // having 'packages/*' in the root of a monorepo is super common
   const result = /(.*(?=\/packages\/))|(.*(?=\/node_modules\/))|(.*)/.exec(
     currentDirectory
@@ -19,7 +19,7 @@ const getMonorepoRootScanCandidates = (currentDirectory: string) => {
 // directories can have them - whichever read first will be returned
 // so if order is important - scanning should be separated to multiple jobs
 // via prioritizedHasMonorepoMarkers
-const hasMonorepoMarkers = async (candidates: string[]) => {
+const hasRootMarkers = async (candidates: string[]) => {
   const markers = [
     '.git',
     'yarn.lock',
@@ -47,7 +47,7 @@ const hasMonorepoMarkers = async (candidates: string[]) => {
   });
 };
 
-const prioritizedHasMonorepoMarkers = (jobs: string[][]) => {
+const prioritizedHasMarkers = (jobs: string[][]) => {
   if (jobs.length === 0) {
     return Promise.resolve(undefined);
   }
@@ -78,7 +78,7 @@ const prioritizedHasMonorepoMarkers = (jobs: string[][]) => {
     };
 
     jobs.forEach((directories, index) => {
-      hasMonorepoMarkers(directories)
+      hasRootMarkers(directories)
         .then((result) => {
           checkShouldComplete(index, result);
         })
@@ -90,7 +90,7 @@ const prioritizedHasMonorepoMarkers = (jobs: string[][]) => {
   });
 };
 
-export const getMonorepoRootViaDirectoryScan = async (
+export const repositoryRootPathViaDirectoryScan = async (
   lookupDirectory: string
 ) => {
   const uniqueDirname = (path?: string) => {
@@ -109,11 +109,11 @@ export const getMonorepoRootViaDirectoryScan = async (
   const superParent = uniqueDirname(parent);
 
   return (
-    (await prioritizedHasMonorepoMarkers(
+    (await prioritizedHasMarkers(
       // scan in most likely locations first with current lookup directory taking priority
       [
         [lookupDirectory],
-        getMonorepoRootScanCandidates(lookupDirectory),
+        getRepositoryRootScanCandidates(lookupDirectory),
         // scan 2 directories upwards
         [parent],
         [superParent],
@@ -125,9 +125,8 @@ export const getMonorepoRootViaDirectoryScan = async (
 };
 
 /**
- * Determine monorepo root path by doing some hacky current and
- * some parent directories scanning and looking for marker files/dirs
- * like:
+ * Determine repository root path by scanning current and parent directories
+ * and looking for marker files/dirs like:
  *
  * - .git
  * - package-lock.json
@@ -135,7 +134,7 @@ export const getMonorepoRootViaDirectoryScan = async (
  * - pnpm-lock.yaml
  * - pnpm-workspace.yaml
  */
-export const monorepoRootPath = onceAsync(async () => {
-  const rootPath = await getMonorepoRootViaDirectoryScan(process.cwd());
+export const repositoryRootPath = onceAsync(async () => {
+  const rootPath = await repositoryRootPathViaDirectoryScan(process.cwd());
   return rootPath;
 });

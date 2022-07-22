@@ -4,7 +4,7 @@ import { dirname } from 'node:path';
 import { hasTurboJson } from '../turbo';
 import { readMonorepoPackagesGlobs } from './readPackagesGlobs';
 
-export async function loadRepoConfiguration() {
+export async function loadRepositoryConfiguration() {
   const [{ root, packagesGlobs }, hasTurbo] = await Promise.all([
     readMonorepoPackagesGlobs(),
     hasTurboJson(),

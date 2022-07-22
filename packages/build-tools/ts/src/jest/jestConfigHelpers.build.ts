@@ -2,7 +2,7 @@ import type { RollupWatchOptions } from 'rollup';
 
 import type { RollupOptionsBuilderOpts } from '../rollup/standardRollupConfig';
 
-export const buildLoadAndRunGlobalHookConfig = ({
+export const buildJestConfigHelpers = ({
   defaultRollupConfig,
 }: RollupOptionsBuilderOpts): RollupWatchOptions => {
   const standard = defaultRollupConfig();
@@ -16,7 +16,7 @@ export const buildLoadAndRunGlobalHookConfig = ({
       banner: `// This file is bundled up from './src/*' and needs to be committed`,
     },
     input: {
-      loadAndRunGlobalHook: './src/jest/loadAndRunGlobalHook.ts',
+      jestConfigHelpers: './src/jest/jestConfigHelpers.ts',
     },
   };
 };

@@ -1,16 +1,25 @@
 import { spawnOutput, spawnOutputConditional } from '../child-process';
 import { spawnResult } from '../child-process/spawnResult';
+import {
+  cliArgsPipe,
+  includesAnyOf,
+  removeLogLevelOption,
+} from '../utils/cliArgsPipe';
 import { runBin } from '../utils/runBin';
-import { taskArgsPipe } from '../utils/taskArgsPipe';
 
 const lintStaged = async () => {
-  await runBin('lint-staged', taskArgsPipe([]), {
-    // this is the command we wrap
-    exitCodes: 'inherit',
-  });
+  await runBin(
+    'lint-staged',
+    cliArgsPipe([removeLogLevelOption()], process.argv.slice(2)),
+    {
+      // this is the command we wrap
+      exitCodes: 'inherit',
+    }
+  );
 };
 
 const stashIncludeUntrackedKeepIndex = async () => {
+  const isHelpMode = includesAnyOf(process.argv, ['--help', '-h']);
   const split = (out: string) => out.split('\n').filter(Boolean);
   const [staged, modified, untracked] = await Promise.all([
     spawnOutput('git', 'diff --name-only --cached'.split(' '), {
@@ -31,7 +40,9 @@ const stashIncludeUntrackedKeepIndex = async () => {
     ).then(split),
   ]);
   const shouldStash =
-    staged.length > 0 && (modified.length > 0 || untracked.length > 0);
+    !isHelpMode &&
+    staged.length > 0 &&
+    (modified.length > 0 || untracked.length > 0);
   if (shouldStash) {
     await spawnOutputConditional(
       'git',

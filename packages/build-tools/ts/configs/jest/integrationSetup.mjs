@@ -1,4 +1,4 @@
-import { loadAndRunGlobalHook } from './loadAndRunGlobalHook.gen.mjs';
+import { loadAndRunGlobalHook } from './jestConfigHelpers.gen.mjs';
 
 /**
  * @param {import('@jest/types').Config.GlobalConfig} globalConfig

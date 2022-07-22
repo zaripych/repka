@@ -5,7 +5,7 @@ import colors from 'picocolors';
 
 import { logger } from '../logger/logger';
 import { cliArgsPipe } from '../utils/cliArgsPipe';
-import { loadRepoConfiguration } from '../utils/loadRepoConfiguration';
+import { loadRepositoryConfiguration } from '../utils/loadRepositoryConfiguration';
 import { runBin } from '../utils/runBin';
 
 function argsToTurboArgs(opts: { cliCommand: string; turboTask?: string }) {
@@ -37,7 +37,7 @@ export async function commandTemplate(opts: {
   command: Command;
   run: (opts: { help: boolean }) => Promise<void>;
 }) {
-  const { root, type } = await loadRepoConfiguration();
+  const { root, type } = await loadRepositoryConfiguration();
   if (type === 'multiple-packages' && process.cwd() === root) {
     logger.error(
       `Running this command in the monorepo root is not supported - try using "turbo": \n\n﹥ ${colors.bold(

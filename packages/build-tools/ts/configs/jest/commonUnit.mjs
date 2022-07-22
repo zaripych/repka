@@ -9,8 +9,8 @@ const unitTestMatch = unitTestGlobs
   )
   .map((glob) => [glob, `*.test.{${exts}}`].join('/'));
 
-export default {
+export const unitTestConfig = {
   testMatch: [...unitTestMatch, '!**/__integration__/**'],
-  coverageDirectory: '../.coverage-unit',
+  coverageDirectory: '.coverage-unit',
   ...commonConfig,
 };

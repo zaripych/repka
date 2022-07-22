@@ -2,11 +2,11 @@ import { readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { configFilePath } from '../utils/configFilePath';
-import { monorepoRootPath } from '../utils/monorepoRootPath';
-import { readPackagesGlobs } from '../utils/readPackagesGlobs';
+import { readMonorepoPackagesGlobs } from '../utils/readPackagesGlobs';
+import { repositoryRootPath } from '../utils/repositoryRootPath';
 
 async function ensureEslintTsConfigExists() {
-  const root = await monorepoRootPath();
+  const { root, packagesGlobs } = await readMonorepoPackagesGlobs();
   const expected = join(root, 'tsconfig.eslint.json');
   const eslintConfigExists = await stat(expected)
     .then((result) => result.isFile())
@@ -18,14 +18,14 @@ async function ensureEslintTsConfigExists() {
   const text = await readFile(configFilePath('eslint/tsconfig.eslint.json'), {
     encoding: 'utf-8',
   });
-  const globs = await readPackagesGlobs(root);
+
   await writeFile(
     expected,
     text.replace(
       '["GLOBS"]',
       JSON.stringify([
         ...new Set(
-          globs.map((glob) => (glob !== '*' ? `${glob}/*.ts` : `*.ts`))
+          packagesGlobs.map((glob) => (glob !== '*' ? `${glob}/*.ts` : `*.ts`))
         ),
       ])
     )
@@ -33,7 +33,7 @@ async function ensureEslintTsConfigExists() {
 }
 
 async function ensureEslintRootConfigExists() {
-  const root = await monorepoRootPath();
+  const root = await repositoryRootPath();
   const expected = join(root, '.eslintrc.cjs');
   const eslintConfigExists = await stat(expected)
     .then((result) => result.isFile())

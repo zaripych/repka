@@ -9,7 +9,7 @@ import { cliArgsPipe } from './utils/cliArgsPipe';
 import { insertAfterAnyOf } from './utils/cliArgsPipe';
 import { includesAnyOf } from './utils/cliArgsPipe';
 import { modulesBinPath } from './utils/modulesBinPath';
-import { monorepoRootPath } from './utils/monorepoRootPath';
+import { repositoryRootPath } from './utils/repositoryRootPath';
 
 export type TaskTypes =
   | 'lint'
@@ -25,7 +25,7 @@ export type TaskTypes =
 const turboPath = () => modulesBinPath('turbo');
 
 export async function hasTurboJson(): Promise<boolean> {
-  const cwd = await monorepoRootPath();
+  const cwd = await repositoryRootPath();
   return await stat(join(cwd, 'turbo.json'))
     .then((res) => res.isFile())
     .catch(() => false);
@@ -60,7 +60,7 @@ export async function runTurboTasksForSinglePackage(opts: {
   spawnOpts: Omit<SpawnOptionsWithExtra<SpawnResultOpts>, 'cwd'>;
 }) {
   const rootDir = opts.packageDir ?? process.cwd();
-  const cwd = await monorepoRootPath();
+  const cwd = await repositoryRootPath();
   return await spawnOutputConditional(
     turboPath(),
     cliArgsPipe(

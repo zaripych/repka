@@ -1,19 +1,17 @@
 import type { PromiseType } from 'utility-types';
 
 import { asyncToSync } from '../utils/async-to-sync';
-import { monorepoRootPath } from '../utils/monorepoRootPath';
 import { once } from '../utils/once';
-import { readPackagesGlobs } from '../utils/readPackagesGlobs';
+import { readMonorepoPackagesGlobs } from '../utils/readPackagesGlobs';
 
 export const eslintConfigHelpers = async () => {
-  const root = await monorepoRootPath();
-  const globs = await readPackagesGlobs(root);
+  const { root, packagesGlobs } = await readMonorepoPackagesGlobs();
   return {
     monorepoRootPath: root,
-    packagesGlobs: globs,
+    packagesGlobs,
     tsConfigGlobs: [
       ...new Set(
-        globs.map((glob) =>
+        packagesGlobs.map((glob) =>
           glob !== '*' ? `${glob}/tsconfig.json` : 'tsconfig.json'
         )
       ),

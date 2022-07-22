@@ -3,16 +3,10 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { logger } from '../logger/logger';
-import { monorepoRootPath } from './monorepoRootPath';
 import { onceAsync } from './onceAsync';
+import { repositoryRootPath } from './repositoryRootPath';
 
-/**
- * Determine monorepo packages glob by reading one of the supported
- * files
- *
- * NOTE: only pnpm is supported at the moment
- */
-export const readPackagesGlobs = async (monorepoRoot: string) => {
+const readPackagesGlobsAt = async (monorepoRoot: string) => {
   try {
     const text = await readFile(
       join(monorepoRoot, 'pnpm-workspace.yaml'),
@@ -28,9 +22,15 @@ export const readPackagesGlobs = async (monorepoRoot: string) => {
   }
 };
 
+/**
+ * Determine monorepo packages glob by reading one of the supported
+ * files
+ *
+ * NOTE: only pnpm is supported at the moment
+ */
 export const readMonorepoPackagesGlobs = onceAsync(async () => {
-  const root = await monorepoRootPath();
-  const packagesGlobs = await readPackagesGlobs(root);
+  const root = await repositoryRootPath();
+  const packagesGlobs = await readPackagesGlobsAt(root);
   return {
     root,
     packagesGlobs,

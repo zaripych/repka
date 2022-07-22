@@ -46,6 +46,7 @@ importers:
       '@rollup/plugin-node-resolve': 13.3.0
       '@rollup/plugin-replace': 4.0.0
       '@rollup/plugin-virtual': 2.1.0
+      '@testing-tools/packages': workspace:*
       '@types/eslint': 8.4.5
       '@types/jest': 28.1.4
       '@types/js-yaml': 4.0.5
@@ -106,6 +107,7 @@ importers:
     devDependencies:
       '@build-tools/dts-bundle-generator': link:../dts-bundle-generator
       '@jest/types': 28.1.1
+      '@testing-tools/packages': link:../../testing-tools/packages
       '@types/eslint': 8.4.5
       '@types/jest': 28.1.4
       '@types/js-yaml': 4.0.5
@@ -116,6 +118,12 @@ importers:
 
   packages/templates/ts-package:
     specifiers: {}
+
+  packages/templates/user-journey-test-bare:
+    specifiers:
+      '@repka-kit/ts': workspace:*
+    devDependencies:
+      '@repka-kit/ts': link:../../build-tools/ts
 
   packages/testing-tools/packages:
     specifiers:

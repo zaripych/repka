@@ -4,8 +4,8 @@ import {
 } from '@testing-tools/packages';
 import { dirname } from 'path';
 
-import { getMonorepoRootViaDirectoryScan } from '../utils/monorepoRootPath';
 import { once } from '../utils/once';
+import { repositoryRootPathViaDirectoryScan } from '../utils/repositoryRootPath';
 
 const sandbox = once(() =>
   packageTestSandbox({
@@ -37,7 +37,7 @@ function sanitize(result: { output: string; exitCode: number | null }) {
 
 it('should lint', async () => {
   const { runBin, rootDirectory } = sandbox();
-  expect(await getMonorepoRootViaDirectoryScan(rootDirectory)).toBe(
+  expect(await repositoryRootPathViaDirectoryScan(rootDirectory)).toBe(
     rootDirectory
   );
   expect(await sortedDirectoryContents(rootDirectory)).toMatchInlineSnapshot(`
