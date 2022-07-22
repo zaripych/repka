@@ -1,3 +1,4 @@
+import { logger } from '../logger/logger';
 import type { PackageJsonExports } from '../package-json/packageJson';
 import type { PackageExportsEntryPoint } from './nodePackageConfig';
 
@@ -14,6 +15,7 @@ const determineName = (key = 'main') => {
 // TODO: This doesn't support globs yet
 const resolveEntryPointsNoConditions = (
   results: Record<string, PackageExportsEntryPoint>,
+  ignored: Record<string, PackageJsonExports>,
   exports: PackageJsonExports,
   entryPoint?: string
 ): void => {
@@ -31,6 +33,14 @@ const resolveEntryPointsNoConditions = (
     return;
   }
 
+  if (exports === null || typeof exports !== 'object') {
+    throw new Error(
+      `Expected "string" or "object" as exports entry - got "${String(
+        exports
+      )}"`
+    );
+  }
+
   for (const [key, entry] of Object.entries(exports)) {
     if (!entry) {
       continue;
@@ -40,32 +50,47 @@ const resolveEntryPointsNoConditions = (
         .replaceAll('*', '')
         .replaceAll(/^\.?\//g, '')
         .replaceAll(/\/$/g, '');
-      throw new Error(
+
+      logger.warn(
         `"exports" in package.json doesn't support conditions/flavors - found "${key}", expected something like "./${
           expected === '' ? 'something' : expected
         }" or "."`
       );
-    }
-    if (key.includes('*')) {
+
+      if (entryPoint) {
+        ignored[entryPoint] = exports;
+      } else {
+        ignored[key] = entry;
+      }
+    } else if (key.includes('*')) {
       const expected = key
         .replaceAll('*', '')
         .replaceAll(/^\.?\//g, '')
         .replaceAll(/\/$/g, '');
-      throw new Error(
+
+      logger.warn(
         `"exports" in package.json doesn't support globs yet - found "${key}", expected something like "./${
           expected === '' ? 'something' : expected
         }"`
       );
+
+      if (entryPoint) {
+        ignored[entryPoint] = exports;
+      } else {
+        ignored[key] = entry;
+      }
     } else {
-      resolveEntryPointsNoConditions(results, entry, key);
+      resolveEntryPointsNoConditions(results, ignored, entry, key);
     }
   }
 };
 
-export function validateEntryPoints(
-  exports: PackageJsonExports
-): Record<string, PackageExportsEntryPoint> {
+export function validateEntryPoints(exports: PackageJsonExports) {
   const results: Record<string, PackageExportsEntryPoint> = {};
-  resolveEntryPointsNoConditions(results, exports);
-  return results;
+  const ignored: Record<string, PackageJsonExports> = {};
+  resolveEntryPointsNoConditions(results, ignored, exports);
+  return {
+    entryPoints: Object.values(results),
+    ignored,
+  };
 }

@@ -19,7 +19,7 @@ export type ExportsConditions =
   | typeof ignoredByNodeExportConditions[number];
 
 export type PackageJsonExports =
-  | string
+  | JsonPrimitive
   | ({
       [condition in ExportsConditions]?: PackageJsonExports;
     } & {

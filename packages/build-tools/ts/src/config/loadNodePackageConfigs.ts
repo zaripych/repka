@@ -1,4 +1,7 @@
-import type { PackageJson } from '../package-json/packageJson';
+import type {
+  PackageJson,
+  PackageJsonExports,
+} from '../package-json/packageJson';
 import { readCwdPackageJson } from '../package-json/readPackageJson';
 import type {
   NodePackageConfig,
@@ -9,12 +12,19 @@ import { validateEntryPoints } from './validateEntryPoints';
 import { validatePackageJson } from './validatePackageJson';
 import { validatePackageJsonBins } from './validatePackageJsonBins';
 
+type BuildEntryPointsResult =
+  | PackageExportsEntryPoint[]
+  | {
+      entryPoints: PackageExportsEntryPoint[];
+      ignored: Record<string, PackageJsonExports>;
+    };
+
 export type BuilderDeps = {
   buildConfig: () => NodePackageConfig | Promise<NodePackageConfig>;
   readPackageJson: () => PackageJson | Promise<PackageJson>;
   buildEntryPoints: () =>
-    | PackageExportsEntryPoint[]
-    | Promise<PackageExportsEntryPoint[]>;
+    | BuildEntryPointsResult
+    | Promise<BuildEntryPointsResult>;
   buildBinEntryPoints: () =>
     | PackageBinEntryPoint[]
     | Promise<PackageBinEntryPoint[]>;
@@ -45,10 +55,18 @@ async function tryBuildingPackageConfig(
   if (!version) {
     throw new Error('"version" of the package is not specified');
   }
-  const entryPointsPromise = deps.buildEntryPoints();
+  const entryPointsBuildResultPromise = deps.buildEntryPoints();
   const binEntryPoints = deps.buildBinEntryPoints();
-  const entryPoints = await entryPointsPromise;
-  if (entryPoints.length === 0) {
+  const entryPointsBuildResult = await Promise.resolve(
+    entryPointsBuildResultPromise
+  );
+  const entryPointsBuildResultParsed = Array.isArray(entryPointsBuildResult)
+    ? {
+        entryPoints: entryPointsBuildResult,
+        ignored: {},
+      }
+    : entryPointsBuildResult;
+  if (entryPointsBuildResultParsed.entryPoints.length === 0) {
     throw new Error(
       "The package doesn't have any entry points, nothing to bundle!"
     );
@@ -58,7 +76,8 @@ async function tryBuildingPackageConfig(
     version,
     dependencies: packageJson.dependencies || {},
     devDependencies: packageJson.devDependencies || {},
-    entryPoints,
+    entryPoints: entryPointsBuildResultParsed.entryPoints,
+    ignoredEntryPoints: entryPointsBuildResultParsed.ignored,
     binEntryPoints: await binEntryPoints,
   };
 }
@@ -71,7 +90,7 @@ export async function loadNodePackageConfigs(opts?: {
     buildConfig: () => tryBuildingPackageConfig(deps, false),
     buildEntryPoints: () =>
       Promise.resolve(deps.readPackageJson()).then((packageJson) =>
-        Object.values(validateEntryPoints(packageJson.exports || {}))
+        validateEntryPoints(packageJson.exports || {})
       ),
     buildBinEntryPoints: () =>
       Promise.resolve(deps.readPackageJson()).then((packageJson) =>

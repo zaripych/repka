@@ -86,7 +86,7 @@ export function buildForNode(opts?: BuildOpts) {
 
       await rmrfDist();
 
-      const { entryPoints } = config;
+      const { entryPoints, ignoredEntryPoints } = config;
 
       const allExternals = externalsFromDependencies(config.dependencies, opts);
       const baseOpts: DefaultRollupConfigBuildOpts = {
@@ -137,6 +137,7 @@ export function buildForNode(opts?: BuildOpts) {
             rollupPackageJsonPlugin({
               outDir: './dist',
               entryPoints,
+              ignoredEntryPoints,
               externals: allExternals,
             }),
           ]),

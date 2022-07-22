@@ -1,3 +1,5 @@
+import type { PackageJsonExports } from '../package-json/packageJson';
+
 /**
  * Normalized and validated config that is typically built
  * from package.json of the package being linted, bundled or
@@ -38,6 +40,12 @@ export type NodePackageConfig = {
    * so we can support running those bins during development.
    */
   binEntryPoints: Array<PackageBinEntryPoint>;
+
+  /**
+   * Entry points of the package that couldn't be parsed and were
+   * ignored - they should be rendered out as is.
+   */
+  ignoredEntryPoints: Record<string, PackageJsonExports>;
 
   /**
    * Package dependencies of the package where the key

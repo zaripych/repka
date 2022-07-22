@@ -1,13 +1,14 @@
 import assert from 'assert';
 
 import type { PackageExportsEntryPoint } from '../config/nodePackageConfig';
-import type { JsonType } from '../package-json/packageJson';
+import type { JsonType, PackageJsonExports } from '../package-json/packageJson';
 
-export function transformPackageJson(
-  entryPoints: Array<PackageExportsEntryPoint>
-) {
-  const entries = Object.values(entryPoints);
-  const main = entryPoints.find((entry) => entry.chunkName === 'main');
+export function transformPackageJson(opts: {
+  entryPoints: Array<PackageExportsEntryPoint>;
+  ignoredEntryPoints: Record<string, PackageJsonExports>;
+}) {
+  const entries = opts.entryPoints;
+  const main = opts.entryPoints.find((entry) => entry.chunkName === 'main');
   assert(!!main);
   return (packageJson: Record<string, JsonType>): Record<string, JsonType> => {
     const license = packageJson['license'];
@@ -33,7 +34,13 @@ export function transformPackageJson(
       }),
       ...(entries.length === 1
         ? {
-            exports: `./dist/${main.chunkName}.es.js`,
+            exports:
+              Object.entries(opts.ignoredEntryPoints).length === 0
+                ? `./dist/${main.chunkName}.es.js`
+                : {
+                    ...opts.ignoredEntryPoints,
+                    '.': `./dist/${main.chunkName}.es.js`,
+                  },
           }
         : {
             exports: entries.reduce(
@@ -41,7 +48,9 @@ export function transformPackageJson(
                 ...acc,
                 [entry.entryPoint]: `./dist/${entry.chunkName}.es.js`,
               }),
-              {}
+              {
+                ...opts.ignoredEntryPoints,
+              }
             ),
           }),
     };
