@@ -137,8 +137,8 @@ export function replaceTextTransform(opts: {
   let chunks = '';
 
   const transform = new Transform({
-    transform(chunk: string, _, callback) {
-      chunks += chunk;
+    transform(chunk: string | Buffer, _, callback) {
+      chunks += Buffer.isBuffer(chunk) ? chunk.toString('utf-8') : chunk;
       if (chunks.length >= maxMatchLength) {
         let result = filter(chunks);
         while (result) {
@@ -206,7 +206,9 @@ async function replaceTextInFile(opts: {
   });
   const writeStream = createWriteStream(opts.fileName, {
     encoding: 'utf-8',
+    flags: 'r+',
   });
+  writeStream.cork();
   await pipeline(
     readStream,
     replaceTextTransform({

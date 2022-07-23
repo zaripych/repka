@@ -12,14 +12,25 @@ import type { ReplaceTextOpts } from './helpers/replaceTextInFiles';
 import { replaceTextInFiles } from './helpers/replaceTextInFiles';
 import { readPackageJson, writePackageJson } from './helpers/writePackageJson';
 
+type OptionallyAsync<T> = T | Promise<T> | (() => T | Promise<T>);
+
+async function unwrap<T extends OptionallyAsync<unknown>>(
+  value: T
+): Promise<T extends OptionallyAsync<infer U> ? U : never> {
+  return (await Promise.resolve(
+    typeof value === 'function' ? value() : value
+  )) as T extends OptionallyAsync<infer U> ? U : never;
+}
+
 export type BuildSandboxOpts = {
   tag: string;
   templateLocation?: string;
   packageUnderTest?: string;
-  copyFiles?: Array<
-    Omit<CopyGlobOpts, 'destination'> & { destination?: string }
+
+  copyFiles?: OptionallyAsync<
+    Array<Omit<CopyGlobOpts, 'destination'> & { destination?: string }>
   >;
-  replaceTextInFiles?: Array<ReplaceTextOpts>;
+  replaceTextInFiles?: OptionallyAsync<Array<ReplaceTextOpts>>;
   packageJson?:
     | ((entries: Record<string, unknown>) => Record<string, unknown>)
     | undefined;
@@ -72,14 +83,15 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
         },
       });
       if (opts.copyFiles) {
+        const copyFilesOpt = await unwrap(opts.copyFiles);
         assert(
-          !opts.copyFiles.some(
+          !copyFilesOpt.some(
             (opt) => opt.destination && isAbsolute(opt.destination)
           ),
           'destination copy paths cannot be absolute, please specify directory relative to the sandbox'
         );
         await Promise.all(
-          opts.copyFiles.map((copyOpts) =>
+          copyFilesOpt.map((copyOpts) =>
             copyFiles({
               ...copyOpts,
               destination: join(rootDirectory, copyOpts.destination || './'),
@@ -88,14 +100,15 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
         );
       }
       if (opts.replaceTextInFiles) {
+        const replaceTextInFilesOpt = await unwrap(opts.replaceTextInFiles);
         assert(
-          !opts.replaceTextInFiles.some(
+          !replaceTextInFilesOpt.some(
             (opt) => opt.target && isAbsolute(opt.target)
           ),
           'replace target paths cannot be absolute, please specify directory relative to the sandbox'
         );
         await Promise.all(
-          opts.replaceTextInFiles.map((replaceOpts) =>
+          replaceTextInFilesOpt.map((replaceOpts) =>
             replaceTextInFiles({
               ...replaceOpts,
               target: join(rootDirectory, replaceOpts.target || './'),
