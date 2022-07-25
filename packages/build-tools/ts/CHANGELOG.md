@@ -1,5 +1,13 @@
 # @repka-kit/ts
 
+## 1.0.0-beta.4
+
+### Minor Changes
+
+- [`a247db8`](https://github.com/zaripych/repka/commit/a247db8cf8cdd328c053b0e8bc895e5b4b72b8cf) Thanks [@zaripych](https://github.com/zaripych)! - fix: writes unsupported globs and conditions from package.json exports to resulting package.json as is without changes
+
+* [`18112ae`](https://github.com/zaripych/repka/commit/18112ae9a7007069b69fb5ee9fe567ec07cb6fe9) Thanks [@zaripych](https://github.com/zaripych)! - Add pre-configured jest and eslint as bins allowing developers to use them without specifying any extra parameters that are typically would be required in a monorepo
+
 ## 1.0.0-beta.3
 
 ### Minor Changes
