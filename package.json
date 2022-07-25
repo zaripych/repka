@@ -17,6 +17,7 @@
     "prepare": "husky install",
     "prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml|yaml)' --write",
     "publish:beta": "pnpm turbo run build && pnpm publish -r --tag beta --access public",
+    "publish:snapshot": "pnpm turbo run build && pnpm publish -r --tag snapshot --access public",
     "test": "pnpm turbo run test",
     "test:all": "pnpm turbo run test",
     "test:changed": "pnpm turbo run test --filter='...[HEAD]'",
