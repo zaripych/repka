@@ -9,7 +9,6 @@ import { mkdir, rm } from 'node:fs/promises';
 import { symlink, unlink } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
-import { copyFiles } from './helpers/copyFiles';
 import { randomText } from './helpers/randomText';
 import { writePackageJson } from './helpers/writePackageJson';
 import { writePnpmWorkspaceYaml } from './helpers/writePnpmWorkspaceYaml';
