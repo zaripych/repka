@@ -1,13 +1,13 @@
 import { Command } from 'commander';
-import colors from 'picocolors';
+import { blue, yellow } from 'kleur/colors';
 
 import { lint } from '../lint';
 import { pipeline } from '../pipeline';
 import { commandTemplate } from './commandTemplate';
 
-const eslint = () => colors.yellow('eslint');
+const eslint = () => yellow('eslint');
 
-const tsc = () => colors.blue('tsc');
+const tsc = () => blue('tsc');
 
 export const lintCommand = () =>
   new Command('lint')
@@ -20,6 +20,7 @@ export const lintCommand = () =>
     .action(async (_opts: unknown, command: Command) => {
       await commandTemplate({
         cliCommand: 'lint',
+        needsSourceCode: true,
         command,
         run: async () => {
           await pipeline(lint({ processArgs: command.args }));

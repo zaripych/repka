@@ -1,5 +1,5 @@
+import { red } from 'kleur/colors';
 import { performance } from 'perf_hooks';
-import pico from 'picocolors';
 
 import { logger } from './logger/logger';
 import { readCwdPackageJson } from './package-json/readPackageJson';
@@ -72,7 +72,7 @@ export async function pipeline<Args extends [Task, ...Task[]]>(
       } catch (err) {
         logger.error(err);
         logger.error(
-          pico.red(
+          red(
             `\nERROR: Failed to ${task.name || 'execute a task'} ${String(
               (await readCwdPackageJson()).name
             )} "${err instanceof Error ? err.message : String(err)}"`

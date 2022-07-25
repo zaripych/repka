@@ -181,6 +181,8 @@ export function buildBinsBundleConfig({
   const banner = `#!/usr/bin/env node
 // NOTE: This file is bundled up from './src/bin/*' and needs to be committed`;
 
+  const bannerDist = `#!/usr/bin/env node`;
+
   const cjsConfig: false | RollupWatchOptions = cjsBins.length > 0 && {
     ...shared,
     input: buildBinInputs(cjsBins),
@@ -236,6 +238,7 @@ export function buildBinsBundleConfig({
               ...bundledBinOutput,
               entryFileNames: `[name].gen.mjs`,
               chunkFileNames: `chunk.[hash].mjs`,
+              banner: bannerDist,
             },
           },
           {
@@ -245,6 +248,7 @@ export function buildBinsBundleConfig({
               ...bundledBinOutput,
               entryFileNames: `[name].gen.mjs`,
               chunkFileNames: `chunk.[hash].mjs`,
+              banner: bannerDist,
             },
           },
         ]

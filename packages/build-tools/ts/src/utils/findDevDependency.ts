@@ -3,13 +3,21 @@ import { join } from 'node:path';
 
 import { logger } from '../logger/logger';
 import { readCwdPackageJson } from '../package-json/readPackageJson';
+import { moduleRootDirectory } from './moduleRootDirectory';
 import { repositoryRootPath } from './repositoryRootPath';
 
 export { readPackageJson } from '../package-json/readPackageJson';
 export { loadRepositoryConfiguration } from './loadRepositoryConfiguration';
 export { repositoryRootPath } from './repositoryRootPath';
 
-async function testPath(opts: {
+async function testPath(opts: { path: string; lookupPackageName: string }) {
+  const path = join(opts.path, 'node_modules', opts.lookupPackageName);
+  return stat(path)
+    .then((result) => (result.isDirectory() ? path : undefined))
+    .catch(() => undefined);
+}
+
+async function testPathRelativeTo(opts: {
   root: string;
   wrapperPackageName: string;
   lookupPackageName: string;
@@ -18,9 +26,10 @@ async function testPath(opts: {
     opts.root,
     `node_modules/${opts.wrapperPackageName}/node_modules/${opts.lookupPackageName}`
   );
-  return stat(path)
-    .then((result) => (result.isDirectory() ? path : undefined))
-    .catch(() => undefined);
+  return testPath({
+    path,
+    lookupPackageName: opts.lookupPackageName,
+  });
 }
 
 async function testLocalAndRoot({
@@ -32,7 +41,7 @@ async function testLocalAndRoot({
   wrapperPackageName: string;
   lookupPackageName: string;
 }) {
-  const localPromise = testPath({
+  const localPromise = testPathRelativeTo({
     root: process.cwd(),
     wrapperPackageName,
     lookupPackageName,
@@ -45,7 +54,7 @@ async function testLocalAndRoot({
     }
   } else {
     // test monorepo root as well:
-    const rootPromise = testPath({
+    const rootPromise = testPathRelativeTo({
       root: repoRootPath,
       wrapperPackageName,
       lookupPackageName,
@@ -98,12 +107,21 @@ export async function findDevDependency(opts: {
   wrapperPackageName?: string;
   lookupPackageName: string;
 }) {
-  const wrapperPackageName = opts.wrapperPackageName ?? '@repka-kit/ts';
   const lookupPackageName = opts.lookupPackageName;
+  const nodeModulesResult = await testPath({
+    path: moduleRootDirectory(),
+    lookupPackageName,
+  });
+  if (nodeModulesResult) {
+    return nodeModulesResult;
+  }
+
+  const wrapperPackageName = opts.wrapperPackageName ?? '@repka-kit/ts';
+
   // start looking up the repository root to check monorepo scenarios:
   const repoRootPathPromise = repositoryRootPath();
 
-  const defaultResult = await testPath({
+  const defaultResult = await testPathRelativeTo({
     root: process.cwd(),
     lookupPackageName,
     wrapperPackageName,
@@ -129,7 +147,7 @@ export async function findDevDependency(opts: {
     // the only alternative now is the repository root
     const repoRootPath = await repoRootPathPromise;
     if (repoRootPath !== process.cwd()) {
-      return await testPath({
+      return await testPathRelativeTo({
         root: repoRootPath,
         lookupPackageName,
         wrapperPackageName,

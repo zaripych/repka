@@ -1,11 +1,11 @@
 import { Command } from 'commander';
-import colors from 'picocolors';
+import { red } from 'kleur/colors';
 
 import { buildForNode } from '../buildForNode';
 import { pipeline } from '../pipeline';
 import { commandTemplate } from './commandTemplate';
 
-const rollup = () => colors.red('rollup');
+const rollup = () => red('rollup');
 
 export const buildNodeCommand = () =>
   new Command('build:node')
@@ -18,6 +18,7 @@ export const buildNodeCommand = () =>
       await commandTemplate({
         cliCommand: 'build:node',
         turboTask: 'build',
+        needsSourceCode: true,
         command,
         run: async () => {
           await pipeline(buildForNode());

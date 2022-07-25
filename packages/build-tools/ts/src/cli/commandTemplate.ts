@@ -1,9 +1,10 @@
 import type { Command } from 'commander';
+import { bgBlack, bold, white } from 'kleur/colors';
 import { stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import colors from 'picocolors';
 
 import { logger } from '../logger/logger';
+import { checkIsEmpty } from '../utils/checkIsEmpty';
 import { cliArgsPipe } from '../utils/cliArgsPipe';
 import { loadRepositoryConfiguration } from '../utils/loadRepositoryConfiguration';
 import { runBin } from '../utils/runBin';
@@ -33,6 +34,7 @@ function argsToTurboArgs(opts: { cliCommand: string; turboTask?: string }) {
 
 export async function commandTemplate(opts: {
   cliCommand: string;
+  needsSourceCode: boolean;
   turboTask?: string;
   command: Command;
   run: (opts: { help: boolean }) => Promise<void>;
@@ -40,9 +42,9 @@ export async function commandTemplate(opts: {
   const { root, type } = await loadRepositoryConfiguration();
   if (type === 'multiple-packages' && process.cwd() === root) {
     logger.error(
-      `Running this command in the monorepo root is not supported - try using "turbo": \n\n﹥ ${colors.bold(
-        colors.bgBlack(
-          colors.white(
+      `Running this command in the monorepo root is not supported - try using "turbo": \n\n﹥ ${bold(
+        bgBlack(
+          white(
             `turbo run ${argsToTurboArgs({
               cliCommand: opts.cliCommand,
               turboTask: opts.turboTask,
@@ -71,6 +73,18 @@ export async function commandTemplate(opts: {
 
   if (help) {
     opts.command.outputHelp();
+  }
+
+  if (opts.needsSourceCode) {
+    const isEmpty = await checkIsEmpty();
+    if (isEmpty) {
+      logger.info(
+        `There is nothing to ${
+          opts.turboTask ?? task
+        } here it seems. Use "repka init" to start.`
+      );
+      return;
+    }
   }
 
   if (!config || !config.isFile()) {

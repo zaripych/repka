@@ -1,26 +1,46 @@
-import { readFile, stat, writeFile } from 'node:fs/promises';
+import {
+  readFile as nodeReadFile,
+  stat,
+  writeFile as nodeWriteFile,
+} from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { configFilePath } from '../utils/configFilePath';
 
-export async function ensureTsConfigExists() {
-  const cwdPackageJsonPath = join(process.cwd(), 'package.json');
-  const packageJsonExists = await stat(cwdPackageJsonPath)
+async function fileExists(path: string) {
+  return stat(path)
     .then((result) => result.isFile())
     .catch(() => false);
-  if (!packageJsonExists) {
-    return;
+}
+
+async function readFile(path: string) {
+  return await nodeReadFile(path, {
+    encoding: 'utf-8',
+  });
+}
+
+async function writeFile(path: string, data: string) {
+  await nodeWriteFile(path, data, 'utf-8');
+}
+
+export async function ensureTsConfigExists(
+  opts?: {
+    ensurePackageJsonInCurrentDirectory?: boolean;
+  },
+  deps = { fileExists, readFile, writeFile }
+) {
+  if (opts?.ensurePackageJsonInCurrentDirectory) {
+    const cwdPackageJsonPath = join(process.cwd(), 'package.json');
+    const packageJsonExists = await deps.fileExists(cwdPackageJsonPath);
+    if (!packageJsonExists) {
+      return;
+    }
   }
   const expected = join(process.cwd(), 'tsconfig.json');
-  const configExists = await stat(expected)
-    .then((result) => result.isFile())
-    .catch(() => false);
-
+  const configExists = await deps.fileExists(expected);
   if (configExists) {
     return;
   }
-  const text = await readFile(configFilePath('tsconfig.pkg.json'), {
-    encoding: 'utf-8',
-  });
-  await writeFile(expected, text);
+  const text = await deps.readFile(configFilePath('tsconfig.pkg.json'));
+  await deps.writeFile(expected, text);
 }

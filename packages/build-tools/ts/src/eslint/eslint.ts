@@ -1,3 +1,5 @@
+import { dirname } from 'node:path';
+
 import { spawnToPromise } from '../child-process';
 import {
   cliArgsPipe,
@@ -7,6 +9,7 @@ import {
   setDefaultArgs,
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
+import { findDevDependency } from '../utils/findDevDependency';
 import { modulesBinPath } from '../utils/modulesBinPath';
 import { repositoryRootPath } from '../utils/repositoryRootPath';
 
@@ -14,8 +17,11 @@ const eslintPath = () => modulesBinPath('eslint');
 
 const eslintConfigPath = () => configFilePath('./eslint/eslint-root.cjs');
 
-export const eslint = async (processArgs: string[]) =>
-  spawnToPromise(
+export const eslint = async (processArgs: string[]) => {
+  const dependency = await findDevDependency({
+    lookupPackageName: '@typescript-eslint/eslint-plugin',
+  });
+  return spawnToPromise(
     eslintPath(),
     cliArgsPipe(
       [
@@ -32,7 +38,11 @@ export const eslint = async (processArgs: string[]) =>
         ),
         setDefaultArgs(
           ['--resolve-plugins-relative-to'],
-          [await repositoryRootPath()]
+          [
+            dependency
+              ? dirname(dirname(dependency))
+              : await repositoryRootPath(),
+          ]
         ),
         // remove non-standard --no-fix parameter
         removeInputArgs(['--no-fix']),
@@ -49,3 +59,4 @@ export const eslint = async (processArgs: string[]) =>
       exitCodes: 'inherit',
     }
   );
+};

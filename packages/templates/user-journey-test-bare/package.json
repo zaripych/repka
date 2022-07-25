@@ -1,0 +1,15 @@
+{
+  "name": "user-journey-test-starter",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "main": "index.js",
+  "scripts": {
+    "_test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@repka-kit/ts": "workspace:*"
+  }
+}

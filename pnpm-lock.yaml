@@ -51,6 +51,7 @@ importers:
       '@types/jest': 28.1.4
       '@types/js-yaml': 4.0.5
       '@types/node': 18.0.0
+      '@types/prompts': ^2.0.14
       '@typescript-eslint/eslint-plugin': 5.30.3
       '@typescript-eslint/parser': 5.30.3
       builtin-modules: 3.3.0
@@ -66,9 +67,10 @@ importers:
       fast-glob: 3.2.11
       jest: 28.1.2
       js-yaml: 4.1.0
+      kleur: 4.1.5
       lint-staged: 13.0.3
-      picocolors: 1.0.0
       prettier: 2.7.1
+      prompts: 2.4.2
       rollup: 2.75.7
       rollup-plugin-analyzer: 4.0.0
       rollup-plugin-generate-package-json: 3.2.0
@@ -112,8 +114,10 @@ importers:
       '@types/jest': 28.1.4
       '@types/js-yaml': 4.0.5
       '@types/node': 18.0.0
+      '@types/prompts': 2.0.14
       commander: 9.2.0
-      picocolors: 1.0.0
+      kleur: 4.1.5
+      prompts: 2.4.2
       utility-types: 3.10.0
 
   packages/templates/ts-package:
@@ -143,14 +147,14 @@ importers:
       '@tooling-tests/todo-list-store': workspace:*
       '@utils/ts': workspace:*
       commander: 9.2.0
-      picocolors: 1.0.0
+      kleur: 4.1.5
     devDependencies:
       '@repka-kit/ts': link:../../build-tools/ts
       '@testing-tools/packages': link:../../testing-tools/packages
       '@tooling-tests/todo-list-store': link:../todo-list-store
       '@utils/ts': link:../../utils/ts
       commander: 9.2.0
-      picocolors: 1.0.0
+      kleur: 4.1.5
 
   packages/tooling-tests/todo-list-store:
     specifiers:
@@ -1271,6 +1275,12 @@ packages:
 
   /@types/prettier/2.6.3:
     resolution: {integrity: sha512-ymZk3LEC/fsut+/Q5qejp6R9O1rMxz3XaRHDV6kX8MrGAhOSPqVARbDi+EZvInBpw+BnCX3TD240byVkOfQsHg==}
+
+  /@types/prompts/2.0.14:
+    resolution: {integrity: sha512-HZBd99fKxRWpYCErtm2/yxUZv6/PBI9J7N4TNFffl5JbrYMHBwF25DjQGTW3b3jmXq+9P6/8fCIb2ee57BFfYA==}
+    dependencies:
+      '@types/node': 18.0.0
+    dev: true
 
   /@types/resolve/1.17.1:
     resolution: {integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==}
