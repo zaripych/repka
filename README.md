@@ -29,7 +29,9 @@ This is a work in progress at the moment.
 
 ## Roadmap
 
-TODO
+- [ ] `init` command for first time initialization and migration of a repository to repka
+- [ ] test on `Windows OS`, test with `npm` and `yarn` package managers
+- [ ] `@repka-kit/node` to be split out of `@repka-kit/ts` in preparation of `@repka-kit/web`
 
 ## Documentation
 
