@@ -1,25 +1,18 @@
-import { readFile, stat } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 
-export async function findPackageUnderTest(startWith = process.cwd()) {
+import { iteratePackageRootDirectories } from './iteratePackageRootDirectories';
+
+export async function findPackageUnderTest(startWith: string) {
   // faster way:
   if (process.env['npm_package_name']) {
     return process.env['npm_package_name'];
   }
-  let current = startWith;
-  while (current !== '/') {
-    const location = join(current, 'package.json');
-    const exists = await stat(location)
-      .then((result) => result.isFile())
-      .catch(() => false);
-    if (exists) {
-      const contents = await readFile(location, 'utf-8');
-      const name = (JSON.parse(contents) as { name?: string }).name;
-      if (name) {
-        return name;
-      }
+  for await (const directory of iteratePackageRootDirectories(startWith)) {
+    const contents = await readFile(directory, 'utf-8');
+    const name = (JSON.parse(contents) as { name?: string }).name;
+    if (name) {
+      return name;
     }
-    current = dirname(current);
   }
   return undefined;
 }

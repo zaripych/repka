@@ -1,7 +1,8 @@
 import { spawnOutput } from '@build-tools/ts';
+import { onceAsync } from '@utils/ts';
 import assert from 'node:assert';
 import { spawn } from 'node:child_process';
-import { rm } from 'node:fs/promises';
+import { mkdir, rm, symlink } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 
 import type { CopyGlobOpts } from './helpers/copyFiles';
@@ -11,6 +12,7 @@ import { randomText } from './helpers/randomText';
 import type { ReplaceTextOpts } from './helpers/replaceTextInFiles';
 import { replaceTextInFiles } from './helpers/replaceTextInFiles';
 import { readPackageJson, writePackageJson } from './helpers/writePackageJson';
+import { loadTestConfig } from './loadTestConfig';
 
 type OptionallyAsync<T> = T | Promise<T> | (() => T | Promise<T>);
 
@@ -41,40 +43,46 @@ export type BuildSandboxOpts = {
  * and files from a template to test them.
  */
 export function packageTestSandbox(opts: BuildSandboxOpts) {
-  const rootDirectory = join(
-    process.cwd(),
-    './.integration',
-    `sandbox-${opts.tag}`
-  );
-
-  const packageUnderTest = async () => {
-    const result = opts.packageUnderTest ?? (await findPackageUnderTest());
+  const props = onceAsync(async () => {
+    const config = await loadTestConfig();
+    const packageUnderTest =
+      opts.packageUnderTest ??
+      (await findPackageUnderTest(config.packageRootDirectory));
     assert(
-      !!result,
+      packageUnderTest,
       'Name of the package under test should be in the environment variables or provided'
     );
-    return result;
-  };
-
-  const templateLocation =
-    opts.templateLocation ?? join(process.cwd(), './.integration', `template`);
-
-  const packageUnderTestPath = async () =>
-    join(rootDirectory, 'node_modules', await packageUnderTest());
+    const sandboxDirectory = join(
+      config.testRootDirectory,
+      `sandbox-${opts.tag}`
+    );
+    return {
+      ...config,
+      packageUnderTest,
+      templateDirectory:
+        opts.templateLocation || join(config.testRootDirectory, 'template'),
+      sandboxDirectory,
+      packageUnderTestDirectory: join(
+        sandboxDirectory,
+        'node_modules',
+        packageUnderTest
+      ),
+    };
+  });
 
   return {
-    rootDirectory,
-    packageUnderTest,
-    packageUnderTestPath,
+    props,
     create: async () => {
-      await rm(rootDirectory, { recursive: true }).catch(() => {
+      const { sandboxDirectory, templateDirectory } = await props();
+      await rm(sandboxDirectory, { recursive: true }).catch(() => {
         // ignore
       });
+      await mkdir(sandboxDirectory);
       await copyFiles({
-        source: templateLocation,
+        source: templateDirectory,
         include: ['**/*'],
-        exclude: ['.turbo'],
-        destination: rootDirectory,
+        exclude: ['node_modules'],
+        destination: sandboxDirectory,
         options: {
           dot: true,
           // create symlinks instead of copying
@@ -82,6 +90,10 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
           followSymbolicLinks: false,
         },
       });
+      await symlink(
+        join(templateDirectory, 'node_modules'),
+        join(sandboxDirectory, 'node_modules')
+      );
       if (opts.copyFiles) {
         const copyFilesOpt = await unwrap(opts.copyFiles);
         assert(
@@ -94,7 +106,7 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
           copyFilesOpt.map((copyOpts) =>
             copyFiles({
               ...copyOpts,
-              destination: join(rootDirectory, copyOpts.destination || './'),
+              destination: join(sandboxDirectory, copyOpts.destination || './'),
             })
           )
         );
@@ -111,12 +123,12 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
           replaceTextInFilesOpt.map((replaceOpts) =>
             replaceTextInFiles({
               ...replaceOpts,
-              target: join(rootDirectory, replaceOpts.target || './'),
+              target: join(sandboxDirectory, replaceOpts.target || './'),
             })
           )
         );
       }
-      const json = await readPackageJson(rootDirectory);
+      const json = await readPackageJson(sandboxDirectory);
       const modified = opts.packageJson
         ? opts.packageJson({
             ...json,
@@ -126,16 +138,14 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
             ...json,
             name: `package-${randomText(8)}`,
           };
-      await writePackageJson(rootDirectory, modified);
+      await writePackageJson(sandboxDirectory, modified);
     },
     runMain: async (...args: string[]) => {
-      const cp = spawn(
-        process.execPath,
-        [await packageUnderTestPath(), ...args],
-        {
-          cwd: rootDirectory,
-        }
-      );
+      const { packageUnderTestDirectory, sandboxDirectory } = await props();
+
+      const cp = spawn(process.execPath, [packageUnderTestDirectory, ...args], {
+        cwd: sandboxDirectory,
+      });
       return {
         output: await spawnOutput(cp, {
           exitCodes: 'any',
@@ -144,18 +154,24 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
       };
     },
     runBin: async (bin: string, ...args: string[]) => {
+      const { sandboxDirectory } = await props();
+
       const cp = spawn(join('./node_modules/.bin/', bin), args, {
-        cwd: rootDirectory,
+        cwd: sandboxDirectory,
       });
       return {
         output: await spawnOutput(cp, {
           exitCodes: 'inherit',
         }),
         exitCode: cp.exitCode,
+        ...(cp.signalCode && {
+          signalCode: cp.signalCode,
+        }),
       };
     },
     cleanup: async () => {
-      await rm(rootDirectory, { recursive: true });
+      const { sandboxDirectory } = await props();
+      await rm(sandboxDirectory, { recursive: true });
     },
   };
 }

@@ -1,17 +1,8 @@
-import { stat } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { iteratePackageRootDirectories } from './iteratePackageRootDirectories';
 
-export async function findPackageRootDir(startWith = process.cwd()) {
-  let current = startWith;
-  while (current !== '/') {
-    const location = join(current, 'package.json');
-    const exists = await stat(location)
-      .then((result) => result.isFile())
-      .catch(() => false);
-    if (exists) {
-      return current;
-    }
-    current = dirname(current);
+export async function findPackageRootDir(startWith: string) {
+  for await (const directory of iteratePackageRootDirectories(startWith)) {
+    return directory;
   }
   return undefined;
 }

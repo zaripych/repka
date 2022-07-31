@@ -30,15 +30,25 @@ const sortPaths = (files: string[]) => {
 
 export const sortedDirectoryContents = async (
   directory: string,
-  patterns: string[] = ['**', '!node_modules/**', '!.git/**']
+  opts?: {
+    include?: string[];
+    exclude?: string[];
+    defaultExcludes?: string[];
+  }
 ) => {
-  const results = await fg(patterns, {
+  const {
+    include = ['**'],
+    defaultExcludes = ['node_modules/**', '.git/**'],
+    exclude = [],
+  } = opts ?? {};
+  const results = await fg(include, {
     cwd: directory,
     unique: true,
     markDirectories: true,
     onlyDirectories: false,
     onlyFiles: false,
     dot: true,
+    ignore: [...defaultExcludes, ...exclude],
   });
 
   sortPaths(results);

@@ -14,7 +14,8 @@
     "cli": "tsx ./src/index.ts",
     "declarations": "repka declarations",
     "integration": "repka integration",
-    "lint": "repka lint"
+    "lint": "repka lint",
+    "setup:integration": "tsx ./src/__integration__/setup.ts"
   },
   "dependencies": {},
   "devDependencies": {

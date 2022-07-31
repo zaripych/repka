@@ -1,11 +1,11 @@
 import { Writable } from 'stream';
 
-import { replaceTextTransform } from './replaceTextInFiles';
+import { searchAndReplaceTextTransform } from './replaceTextInFiles';
 
 describe('replaceTextTransform', () => {
   it('requires non-empty substring', () => {
     expect(() =>
-      replaceTextTransform({
+      searchAndReplaceTextTransform({
         filters: [
           {
             substring: '',
@@ -18,7 +18,7 @@ describe('replaceTextTransform', () => {
 
   it('requires at least one filter', () => {
     expect(() =>
-      replaceTextTransform({
+      searchAndReplaceTextTransform({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
         filters: [],
@@ -28,7 +28,7 @@ describe('replaceTextTransform', () => {
 
   it('requires maxMatchLength parameters', () => {
     expect(() =>
-      replaceTextTransform({
+      searchAndReplaceTextTransform({
         filters: [
           {
             regExp: /test/,
@@ -49,7 +49,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           substring: 'test',
@@ -75,7 +75,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           substring: 'test',
@@ -135,7 +135,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           substring: 'test',
@@ -167,7 +167,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           substring: 'test',
@@ -192,7 +192,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           substring: 'test',
@@ -217,7 +217,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           substring: 'test',
@@ -243,7 +243,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           substring: 'test',
@@ -267,7 +267,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           substring: 'test',
@@ -290,7 +290,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           substring: '😞',
@@ -320,7 +320,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           regExp: /te+st/,
@@ -350,7 +350,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           regExp: /te+st/,
@@ -381,7 +381,7 @@ describe('replaceTextTransform', () => {
         cb(null);
       },
     });
-    const input = replaceTextTransform({
+    const input = searchAndReplaceTextTransform({
       filters: [
         {
           regExp: /te+st/,

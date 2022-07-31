@@ -25,10 +25,11 @@ afterAll(async () => {
 });
 
 it('should be able to compile test cases', async () => {
+  const { sandboxDirectory } = await sandbox().props();
   expect(
     await spawnOutput(
       spawn('pnpm', 'exec tsc --project ./tsconfig.json'.split(' '), {
-        cwd: sandbox().rootDirectory,
+        cwd: sandboxDirectory,
       }),
       {
         exitCodes: [0, 1, 2],

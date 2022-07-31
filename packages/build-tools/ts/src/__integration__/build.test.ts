@@ -2,10 +2,8 @@ import {
   packageTestSandbox,
   sortedDirectoryContents,
 } from '@testing-tools/packages';
-import { dirname } from 'path';
 
 import { once } from '../utils/once';
-import { repositoryRootPathViaDirectoryScan } from '../utils/repositoryRootPath';
 
 const sandbox = once(() =>
   packageTestSandbox({
@@ -28,35 +26,38 @@ beforeAll(async () => {
   await sandbox().create();
 });
 
-function sanitize(result: { output: string; exitCode: number | null }) {
+function sanitize(
+  result: { output: string; exitCode: number | null },
+  sandboxDirectory: string
+) {
   return {
     ...result,
     ...(result.output && {
-      output: result.output.replaceAll(
-        dirname(sandbox().rootDirectory) + '/',
-        './'
-      ),
+      output: result.output.replaceAll(sandboxDirectory + '/', './'),
     }),
   };
 }
 
 it('should build', async () => {
-  const { runBin, rootDirectory } = sandbox();
-  expect(await repositoryRootPathViaDirectoryScan(rootDirectory)).toBe(
-    rootDirectory
-  );
-  expect(await sortedDirectoryContents(rootDirectory)).toMatchInlineSnapshot(`
+  const { sandboxDirectory } = await sandbox().props();
+  expect(
+    await sortedDirectoryContents(sandboxDirectory, {
+      exclude: ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'],
+    })
+  ).toMatchInlineSnapshot(`
     Array [
       "build.ts",
       "package.json",
-      "pnpm-lock.yaml",
-      "pnpm-workspace.yaml",
       "src/",
       "src/index.ts",
     ]
   `);
-  expect(sanitize(await runBin('tsx', './build.ts', '--log-level', 'error')))
-    .toMatchInlineSnapshot(`
+  expect(
+    sanitize(
+      await sandbox().runBin('tsx', './build.ts', '--log-level', 'error'),
+      sandboxDirectory
+    )
+  ).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
       "output": "-----------------------------
@@ -73,7 +74,11 @@ it('should build', async () => {
     ",
     }
   `);
-  expect(await sortedDirectoryContents(rootDirectory)).toMatchInlineSnapshot(`
+  expect(
+    await sortedDirectoryContents(sandboxDirectory, {
+      exclude: ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'],
+    })
+  ).toMatchInlineSnapshot(`
     Array [
       "build.ts",
       "dist/",
@@ -81,8 +86,6 @@ it('should build', async () => {
       "dist/dist/main.es.js",
       "dist/package.json",
       "package.json",
-      "pnpm-lock.yaml",
-      "pnpm-workspace.yaml",
       "src/",
       "src/index.ts",
     ]

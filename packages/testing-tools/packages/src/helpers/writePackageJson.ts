@@ -15,7 +15,7 @@ export async function writePackageJson(
 ) {
   await writeFile(
     join(directory, 'package.json'),
-    JSON.stringify(packageJson),
+    JSON.stringify(packageJson, undefined, '  '),
     {
       encoding: 'utf-8',
     }

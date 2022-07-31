@@ -9,7 +9,7 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-export type ReplaceOptsExtra = Pick<
+export type SearchAndReplaceOptsExtra = Pick<
   fg.Options,
   'cwd' | 'deep' | 'dot' | 'followSymbolicLinks'
 >;
@@ -26,6 +26,16 @@ export type ReplaceTextFilter =
 
 export type ReplaceTextFilters = [ReplaceTextFilter, ...ReplaceTextFilter[]];
 
+export type SearchTextFilter =
+  | {
+      substring: string;
+    }
+  | {
+      regExp: RegExp;
+    };
+
+export type SearchTextFilters = [SearchTextFilter, ...SearchTextFilter[]];
+
 export type ReplaceTextOpts = {
   /**
    * Target directory (defaults to current)
@@ -34,7 +44,22 @@ export type ReplaceTextOpts = {
   include: string[];
   exclude?: string[];
   filters: ReplaceTextFilters;
-  options?: ReplaceOptsExtra & {
+  maxMatchLength?: number;
+  options?: SearchAndReplaceOptsExtra & {
+    dryRun?: boolean;
+  };
+};
+
+export type SearchTextOpts = {
+  /**
+   * Target directory (defaults to current)
+   */
+  target?: string;
+  include: string[];
+  exclude?: string[];
+  filters: SearchTextFilters;
+  maxMatchLength?: number;
+  options?: SearchAndReplaceOptsExtra & {
     dryRun?: boolean;
   };
 };
@@ -58,7 +83,7 @@ function filesStream({
   );
 }
 
-function createFilter(textFilters: ReplaceTextFilters) {
+function createFilter(textFilters: ReplaceTextFilters | SearchTextFilters) {
   const filters = textFilters.map((entry) => {
     if ('substring' in entry) {
       if (!entry.substring) {
@@ -66,12 +91,16 @@ function createFilter(textFilters: ReplaceTextFilters) {
       }
       return {
         regex: new RegExp(escapeRegExp(entry.substring), 'u'),
-        replaceWith: (_match: RegExpExecArray) => entry.replaceWith,
+        ...('replaceWith' in entry && {
+          replaceWith: (_match: RegExpExecArray) => entry.replaceWith,
+        }),
       };
     } else if ('regExp' in entry) {
       return {
         regex: entry.regExp,
-        replaceWith: entry.replaceWith,
+        ...('replaceWith' in entry && {
+          replaceWith: entry.replaceWith,
+        }),
       };
     } else {
       throw new UnreachableError(entry);
@@ -79,16 +108,19 @@ function createFilter(textFilters: ReplaceTextFilters) {
   });
 
   return (text: string) => {
-    for (const filter of filters) {
+    for (const [filterIndex, filter] of filters.entries()) {
       const result = filter.regex.exec(text);
       if (!result || !result[0]) {
         continue;
       }
+      const original = result[0];
       return {
+        filterIndex,
         index: result.index,
         length: result[0].length,
         before: text.slice(0, result.index),
-        replacement: () => filter.replaceWith(result),
+        match: result,
+        replacement: () => filter.replaceWith?.(result) ?? original,
         after: text.slice(result.index + result[0].length),
       };
     }
@@ -96,8 +128,15 @@ function createFilter(textFilters: ReplaceTextFilters) {
   };
 }
 
-export function replaceTextTransform(opts: {
-  filters: ReplaceTextFilters;
+export type Match = {
+  filterIndex: number;
+  match: RegExpExecArray;
+  position: number;
+  length: number;
+};
+
+export function searchAndReplaceTextTransform(opts: {
+  filters: ReplaceTextFilters | SearchTextFilters;
   /**
    * Maximum length of the match ensures that replacement function is called
    * on chunks of at least this size
@@ -105,11 +144,9 @@ export function replaceTextTransform(opts: {
   maxMatchLength?: number;
   onEvent?: (
     opts:
-      | {
+      | ({
           event: 'match';
-          position: number;
-          length: number;
-        }
+        } & Match)
       | {
           event: 'flush';
           totalRead: number;
@@ -124,7 +161,7 @@ export function replaceTextTransform(opts: {
 
   const maxMatchLength =
     opts.maxMatchLength ??
-    opts.filters.reduce((acc, entry) => {
+    [...opts.filters].reduce((acc, entry) => {
       if ('regExp' in entry) {
         throw new Error(
           'maxMatchLength must be specified when using RegExp replacement'
@@ -145,6 +182,8 @@ export function replaceTextTransform(opts: {
           if (opts.onEvent) {
             opts.onEvent({
               event: 'match',
+              filterIndex: result.filterIndex,
+              match: result.match,
               position: totalRead + result.index,
               length: result.length,
             });
@@ -171,6 +210,8 @@ export function replaceTextTransform(opts: {
           if (opts.onEvent) {
             opts.onEvent({
               event: 'match',
+              filterIndex: result.filterIndex,
+              match: result.match,
               position: totalRead + result.index,
               length: result.length,
             });
@@ -200,6 +241,7 @@ export function replaceTextTransform(opts: {
 async function replaceTextInFile(opts: {
   fileName: string;
   filters: ReplaceTextFilters;
+  maxMatchLength?: number;
 }) {
   const readStream = createReadStream(opts.fileName, {
     encoding: 'utf-8',
@@ -211,8 +253,9 @@ async function replaceTextInFile(opts: {
   writeStream.cork();
   await pipeline(
     readStream,
-    replaceTextTransform({
+    searchAndReplaceTextTransform({
       filters: opts.filters,
+      maxMatchLength: opts.maxMatchLength,
     }),
     writeStream
   );
@@ -235,6 +278,7 @@ export async function replaceTextInFiles(opts: ReplaceTextOpts) {
     await replaceTextInFile({
       fileName,
       filters: opts.filters,
+      maxMatchLength: opts.maxMatchLength,
     });
   };
 
@@ -247,4 +291,72 @@ export async function replaceTextInFiles(opts: ReplaceTextOpts) {
   } finally {
     await allFulfilled(replaceTasks);
   }
+}
+
+async function searchTextInFile(opts: {
+  fileName: string;
+  filters: SearchTextFilters;
+  maxMatchLength?: number;
+}) {
+  const readStream = createReadStream(opts.fileName, {
+    encoding: 'utf-8',
+  });
+  const matches: Array<Match> = [];
+  await pipeline(
+    readStream,
+    searchAndReplaceTextTransform({
+      filters: opts.filters,
+      maxMatchLength: opts.maxMatchLength,
+      onEvent: (ev) => {
+        if (ev.event === 'match') {
+          const { event, ...match } = ev;
+          matches.push(match);
+        }
+      },
+    })
+  );
+  return matches;
+}
+
+export async function searchTextInFiles(opts: SearchTextOpts) {
+  const set = new Set<string>();
+  const map = new Map<string, Match[]>();
+  const searchStream = filesStream(opts);
+  const searchingForFiles = promiseFromEvents({
+    emitter: searchStream,
+    resolveEvent: 'close',
+    rejectEvent: 'error',
+  });
+
+  const searchTasks: Array<Promise<void>> = [];
+  const addPendingSearchTask = <T>(promise: Promise<T>) => {
+    searchTasks.push(promise as unknown as Promise<void>);
+  };
+
+  const searchTask = async (fileName: string) => {
+    if (set.has(fileName)) {
+      return;
+    }
+    set.add(fileName);
+    const results = await searchTextInFile({
+      fileName,
+      filters: opts.filters,
+      maxMatchLength: opts.maxMatchLength,
+    });
+    if (results.length === 0) {
+      return;
+    }
+    map.set(fileName, results);
+  };
+
+  searchStream.on('data', (chunk: string) => {
+    addPendingSearchTask(searchTask(chunk));
+  });
+
+  try {
+    await searchingForFiles;
+  } finally {
+    await allFulfilled(searchTasks);
+  }
+  return map;
 }

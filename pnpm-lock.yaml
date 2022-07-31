@@ -46,6 +46,7 @@ importers:
       '@rollup/plugin-node-resolve': 13.3.0
       '@rollup/plugin-replace': 4.0.0
       '@rollup/plugin-virtual': 2.1.0
+      '@rollup/pluginutils': ^4.2.1
       '@testing-tools/packages': workspace:*
       '@types/eslint': 8.4.5
       '@types/jest': 28.1.4
@@ -82,6 +83,7 @@ importers:
       '@rollup/plugin-node-resolve': 13.3.0_rollup@2.75.7
       '@rollup/plugin-replace': 4.0.0_rollup@2.75.7
       '@rollup/plugin-virtual': 2.1.0_rollup@2.75.7
+      '@rollup/pluginutils': 4.2.1
       '@typescript-eslint/eslint-plugin': 5.30.3_xuuykav7urhdozug7htlfgar3u
       '@typescript-eslint/parser': 5.30.3_4x5o4skxv6sl53vpwefgt23khm
       builtin-modules: 3.3.0
@@ -118,12 +120,6 @@ importers:
 
   packages/templates/ts-package:
     specifiers: {}
-
-  packages/templates/user-journey-test-bare:
-    specifiers:
-      '@repka-kit/ts': workspace:*
-    devDependencies:
-      '@repka-kit/ts': link:../../build-tools/ts
 
   packages/testing-tools/packages:
     specifiers:
@@ -1154,6 +1150,14 @@ packages:
       picomatch: 2.3.1
       rollup: 2.75.7
 
+  /@rollup/pluginutils/4.2.1:
+    resolution: {integrity: sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ==}
+    engines: {node: '>= 8.0.0'}
+    dependencies:
+      estree-walker: 2.0.2
+      picomatch: 2.3.1
+    dev: false
+
   /@sinclair/typebox/0.23.5:
     resolution: {integrity: sha512-AFBVi/iT4g20DHoujvMH1aEDn8fGJh4xsRGCP6d8RpLPMqsNPvW01Jcn0QysXTsg++/xj25NmJsGyH9xug/wKg==}
 
@@ -1942,7 +1946,7 @@ packages:
     resolution: {integrity: sha512-Rd3se6QB+sO1TwqZjscQrurpEPIfO0/yYnSin6Q/rD3mOutHvUrCAhJub3r90uNb+SESBuE0QYoB90YdfatsRg==}
 
   /concat-map/0.0.1:
-    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
+    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
 
   /convert-source-map/1.8.0:
     resolution: {integrity: sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA==}
@@ -3377,7 +3381,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   /isarray/1.0.0:
-    resolution: {integrity: sha1-u5NdSFgsuhaMBoNJV6VKPgcSTxE=}
+    resolution: {integrity: sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ==}
 
   /isexe/2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
