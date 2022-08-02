@@ -19,15 +19,15 @@ async function ensureEslintTsConfigExists() {
     encoding: 'utf-8',
   });
 
+  const globs = new Set(
+    packagesGlobs.map((glob) => (glob !== '*' ? `${glob}/*.ts` : `*.ts`))
+  );
+
   await writeFile(
     expected,
     text.replace(
       '["GLOBS"]',
-      JSON.stringify([
-        ...new Set(
-          packagesGlobs.map((glob) => (glob !== '*' ? `${glob}/*.ts` : `*.ts`))
-        ),
-      ])
+      JSON.stringify(globs.size === 0 ? ['*.ts'] : [...globs])
     )
   );
 }

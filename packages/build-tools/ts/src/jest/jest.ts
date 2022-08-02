@@ -6,6 +6,7 @@ import type {
 import { spawnWithSpawnParameters } from '../child-process/spawnToPromise';
 import { spawnToPromise } from '../child-process/spawnToPromise';
 import { logger } from '../logger/logger';
+import { binPath } from '../utils/binPath';
 import {
   cliArgsPipe,
   includesAnyOf,
@@ -14,9 +15,12 @@ import {
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
 import { isTruthy } from '../utils/isTruthy';
-import { modulesBinPath } from '../utils/modulesBinPath';
 
-const jestPath = () => modulesBinPath('jest');
+const jestPath = () =>
+  binPath({
+    binName: 'jest',
+    binScriptPath: 'eslint/bin/eslint.js',
+  });
 
 export const jest = async (
   args: string[],
@@ -24,7 +28,7 @@ export const jest = async (
 ) => {
   const canUseStdioPipeToFilterOutput = !includesAnyOf(args, ['--watch']);
   const { child } = spawnWithSpawnParameters([
-    jestPath(),
+    await jestPath(),
     cliArgsPipe(
       [
         removeLogLevelOption(),

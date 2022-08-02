@@ -4,11 +4,11 @@ import { join } from 'path';
 import type { SpawnOptionsWithExtra } from './child-process';
 import { spawnOutputConditional } from './child-process';
 import type { SpawnResultOpts } from './child-process/spawnResult';
+import { binPath } from './utils/binPath';
 import type { CliArgs } from './utils/cliArgsPipe';
 import { cliArgsPipe } from './utils/cliArgsPipe';
 import { insertAfterAnyOf } from './utils/cliArgsPipe';
 import { includesAnyOf } from './utils/cliArgsPipe';
-import { modulesBinPath } from './utils/modulesBinPath';
 import { repositoryRootPath } from './utils/repositoryRootPath';
 
 export type TaskTypes =
@@ -22,7 +22,11 @@ export type TaskTypes =
       _allowStrings?: undefined;
     });
 
-const turboPath = () => modulesBinPath('turbo');
+export const turboBinPath = () =>
+  binPath({
+    binName: 'turbo',
+    binScriptPath: 'turbo/bin/turbo',
+  });
 
 export async function hasTurboJson(): Promise<boolean> {
   const cwd = await repositoryRootPath();
@@ -62,7 +66,7 @@ export async function runTurboTasksForSinglePackage(opts: {
   const rootDir = opts.packageDir ?? process.cwd();
   const cwd = await repositoryRootPath();
   return await spawnOutputConditional(
-    turboPath(),
+    await turboBinPath(),
     cliArgsPipe(
       [inheritTurboForceArgFromEnv()],
       [

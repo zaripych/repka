@@ -17,7 +17,7 @@ const readPackagesGlobsAt = async (monorepoRoot: string) => {
     };
     return rootPath.packages ?? [];
   } catch (err) {
-    logger.error(err);
+    logger.debug(err);
     return [];
   }
 };

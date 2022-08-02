@@ -2,7 +2,11 @@ import virtual from '@rollup/plugin-virtual';
 import type { OutputOptions, Plugin, RollupWatchOptions } from 'rollup';
 
 import type { PackageBinEntryPoint } from '../config/nodePackageConfig';
+import { determineBinScriptPath } from '../utils/binPath';
 import { isTruthy } from '../utils/isTruthy';
+import { mirroredBinContent } from './bin-virtual-modules/mirroredBinContent';
+import { tsxJumpDevTimeContent } from './bin-virtual-modules/tsxJumpDevTimeContent';
+import { rollupMakeExecutablePlugin } from './rollupMakeExecutablePlugin';
 import type { RollupOptionsBuilderOpts } from './standardRollupConfig';
 
 function buildBinInputs(
@@ -20,9 +24,27 @@ function buildBinInputs(
   );
 }
 
-function buildBinsPlugins(entryPoints: PackageBinEntryPoint[]) {
+async function buildBinsPlugins(entryPoints: PackageBinEntryPoint[]) {
   const mirroredBins = entryPoints.filter(
     (entry) => entry.binEntryType === 'dependency-bin'
+  );
+
+  const mirroredBinsAndScriptPaths = await Promise.all(
+    mirroredBins.map(async (bin) => ({
+      ...bin,
+      binScriptPath: await determineBinScriptPath({
+        binName: bin.binName,
+        binPackageName: bin.binName,
+      }).then((result) => {
+        if (!result) {
+          throw new Error(
+            `Cannot determine location of the bin script for "${bin.binName}"` +
+              `, location has to be specified manually.`
+          );
+        }
+        return result;
+      }),
+    }))
   );
 
   // for bins which are declared in package.json but do not exist in
@@ -31,29 +53,14 @@ function buildBinsPlugins(entryPoints: PackageBinEntryPoint[]) {
   const mirroredBinsVirtualPlugin =
     mirroredBins.length > 0 &&
     virtual({
-      ...mirroredBins.reduce(
-        (acc, { binName }) => ({
+      ...mirroredBinsAndScriptPaths.reduce(
+        (acc, { binName, binScriptPath }) => ({
           ...acc,
           // [location of the module]: 'source code of the module'
-          [`./src/bin/${binName}.ts`]: `import { spawn } from 'child_process';
-
-const cp = spawn(
-  new URL("../node_modules/.bin/${binName}", import.meta.url).pathname,
-  process.argv.slice(2),
-  { stdio: "inherit" }
-);
-cp.on("error", (err) => {
-  console.error(err);
-  process.exitCode = 1;
-});
-cp.on("close", (code, signal) => {
-  if (typeof code === "number") {
-    process.exitCode = code;
-  } else if (typeof signal === "string") {
-    console.error("Failed to start", "${binName}", signal);
-  }
-});
-`,
+          [`./src/bin/${binName}.ts`]: mirroredBinContent({
+            binName,
+            binScriptPath,
+          }),
         }),
         {}
       ),
@@ -70,28 +77,10 @@ cp.on("close", (code, signal) => {
     bundledEsmBins.length > 0 &&
     virtual({
       ...bundledEsmBins.reduce(
-        (acc, { binName: bin }) => ({
+        (acc, { binName }) => ({
           ...acc,
           // [location of the module]: 'source code of the module'
-          [`./src/bin/${bin}.dev.ts`]: `import { spawn } from 'child_process';
-
-const cp = spawn(
-  new URL("../node_modules/.bin/tsx", import.meta.url).pathname,
-  [new URL("../src/bin/${bin}.ts", import.meta.url).pathname, ...process.argv.slice(2)],
-  { stdio: "inherit" }
-);
-cp.on("error", (err) => {
-  console.error(err);
-  process.exitCode = 1;
-});
-cp.on("close", (code, signal) => {
-  if (typeof code === "number") {
-    process.exitCode = code;
-  } else if (typeof signal === "string") {
-    console.error("Failed to start", "${bin}", signal);
-  }
-});
-`,
+          [`./src/bin/${binName}.dev.ts`]: tsxJumpDevTimeContent(binName),
         }),
         {}
       ),
@@ -143,7 +132,7 @@ cp.on("close", (code, signal) => {
   };
 }
 
-export function buildBinsBundleConfig({
+export async function buildBinsBundleConfig({
   config,
   defaultRollupConfig,
 }: RollupOptionsBuilderOpts) {
@@ -154,7 +143,7 @@ export function buildBinsBundleConfig({
       binConfigs: [],
     };
   }
-  const { plugins } = buildBinsPlugins(config.binEntryPoints);
+  const { plugins } = await buildBinsPlugins(config.binEntryPoints);
 
   const standard = defaultRollupConfig();
 
@@ -167,11 +156,13 @@ export function buildBinsBundleConfig({
   const devBinOutput: OutputOptions = {
     ...(standard.output as OutputOptions),
     dir: './bin',
+    plugins: [rollupMakeExecutablePlugin()],
   };
 
   const bundledBinOutput: OutputOptions = {
     ...(standard.output as OutputOptions),
     dir: './dist/bin',
+    plugins: [rollupMakeExecutablePlugin()],
   };
 
   const cjsBins = config.binEntryPoints.filter(
@@ -180,6 +171,8 @@ export function buildBinsBundleConfig({
 
   const banner = `#!/usr/bin/env node
 // NOTE: This file is bundled up from './src/bin/*' and needs to be committed`;
+
+  const bannerDist = `#!/usr/bin/env node`;
 
   const cjsConfig: false | RollupWatchOptions = cjsBins.length > 0 && {
     ...shared,
@@ -236,6 +229,7 @@ export function buildBinsBundleConfig({
               ...bundledBinOutput,
               entryFileNames: `[name].gen.mjs`,
               chunkFileNames: `chunk.[hash].mjs`,
+              banner: bannerDist,
             },
           },
           {
@@ -245,6 +239,7 @@ export function buildBinsBundleConfig({
               ...bundledBinOutput,
               entryFileNames: `[name].gen.mjs`,
               chunkFileNames: `chunk.[hash].mjs`,
+              banner: bannerDist,
             },
           },
         ]

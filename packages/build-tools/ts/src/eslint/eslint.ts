@@ -1,4 +1,5 @@
 import { spawnToPromise } from '../child-process';
+import { binPath } from '../utils/binPath';
 import {
   cliArgsPipe,
   includesAnyOf,
@@ -7,16 +8,19 @@ import {
   setDefaultArgs,
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
-import { modulesBinPath } from '../utils/modulesBinPath';
 import { repositoryRootPath } from '../utils/repositoryRootPath';
 
-const eslintPath = () => modulesBinPath('eslint');
+export const eslintBinPath = () =>
+  binPath({
+    binName: 'eslint',
+    binScriptPath: 'eslint/bin/eslint.js',
+  });
 
 const eslintConfigPath = () => configFilePath('./eslint/eslint-root.cjs');
 
 export const eslint = async (processArgs: string[]) =>
   spawnToPromise(
-    eslintPath(),
+    await eslintBinPath(),
     cliArgsPipe(
       [
         removeLogLevelOption(),

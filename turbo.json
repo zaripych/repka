@@ -69,7 +69,7 @@
     "setup:integration": {
       "dependsOn": ["^build:tools", "build:tools", "$TEST_PACKAGE_MANAGER"],
       "inputs": ["dist/**/*", "src/__integration__/setup.ts", "package.json"],
-      "outputs": [".integration/template"],
+      "outputs": [],
       "outputMode": "new-only"
     },
     "integration": {

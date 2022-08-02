@@ -33,5 +33,8 @@ export async function spawnOutputConditional(
   if (shouldOutput(result)) {
     logger.error(result.output.join(''));
   }
+  if (result.error) {
+    return Promise.reject(result.error);
+  }
   return Promise.resolve(result);
 }

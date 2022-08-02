@@ -1,18 +1,25 @@
-import { spawnOutput, spawnOutputConditional } from '../child-process';
+import {
+  spawnOutput,
+  spawnOutputConditional,
+  spawnToPromise,
+} from '../child-process';
 import { spawnResult } from '../child-process/spawnResult';
+import { binPath } from '../utils/binPath';
 import {
   cliArgsPipe,
   includesAnyOf,
   removeLogLevelOption,
 } from '../utils/cliArgsPipe';
-import { runBin } from '../utils/runBin';
 
 const lintStaged = async () => {
-  await runBin(
-    'lint-staged',
+  await spawnToPromise(
+    await binPath({
+      binName: 'lint-staged',
+      binScriptPath: 'lint-staged/bin/lint-staged.js',
+    }),
     cliArgsPipe([removeLogLevelOption()], process.argv.slice(2)),
     {
-      // this is the command we wrap
+      stdio: 'inherit',
       exitCodes: 'inherit',
     }
   );

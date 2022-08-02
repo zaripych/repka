@@ -1,6 +1,11 @@
 import { relative } from 'node:path';
 
-import { inheritTurboForceArgFromEnv, passTurboForceEnv } from '../turbo';
+import { spawnToPromise } from '../child-process';
+import {
+  inheritTurboForceArgFromEnv,
+  passTurboForceEnv,
+  turboBinPath,
+} from '../turbo';
 import {
   cliArgsPipe,
   includesAnyOf,
@@ -8,12 +13,11 @@ import {
   setDefaultArgs,
 } from '../utils/cliArgsPipe';
 import { repositoryRootPath } from '../utils/repositoryRootPath';
-import { runBin } from '../utils/runBin';
 
 const runTurbo = async () => {
   const root = await repositoryRootPath();
-  await runBin(
-    'turbo',
+  await spawnToPromise(
+    await turboBinPath(),
     cliArgsPipe(
       [
         setDefaultArgs(
@@ -32,6 +36,7 @@ const runTurbo = async () => {
     ),
     {
       cwd: root,
+      stdio: 'inherit',
       exitCodes: 'inherit',
       env: {
         ...process.env,

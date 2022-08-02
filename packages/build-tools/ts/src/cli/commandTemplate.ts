@@ -3,10 +3,11 @@ import { stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import colors from 'picocolors';
 
+import { spawnToPromise } from '../child-process';
 import { logger } from '../logger/logger';
+import { binPath } from '../utils/binPath';
 import { cliArgsPipe } from '../utils/cliArgsPipe';
 import { loadRepositoryConfiguration } from '../utils/loadRepositoryConfiguration';
-import { runBin } from '../utils/runBin';
 
 function argsToTurboArgs(opts: { cliCommand: string; turboTask?: string }) {
   return cliArgsPipe(
@@ -60,10 +61,17 @@ export async function commandTemplate(opts: {
 
   const runUsingConfig = async () => {
     logger.debug(`Found a "${configLocation}", running it with "tsx": `);
-    await runBin('tsx', [configLocation, ...process.argv.slice(2)], {
-      stdio: 'inherit',
-      exitCodes: 'inherit',
-    });
+    await spawnToPromise(
+      await binPath({
+        binName: 'tsx',
+        binScriptPath: 'tsx/dist/cli.js',
+      }),
+      [configLocation, ...opts.command.args],
+      {
+        stdio: 'inherit',
+        exitCodes: 'inherit',
+      }
+    );
   };
 
   const help =

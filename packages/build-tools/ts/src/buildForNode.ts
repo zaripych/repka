@@ -100,7 +100,7 @@ export function buildForNode(opts?: BuildOpts) {
           combineDefaultRollupConfigBuildOpts(baseOpts, opts)
         );
 
-      const { binConfigs, bundledEsmBinsInputs } = buildBinsBundleConfig({
+      const { binConfigs, bundledEsmBinsInputs } = await buildBinsBundleConfig({
         config,
         defaultRollupConfig: defaultConfig,
       });

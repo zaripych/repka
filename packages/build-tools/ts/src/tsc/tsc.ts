@@ -1,13 +1,17 @@
 import { join, relative } from 'node:path';
 
 import { spawnToPromise } from '../child-process/spawnToPromise';
-import { modulesBinPath } from '../utils/modulesBinPath';
+import { binPath } from '../utils/binPath';
 import { repositoryRootPath } from '../utils/repositoryRootPath';
 
-const tscPath = () => modulesBinPath('tsc');
+export const tscPath = () =>
+  binPath({
+    binName: 'tsc',
+    binScriptPath: 'typescript/bin/tsc',
+  });
 
 const tsc = async (args: string[]) =>
-  spawnToPromise(tscPath(), args, {
+  spawnToPromise(await tscPath(), args, {
     stdio: 'inherit',
     // based on the monorepo "packages/*/*" directory structure
     // for full paths in TypeScript errors just do this:
