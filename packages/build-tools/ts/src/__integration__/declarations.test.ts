@@ -27,7 +27,7 @@ beforeAll(async () => {
 });
 
 function sanitize(
-  result: { output: string; exitCode: number | null },
+  result: { output: string; exitCode?: number },
   sandboxDirectory: string
 ) {
   return {

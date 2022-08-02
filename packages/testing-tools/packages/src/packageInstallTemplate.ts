@@ -3,18 +3,13 @@ import { runTurboTasksForSinglePackage } from '@build-tools/ts';
 import { logger } from '@build-tools/ts';
 import { onceAsync } from '@utils/ts';
 import assert from 'node:assert';
-import {
-  mkdir,
-  readFile,
-  realpath,
-  rm,
-  unlink,
-  writeFile,
-} from 'node:fs/promises';
+import { mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 import { copyFiles } from './helpers/copyFiles';
+import { deleteTurboCache } from './helpers/deleteTurboCache';
 import { findPackageUnderTest } from './helpers/findPackageUnderTest';
+import { ignoreErrors } from './helpers/ignoreErrors';
 import { randomText } from './helpers/randomText';
 import { readPackageJson, writePackageJson } from './helpers/writePackageJson';
 import { installPackage, isSupportedPackageManager } from './installPackage';
@@ -126,7 +121,7 @@ export function packageInstallTemplate(opts?: {
 
       const installResultFilePath = join(
         testRootDirectory,
-        'template-install-result.json'
+        'install-result.json'
       );
       const packageUnderTestInstallDirectory = join(
         templateDirectory,
@@ -134,39 +129,52 @@ export function packageInstallTemplate(opts?: {
         packageUnderTest
       );
 
-      const currentContents = readPackageJson(packageInstallSource);
+      // avoid having to --force install and make it look like
+      // we have a new package every time
+      const randomId = randomText(8);
+      const cacheBustedInstallSource = join(testRootDirectory, `.${randomId}`);
+
       const expectedInstallResult = {
-        ...allProps,
-        packageJsonContents: await currentContents,
+        propsTriggeringReinstall: {
+          packageManager: allProps.packageManager,
+          packageUnderTest: allProps.packageUnderTest,
+          packageInstallSource: allProps.packageInstallSource,
+          packageJsonContents: await readPackageJson(packageInstallSource),
+        },
+        turboHash: process.env['TURBO_HASH'],
+        cacheBustedInstallSource,
       };
-      const previousInstallResult = await readFile(
-        installResultFilePath,
-        'utf-8'
-      )
-        .then((result) => JSON.parse(result) as Record<string, unknown>)
-        .catch(() => undefined);
+      const previousInstallResult = await ignoreErrors(
+        readFile(installResultFilePath, 'utf-8').then(
+          (result) => JSON.parse(result) as typeof expectedInstallResult
+        )
+      );
 
       if (
         !previousInstallResult ||
-        JSON.stringify(expectedInstallResult) !==
-          JSON.stringify(previousInstallResult)
+        JSON.stringify(expectedInstallResult.propsTriggeringReinstall) !==
+          JSON.stringify(previousInstallResult.propsTriggeringReinstall)
       ) {
-        await rm(templateDirectory, { recursive: true }).catch(() => {
-          return;
-        });
+        logger.info('Will install using package manager', packageManager);
+
+        // remove the entire root if the file could not be loaded
+        // this means file doesn't exist and we are starting from scratch
+        await ignoreErrors(rm(testRootDirectory, { recursive: true }));
+
+        // delete cache entry for previous run when we have to reinstall
+        if (previousInstallResult?.turboHash) {
+          await deleteTurboCache(previousInstallResult.turboHash);
+        }
+
         await mkdir(templateDirectory, { recursive: true });
 
         const transform = opts?.packageJson
           ? opts.packageJson
           : (opt: Record<string, unknown>) => opt;
 
-        // avoid having to --force install and make it look like
-        // we have a new package every time
-        const randomId = randomText(8);
-        const cacheBustedLocation = join(testRootDirectory, `.${randomId}`);
         await copyFiles({
           source: packageInstallSource,
-          destination: cacheBustedLocation,
+          destination: cacheBustedInstallSource,
           include: ['**'],
           exclude: ['node_modules'],
           options: {
@@ -191,7 +199,7 @@ export function packageInstallTemplate(opts?: {
               license: 'ISC',
               type: 'module',
               dependencies: {
-                [packageUnderTest]: `file:${cacheBustedLocation}`,
+                [packageUnderTest]: `file:${cacheBustedInstallSource}`,
               },
             })
           ),
@@ -206,7 +214,7 @@ export function packageInstallTemplate(opts?: {
           'Skipping installation because package.json contents has not changed and props are same',
           allProps
         );
-        await unlink(installResultFilePath);
+
         if (
           (await realpath(packageInstallSource)) !==
           (await realpath(packageUnderTestInstallDirectory))

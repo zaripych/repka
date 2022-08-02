@@ -1,7 +1,6 @@
-import { spawnOutput } from '@build-tools/ts';
+import { spawnResult } from '@build-tools/ts';
 import { onceAsync } from '@utils/ts';
 import assert from 'node:assert';
-import { spawn } from 'node:child_process';
 import { mkdir, rm, symlink } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 
@@ -143,29 +142,48 @@ export function packageTestSandbox(opts: BuildSandboxOpts) {
     runMain: async (...args: string[]) => {
       const { packageUnderTestDirectory, sandboxDirectory } = await props();
 
-      const cp = spawn(process.execPath, [packageUnderTestDirectory, ...args], {
-        cwd: sandboxDirectory,
-      });
-      return {
-        output: await spawnOutput(cp, {
+      const result = await spawnResult(
+        process.execPath,
+        [packageUnderTestDirectory, ...args],
+        {
+          cwd: sandboxDirectory,
           exitCodes: 'any',
+        }
+      );
+      return {
+        output: result.output.join(''),
+        ...(result.error && {
+          error: result.error,
         }),
-        exitCode: cp.exitCode,
+        ...(typeof result.status === 'number' && {
+          exitCode: result.status,
+        }),
+        ...(result.signal && {
+          signalCode: result.signal,
+        }),
       };
     },
     runBin: async (bin: string, ...args: string[]) => {
       const { sandboxDirectory } = await props();
 
-      const cp = spawn(join('./node_modules/.bin/', bin), args, {
-        cwd: sandboxDirectory,
-      });
+      const result = await spawnResult(
+        join(sandboxDirectory, './node_modules/.bin/', bin),
+        args,
+        {
+          cwd: sandboxDirectory,
+          exitCodes: 'any',
+        }
+      );
       return {
-        output: await spawnOutput(cp, {
-          exitCodes: 'inherit',
+        output: result.output.join(''),
+        ...(result.error && {
+          error: result.error,
         }),
-        exitCode: cp.exitCode,
-        ...(cp.signalCode && {
-          signalCode: cp.signalCode,
+        ...(typeof result.status === 'number' && {
+          exitCode: result.status,
+        }),
+        ...(result.signal && {
+          signalCode: result.signal,
         }),
       };
     },

@@ -45,7 +45,11 @@ async function loadTestConfigInternal(): Promise<TestConfig> {
           testRootDirectory: data.testRootDirectory,
         };
       } catch (err) {
-        logger.error('Cannot parse JSON:\n', result, err);
+        logger.error(
+          `Cannot parse JSON file at ${filePath} with contents:\n`,
+          `  "${result}"\n`,
+          err
+        );
         return Promise.reject(err);
       }
     },

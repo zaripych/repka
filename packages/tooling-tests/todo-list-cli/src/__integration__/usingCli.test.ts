@@ -11,10 +11,6 @@ beforeAll(async () => {
   await sandbox().create();
 });
 
-afterAll(async () => {
-  await sandbox().cleanup();
-});
-
 it('should add, list and remove entries', async () => {
   const { runMain } = sandbox();
   expect(await runMain()).toMatchInlineSnapshot(`
