@@ -32,6 +32,7 @@ async function loadTestConfigInternal(): Promise<TestConfig> {
       `Following along parent directories of "${process.cwd()}" no package.json in sight`
     );
   }
+  const directoryPath = join(packageRootDirectory, './.integration');
   const filePath = join(packageRootDirectory, './.integration', 'config.json');
   const config = await readFile(filePath, 'utf-8').then(
     (result) => {
@@ -66,6 +67,7 @@ async function loadTestConfigInternal(): Promise<TestConfig> {
     }
   );
   await mkdir(config.testRootDirectory, { recursive: true });
+  await mkdir(directoryPath, { recursive: true });
   await writeFile(filePath, JSON.stringify(config, undefined, '  '), 'utf-8');
   logger.debug(
     `Integration test root directory is "${config.testRootDirectory}"`
