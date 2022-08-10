@@ -5,7 +5,14 @@ import { spawnWithSpawnParameters } from './spawnToPromise';
 import { spawnToPromise } from './spawnToPromise';
 
 export type SpawnResultOpts = {
-  output?: ['stdout' | 'stderr', ...Array<'stdout' | 'stderr'>];
+  output?:
+    | Array<'stdout' | 'stderr'>
+    | ['stdout' | 'stderr', ...Array<'stdout' | 'stderr'>];
+  buffers?: {
+    combined?: string[];
+    stdout?: string[];
+    stderr?: string[];
+  };
 } & SpawnToPromiseOpts;
 
 export type SpawnResultReturn = {
@@ -22,9 +29,9 @@ export async function spawnResult(
   ...parameters: SpawnParameterMix<SpawnResultOpts>
 ): Promise<SpawnResultReturn> {
   const { child, opts } = spawnWithSpawnParameters(parameters);
-  const combinedData: string[] = [];
-  const stdoutData: string[] = [];
-  const stderrData: string[] = [];
+  const combinedData: string[] = opts.buffers?.combined ?? [];
+  const stdoutData: string[] = opts.buffers?.stdout ?? [];
+  const stderrData: string[] = opts.buffers?.stderr ?? [];
   const output = opts.output ?? ['stdout', 'stderr'];
   if (output.includes('stdout')) {
     assert(
