@@ -30,17 +30,12 @@ export const jestTransformConfigProp = (jestPluginRoot) => {
 export const commonConfig = {
   cacheDirectory: '.jest-cache',
   testPathIgnorePatterns: [
-    ...ignoreDirs,
     ...ignoreDirs.map((dir) => `<rootDir>${dir}`),
+    '<rootDir>/.*/test-cases/',
   ],
-  transformIgnorePatterns: [
-    ...ignoreDirs,
-    ...ignoreDirs.map((dir) => `<rootDir>${dir}`),
-  ],
-  coveragePathIgnorePatterns: [
-    ...ignoreDirs,
-    ...ignoreDirs.map((dir) => `<rootDir>${dir}`),
-  ],
+  transformIgnorePatterns: [...ignoreDirs.map((dir) => `<rootDir>${dir}`)],
+  coveragePathIgnorePatterns: [...ignoreDirs.map((dir) => `<rootDir>${dir}`)],
+  modulePathIgnorePatterns: [...ignoreDirs.map((dir) => `<rootDir>${dir}`)],
   extensionsToTreatAsEsm: extensions
     .filter((entry) => !['js'].includes(entry))
     .map((ext) => `.${ext}`),

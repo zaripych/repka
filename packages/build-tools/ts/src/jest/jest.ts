@@ -19,14 +19,17 @@ import { isTruthy } from '../utils/isTruthy';
 const jestPath = () =>
   binPath({
     binName: 'jest',
-    binScriptPath: 'eslint/bin/eslint.js',
+    binScriptPath: 'jest/bin/jest.js',
   });
 
 export const jest = async (
   args: string[],
   spawnOpts: SpawnOptionsWithExtra<SpawnToPromiseOpts>
 ) => {
-  const canUseStdioPipeToFilterOutput = !includesAnyOf(args, ['--watch']);
+  const canUseStdioPipeToFilterOutput = !includesAnyOf(args, [
+    '--watch',
+    '--help',
+  ]);
   const { child } = spawnWithSpawnParameters([
     await jestPath(),
     cliArgsPipe(
@@ -50,6 +53,7 @@ export const jest = async (
       cwd: process.cwd(),
       env: {
         ...process.env,
+        ...spawnOpts.env,
         NODE_OPTIONS: `--experimental-vm-modules`,
         LOG_LEVEL: logger.logLevel,
       },
@@ -59,8 +63,8 @@ export const jest = async (
     filterAndPrint(child, [
       {
         regExp:
-          /\(node:\d+\) ExperimentalWarning: VM Modules is an experimental feature\./,
-        replaceWith: undefined,
+          /\(node:\d+\) ExperimentalWarning: VM Modules is an experimental feature\. This feature could change at any time\s+\(Use `node --trace-warnings ...` to show where the warning was created\)\n/gm,
+        replaceWith: '',
       },
     ]);
   }

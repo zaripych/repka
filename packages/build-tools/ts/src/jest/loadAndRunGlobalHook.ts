@@ -12,7 +12,8 @@ async function loadStandardGlobalHook(
   globalConfig: Config.GlobalConfig,
   projectConfig: Config.ProjectConfig
 ) {
-  const hasHook = await stat(script)
+  const location = join(projectConfig.rootDir, script);
+  const hasHook = await stat(location)
     .then((result) => result.isFile())
     .catch(() => false);
   return {
@@ -21,7 +22,6 @@ async function loadStandardGlobalHook(
       if (!hasHook) {
         return;
       }
-      const location = join(process.cwd(), script);
       const result = (await import(location)) as
         | {
             default?: (
@@ -39,8 +39,12 @@ async function loadStandardGlobalHook(
   };
 }
 
-async function loadCustomGlobalHook(script: string) {
-  const hasHook = await stat(script)
+async function loadCustomGlobalHook(
+  script: string,
+  projectConfig: Config.ProjectConfig
+) {
+  const location = join(projectConfig.rootDir, script);
+  const hasHook = await stat(location)
     .then((result) => result.isFile())
     .catch(() => false);
   return {
@@ -49,13 +53,12 @@ async function loadCustomGlobalHook(script: string) {
       if (!hasHook) {
         return;
       }
-      const location = join(process.cwd(), script);
       const packageJson = await readPackageJson(
         join(process.cwd(), 'package.json')
       );
 
       if (
-        script.endsWith('setup.ts') &&
+        location.endsWith('setup.ts') &&
         typeof packageJson['scripts'] === 'object' &&
         packageJson['scripts']['setup:integration'] === `tsx ${script}`
       ) {
@@ -90,7 +93,7 @@ export async function loadAndRunGlobalHook(
 ) {
   const [standard, custom] = await Promise.all([
     loadStandardGlobalHook(`${script}.mjs`, globalConfig, projectConfig),
-    loadCustomGlobalHook(`${script}.ts`),
+    loadCustomGlobalHook(`${script}.ts`, projectConfig),
   ]);
   if (!custom.hasHook && tip) {
     logger.tip(tip);
