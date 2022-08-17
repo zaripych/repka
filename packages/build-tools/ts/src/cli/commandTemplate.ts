@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
+import { bgBlack, bold, white } from 'kleur/colors';
 import { stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import colors from 'picocolors';
 
 import { spawnToPromise } from '../child-process';
 import { logger } from '../logger/logger';
@@ -41,9 +41,9 @@ export async function commandTemplate(opts: {
   const { root, type } = await loadRepositoryConfiguration();
   if (type === 'multiple-packages' && process.cwd() === root) {
     logger.error(
-      `Running this command in the monorepo root is not supported - try using "turbo": \n\n﹥ ${colors.bold(
-        colors.bgBlack(
-          colors.white(
+      `Running this command in the monorepo root is not supported - try using "turbo": \n\n﹥ ${bold(
+        bgBlack(
+          white(
             `turbo run ${argsToTurboArgs({
               cliCommand: opts.cliCommand,
               turboTask: opts.turboTask,
