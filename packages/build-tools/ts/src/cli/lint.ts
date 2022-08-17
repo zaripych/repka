@@ -20,6 +20,7 @@ export const lintCommand = () =>
     .action(async (_opts: unknown, command: Command) => {
       await commandTemplate({
         cliCommand: 'lint',
+        needsSourceCode: true,
         command,
         run: async () => {
           await pipeline(lint({ processArgs: command.args }));

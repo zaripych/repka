@@ -22,6 +22,7 @@ export const integrationCommand = () =>
     .action(async (_, command: Command) => {
       await commandTemplate({
         cliCommand: 'integration',
+        needsSourceCode: true,
         command,
         run: async () => {
           await pipeline(integrationTest({ processArgs: command.args }));

@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { spawnToPromise } from '../child-process';
 import { logger } from '../logger/logger';
 import { binPath } from '../utils/binPath';
+import { checkIsEmpty } from '../utils/checkIsEmpty';
 import { cliArgsPipe } from '../utils/cliArgsPipe';
 import { loadRepositoryConfiguration } from '../utils/loadRepositoryConfiguration';
 
@@ -34,6 +35,7 @@ function argsToTurboArgs(opts: { cliCommand: string; turboTask?: string }) {
 
 export async function commandTemplate(opts: {
   cliCommand: string;
+  needsSourceCode: boolean;
   turboTask?: string;
   command: Command;
   run: (opts: { help: boolean }) => Promise<void>;
@@ -79,6 +81,18 @@ export async function commandTemplate(opts: {
 
   if (help) {
     opts.command.outputHelp();
+  }
+
+  if (opts.needsSourceCode) {
+    const isEmpty = await checkIsEmpty();
+    if (isEmpty) {
+      logger.info(
+        `There is nothing to ${
+          opts.turboTask ?? task
+        } here it seems. Use "repka init" to start.`
+      );
+      return;
+    }
   }
 
   if (!config || !config.isFile()) {

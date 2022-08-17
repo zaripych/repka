@@ -19,6 +19,7 @@ export const declarationsCommand = () =>
     .action(async (_, command: Command) => {
       await commandTemplate({
         cliCommand: 'declarations',
+        needsSourceCode: true,
         command,
         run: async () => {
           await pipeline(declarations());

@@ -18,6 +18,7 @@ export const buildNodeCommand = () =>
       await commandTemplate({
         cliCommand: 'build:node',
         turboTask: 'build',
+        needsSourceCode: true,
         command,
         run: async () => {
           await pipeline(buildForNode());

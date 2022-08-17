@@ -19,6 +19,7 @@ export const testCommand = () =>
     .action(async (_, command: Command) => {
       await commandTemplate({
         cliCommand: 'test',
+        needsSourceCode: true,
         command,
         run: async () => {
           await pipeline(unitTest({ processArgs: command.args }));
