@@ -2,24 +2,34 @@ import { load } from 'js-yaml';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { logger } from '../logger/logger';
 import { onceAsync } from './onceAsync';
 import { repositoryRootPath } from './repositoryRootPath';
 
+async function tryReadingPnpmWorkspaceYaml(monorepoRoot: string) {
+  const text = await readFile(
+    join(monorepoRoot, 'pnpm-workspace.yaml'),
+    'utf-8'
+  );
+  const rootPath = load(text) as {
+    packages?: string[];
+  };
+  return rootPath.packages ?? [];
+}
+
+async function tryReadingPackageJsonWorkspaces(monorepoRoot: string) {
+  const text = await readFile(join(monorepoRoot, 'package.json'), 'utf-8');
+  const packageJson = JSON.parse(text) as {
+    workspaces?: string[];
+  };
+  return Array.isArray(packageJson.workspaces) ? packageJson.workspaces : [];
+}
+
 const readPackagesGlobsAt = async (monorepoRoot: string) => {
-  try {
-    const text = await readFile(
-      join(monorepoRoot, 'pnpm-workspace.yaml'),
-      'utf-8'
-    );
-    const rootPath = load(text) as {
-      packages?: string[];
-    };
-    return rootPath.packages ?? [];
-  } catch (err) {
-    logger.debug(err);
-    return [];
-  }
+  const [pnpmWorkspaces, packageJsonWorkspaces] = await Promise.all([
+    tryReadingPnpmWorkspaceYaml(monorepoRoot).catch(() => undefined),
+    tryReadingPackageJsonWorkspaces(monorepoRoot).catch(() => undefined),
+  ]);
+  return pnpmWorkspaces || packageJsonWorkspaces || [];
 };
 
 /**

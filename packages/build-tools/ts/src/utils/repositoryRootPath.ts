@@ -1,6 +1,6 @@
-import assert from 'assert';
 import fg from 'fast-glob';
-import { dirname, join } from 'path';
+import assert from 'node:assert';
+import { dirname, join } from 'node:path';
 
 import { isTruthy } from './isTruthy';
 import { onceAsync } from './onceAsync';
@@ -34,17 +34,11 @@ const hasRootMarkers = async (candidates: string[]) => {
       onlyFiles: false,
     }
   );
-  return new Promise<string | undefined>((res) => {
-    markersStream.on('data', (entry: string) => {
-      res(dirname(entry));
-      if ('destroy' in markersStream) {
-        (markersStream as unknown as { destroy: () => void }).destroy();
-      }
-    });
-    markersStream.on('end', () => {
-      res(undefined);
-    });
-  });
+  for await (const entry of markersStream) {
+    assert(typeof entry === 'string');
+    return dirname(entry);
+  }
+  return undefined;
 };
 
 const prioritizedHasMarkers = (jobs: string[][]) => {

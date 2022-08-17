@@ -1,6 +1,6 @@
 import { searchTextInFiles } from '@testing-tools/packages';
 
-import { binPath } from './binPath';
+import { binPath, determineBinScriptPath } from './binPath';
 import { moduleRootDirectory } from './moduleRootDirectory';
 
 const allUsagesOfBinPath = async () => {
@@ -36,6 +36,30 @@ describe('all usages of binPath', () => {
   it('should work', async () => {
     const usages = await allUsagesOfBinPath();
     expect(usages.length).toBeGreaterThan(0);
+
+    await expect(
+      Promise.all(
+        usages.map(async (entry) => {
+          const binScriptPath = await determineBinScriptPath({
+            binName: entry.binName,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            binPackageName: entry.binScriptPath.split('/')[0]!,
+          });
+          return {
+            fileName: entry.fileName,
+            binName: entry.binName,
+            binScriptPath,
+          };
+        })
+      )
+    ).resolves.toMatchObject(
+      usages.map(({ binName, binScriptPath, fileName }) => ({
+        fileName,
+        binName,
+        binScriptPath,
+      }))
+    );
+
     await expect(
       Promise.all(
         usages.map((entry) =>
@@ -49,6 +73,7 @@ describe('all usages of binPath', () => {
         )
       )
     ).resolves.toBeTruthy();
+
     await expect(
       Promise.all(
         usages.map((entry) =>
