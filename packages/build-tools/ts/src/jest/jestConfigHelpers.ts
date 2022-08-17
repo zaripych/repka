@@ -1,8 +1,8 @@
+import { onceAsync } from '@utils/ts';
 import { dirname } from 'node:path';
 
 import { logger } from '../logger/logger';
 import { findDevDependency } from '../utils/findDevDependency';
-import { onceAsync } from '../utils/onceAsync';
 
 export { readPackageJson } from '../package-json/readPackageJson';
 export { loadRepositoryConfiguration } from '../utils/loadRepositoryConfiguration';

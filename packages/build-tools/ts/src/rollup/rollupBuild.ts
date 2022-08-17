@@ -1,8 +1,8 @@
+import { once } from '@utils/ts';
 import type { RollupCache, RollupOptions } from 'rollup';
 import { rollup } from 'rollup';
 
 import { logger } from '../logger/logger';
-import { once } from '../utils/once';
 
 const rollupCache = once((): RollupCache => {
   return {

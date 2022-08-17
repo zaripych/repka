@@ -1,7 +1,7 @@
+import { once } from '@utils/ts';
 import type { PromiseType } from 'utility-types';
 
 import { asyncToSync } from '../utils/async-to-sync';
-import { once } from '../utils/once';
 import { readMonorepoPackagesGlobs } from '../utils/readPackagesGlobs';
 
 export const eslintConfigHelpers = async () => {

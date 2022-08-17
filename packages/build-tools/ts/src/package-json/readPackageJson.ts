@@ -1,7 +1,7 @@
+import { onceAsync } from '@utils/ts';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { onceAsync } from '../utils/onceAsync';
 import type { PackageJson } from './packageJson';
 
 const cwdPackageJsonPath = () => join(process.cwd(), './package.json');

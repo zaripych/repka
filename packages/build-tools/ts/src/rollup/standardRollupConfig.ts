@@ -3,11 +3,11 @@
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
+import { isTruthy } from '@utils/ts';
 import type { Plugin, RollupWatchOptions } from 'rollup';
 import analyze from 'rollup-plugin-analyzer';
 
 import type { NodePackageConfig } from '../config/nodePackageConfig';
-import { isTruthy } from '../utils/isTruthy';
 import { resolveNodeBuiltinsPlugin } from './resolveNodeBuiltinsPlugin';
 import { esbuild } from './rollupPluginEsbuild';
 import { extensions } from './rollupPluginExtensions';

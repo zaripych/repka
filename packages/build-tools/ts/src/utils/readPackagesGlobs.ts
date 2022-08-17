@@ -1,8 +1,8 @@
+import { onceAsync } from '@utils/ts';
 import { load } from 'js-yaml';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { onceAsync } from './onceAsync';
 import { repositoryRootPath } from './repositoryRootPath';
 
 async function tryReadingPnpmWorkspaceYaml(monorepoRoot: string) {

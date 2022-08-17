@@ -1,7 +1,6 @@
+import { once } from '@utils/ts';
 import nodeBuiltins from 'builtin-modules/static.js';
 import type { Plugin } from 'rollup';
-
-import { once } from '../utils/once';
 
 const allBuiltins = once(() =>
   nodeBuiltins

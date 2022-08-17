@@ -1,3 +1,5 @@
+import { isTruthy } from '@utils/ts';
+
 import { filterAndPrint } from '../child-process/filterAndPrint';
 import type {
   SpawnOptionsWithExtra,
@@ -14,7 +16,6 @@ import {
   setDefaultArgs,
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
-import { isTruthy } from '../utils/isTruthy';
 
 const jestPath = () =>
   binPath({

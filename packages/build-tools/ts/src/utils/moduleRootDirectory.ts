@@ -1,7 +1,6 @@
+import { once } from '@utils/ts';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import { once } from './once';
 
 export const getModuleRootDirectoryForImportMetaUrl = (opts: {
   importMetaUrl: string;

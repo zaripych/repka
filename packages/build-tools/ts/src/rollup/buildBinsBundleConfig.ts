@@ -1,9 +1,9 @@
 import virtual from '@rollup/plugin-virtual';
+import { isTruthy } from '@utils/ts';
 import type { OutputOptions, Plugin, RollupWatchOptions } from 'rollup';
 
 import type { PackageBinEntryPoint } from '../config/nodePackageConfig';
 import { determineBinScriptPath } from '../utils/binPath';
-import { isTruthy } from '../utils/isTruthy';
 import { mirroredBinContent } from './bin-virtual-modules/mirroredBinContent';
 import { tsxJumpDevTimeContent } from './bin-virtual-modules/tsxJumpDevTimeContent';
 import { rollupMakeExecutablePlugin } from './rollupMakeExecutablePlugin';

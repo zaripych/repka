@@ -1,9 +1,9 @@
+import type { BivarianceHack } from '@utils/ts';
 import fg from 'fast-glob';
 import { dirname, join } from 'node:path';
 
 import { logger } from '../logger/logger';
 import { readPackageJson } from '../package-json/readPackageJson';
-import type { BivarianceHack } from './bivarianceHack';
 import { readMonorepoPackagesGlobs } from './readPackagesGlobs';
 
 /**

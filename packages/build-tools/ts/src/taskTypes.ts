@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 
+import { BivarianceHack } from '@utils/ts';
+
 import type { TaskOpts } from './tasks/declareTask';
-import { BivarianceHack } from './utils/bivarianceHack';
 
 type TaskOf<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

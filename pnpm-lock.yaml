@@ -164,8 +164,10 @@ importers:
   packages/utils/ts:
     specifiers:
       '@build-tools/ts': workspace:@repka-kit/ts@*
+      utility-types: 3.10.0
     devDependencies:
       '@build-tools/ts': link:../../build-tools/ts
+      utility-types: 3.10.0
 
 packages:
 

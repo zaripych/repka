@@ -1,4 +1,4 @@
-import { once } from '../utils/once';
+import { once } from '@utils/ts';
 
 const levels = ['debug', 'info', 'warn', 'error', 'fatal'] as const;
 

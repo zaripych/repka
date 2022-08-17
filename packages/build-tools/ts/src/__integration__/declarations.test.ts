@@ -2,8 +2,7 @@ import {
   packageTestSandbox,
   sortedDirectoryContents,
 } from '@testing-tools/packages';
-
-import { once } from '../utils/once';
+import { once } from '@utils/ts';
 
 const sandbox = once(() =>
   packageTestSandbox({
