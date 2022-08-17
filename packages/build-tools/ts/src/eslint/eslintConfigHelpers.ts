@@ -1,5 +1,4 @@
 import { once } from '@utils/ts';
-import type { PromiseType } from 'utility-types';
 
 import { asyncToSync } from '../utils/async-to-sync';
 import { readMonorepoPackagesGlobs } from '../utils/readPackagesGlobs';
@@ -19,7 +18,7 @@ export const eslintConfigHelpers = async () => {
 };
 
 export const syncEslintConfigHelpers = once(() => {
-  return asyncToSync<PromiseType<ReturnType<typeof eslintConfigHelpers>>>(
+  return asyncToSync<Awaited<ReturnType<typeof eslintConfigHelpers>>>(
     import.meta.url,
     'eslintConfigHelpers',
     []
