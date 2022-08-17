@@ -1,3 +1,4 @@
+import { allFulfilled } from '@utils/ts';
 import { red } from 'kleur/colors';
 import { performance } from 'perf_hooks';
 
@@ -5,7 +6,6 @@ import { logger } from './logger/logger';
 import { readCwdPackageJson } from './package-json/readPackageJson';
 import type { TaskExecuteFn, TaskWatchFn } from './tasks/declareTask';
 import type { AllTaskTypes } from './taskTypes';
-import { allFulfilled } from './utils/allFullfilled';
 import { enableSourceMapsSupport } from './utils/enableSourceMapsSupport';
 
 type Task = AllTaskTypes | TaskExecuteFn<unknown>;

@@ -1,5 +1,6 @@
 /// <reference types="./@types/rollup-plugin-generate-package-json" />
 
+import { allFulfilled } from '@utils/ts';
 import type { Plugin, RollupWatchOptions } from 'rollup';
 
 import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
@@ -17,7 +18,6 @@ import { combinePluginsProp } from './rollup/standardRollupConfig';
 import { combineDefaultRollupConfigBuildOpts } from './rollup/standardRollupConfig';
 import { defaultRollupConfig } from './rollup/standardRollupConfig';
 import { declareTask } from './tasks/declareTask';
-import { allFulfilled } from './utils/allFullfilled';
 
 export type BuildOpts = {
   /**

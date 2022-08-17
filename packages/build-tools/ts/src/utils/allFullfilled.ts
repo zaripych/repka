@@ -1,12 +1,16 @@
+type ReturnType<T extends readonly unknown[] | []> = {
+  -readonly [P in keyof T]: Awaited<T[P]>;
+};
+
 export async function allFulfilled<T extends readonly unknown[] | []>(
   args: T
-): Promise<{ -readonly [P in keyof T]: PromiseSettledResult<Awaited<T[P]>> }> {
+): Promise<ReturnType<T>> {
   const results = await Promise.allSettled(args);
   const resultsArr = results as unknown as Array<PromiseSettledResult<unknown>>;
-  for (const result of resultsArr) {
+  return resultsArr.map((result) => {
     if (result.status === 'rejected') {
       throw result.reason;
     }
-  }
-  return results;
+    return result.value;
+  }) as unknown as ReturnType<T>;
 }

@@ -1,3 +1,4 @@
+import { allFulfilled } from '@utils/ts';
 import { stat } from 'node:fs/promises';
 
 import { ensureEslintConfigFilesExist } from './eslint/ensureEslintConfigFilesExist';
@@ -6,7 +7,6 @@ import { logger } from './logger/logger';
 import { declareTask } from './tasks/declareTask';
 import { ensureTsConfigExists } from './tsc/ensureTsConfigExists';
 import { tscCompositeTypeCheck } from './tsc/tsc';
-import { allFulfilled } from './utils/allFullfilled';
 
 /**
  * Lint using eslint, no customizations possible, other than
