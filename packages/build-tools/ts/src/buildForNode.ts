@@ -8,6 +8,7 @@ import { rmrfDist } from './file-system/rmrfDist';
 import { buildBinsBundleConfig } from './rollup/buildBinsBundleConfig';
 import { rollupBuild } from './rollup/rollupBuild';
 import { rollupPackageJsonPlugin } from './rollup/rollupPackageJsonPlugin';
+import { rollupWatch } from './rollup/rollupWatch';
 import type {
   DefaultRollupConfigBuildOpts,
   RollupOptionsBuilder,
@@ -153,11 +154,13 @@ export function buildForNode(opts?: BuildOpts) {
           )
         : [buildExportsConfig()];
 
-      await allFulfilled(
-        [...exportsConfig, ...binConfigs, ...extraConfigs].map((config) =>
-          rollupBuild(config)
-        )
-      );
+      const configs = [...exportsConfig, ...binConfigs, ...extraConfigs];
+      await allFulfilled(configs.map((config) => rollupBuild(config)));
+
+      return configs;
+    },
+    watch: async (configs) => {
+      await rollupWatch(configs);
     },
   });
 }

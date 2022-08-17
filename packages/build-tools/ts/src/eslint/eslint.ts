@@ -18,8 +18,8 @@ export const eslintBinPath = () =>
 
 const eslintConfigPath = () => configFilePath('./eslint/eslint-root.cjs');
 
-export const eslint = async (processArgs: string[]) =>
-  spawnToPromise(
+export const eslint = async (processArgs: string[]) => {
+  return spawnToPromise(
     await eslintBinPath(),
     cliArgsPipe(
       [
@@ -53,3 +53,4 @@ export const eslint = async (processArgs: string[]) =>
       exitCodes: 'inherit',
     }
   );
+};

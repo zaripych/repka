@@ -3,12 +3,12 @@ import pico from 'picocolors';
 
 import { logger } from './logger/logger';
 import { readCwdPackageJson } from './package-json/readPackageJson';
-import type { TaskExecuteFn } from './tasks/declareTask';
+import type { TaskExecuteFn, TaskWatchFn } from './tasks/declareTask';
 import type { AllTaskTypes } from './taskTypes';
 import { allFulfilled } from './utils/allFullfilled';
 import { enableSourceMapsSupport } from './utils/enableSourceMapsSupport';
 
-type Task = AllTaskTypes | TaskExecuteFn;
+type Task = AllTaskTypes | TaskExecuteFn<unknown>;
 
 const postTaskNames: Array<AllTaskTypes['name']> = ['copy'];
 
@@ -33,6 +33,7 @@ const mainTaskNames: Array<AllTaskTypes['name']> = [
 export async function pipeline<Args extends [Task, ...Task[]]>(
   ...tasks: Args
 ): Promise<void> {
+  const isWatchMode = process.argv.includes('--watch');
   const start = performance.now();
   try {
     enableSourceMapsSupport();
@@ -68,7 +69,7 @@ export async function pipeline<Args extends [Task, ...Task[]]>(
       try {
         return typeof task === 'function'
           ? await task()
-          : await Promise.resolve(task.execute?.());
+          : await Promise.resolve<unknown>(task.execute?.());
       } catch (err) {
         logger.error(err);
         logger.error(
@@ -82,15 +83,54 @@ export async function pipeline<Args extends [Task, ...Task[]]>(
       }
     };
 
-    await allFulfilled([...main, ...custom].map(executeTask));
-    await allFulfilled(post.map(executeTask));
+    const watchTask = async (task: Task, state: unknown) => {
+      try {
+        if (typeof task === 'function') {
+          return;
+        }
+        if (!task.watch) {
+          return;
+        }
+        const watchFn = task.watch as TaskWatchFn<unknown>;
+        return await Promise.resolve(watchFn(state));
+      } catch (err) {
+        logger.error(err);
+        logger.error(
+          pico.red(
+            `\nERROR: Failed to ${
+              task.name || 'execute a task in watch mode'
+            } ${String((await readCwdPackageJson()).name)} "${
+              err instanceof Error ? err.message : String(err)
+            }"`
+          )
+        );
+        return Promise.reject(err);
+      }
+    };
+
+    const mainAndCustom = await allFulfilled(
+      [...main, ...custom].map(executeTask)
+    );
+    const postTasks = await allFulfilled(post.map(executeTask));
+
+    if (isWatchMode) {
+      await allFulfilled(
+        [...main, ...custom, ...post].map((task, index) =>
+          index < mainAndCustom.length
+            ? watchTask(task, mainAndCustom[index])
+            : watchTask(task, postTasks[index - mainAndCustom.length])
+        )
+      );
+    }
   } catch (err) {
     if (typeof process.exitCode !== 'number') {
       process.exitCode = 1;
     }
   } finally {
-    const end = performance.now();
-    const toSeconds = (value: number) => `${(value / 1000).toFixed(2)}s`;
-    logger.log(`\nTask took ${toSeconds(end - start)}`);
+    if (!isWatchMode) {
+      const end = performance.now();
+      const toSeconds = (value: number) => `${(value / 1000).toFixed(2)}s`;
+      logger.log(`\nTask took ${toSeconds(end - start)}`);
+    }
   }
 }

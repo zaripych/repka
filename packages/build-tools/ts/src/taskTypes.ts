@@ -3,8 +3,10 @@
 import type { TaskOpts } from './tasks/declareTask';
 import { BivarianceHack } from './utils/bivarianceHack';
 
-type TaskOf<T extends BivarianceHack<unknown[], TaskOpts<string, unknown>>> =
-  ReturnType<T>;
+type TaskOf<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends BivarianceHack<unknown[], TaskOpts<string, unknown, any>>
+> = ReturnType<T>;
 
 type LintTask = TaskOf<typeof import('./lint').lint>;
 type BuildForNodeTask = TaskOf<typeof import('./buildForNode').buildForNode>;

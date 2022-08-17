@@ -1,4 +1,4 @@
-export type TaskOpts<Key extends string, Args> = {
+export type TaskOpts<Key extends string, Args, State> = {
   /**
    * A key identifying task options
    */
@@ -11,15 +11,26 @@ export type TaskOpts<Key extends string, Args> = {
   /**
    * Function that executes the task
    */
-  execute?: TaskExecuteFn;
+  execute?: TaskExecuteFn<State>;
+
+  /**
+   * Function that executes the task in watch mode
+   */
+  watch?: TaskWatchFn<State>;
 };
 
-export type TaskExecuteFn = () => Promise<unknown>;
+export type TaskExecuteFn<State> = () => Promise<State>;
 
-export type BuiltTaskOpts<Key extends string, Args> = TaskOpts<Key, Args>;
+export type TaskWatchFn<State> = (state: State) => Promise<unknown>;
 
-export function declareTask<Key extends string, Args>(
-  opts: TaskOpts<Key, Args>
-): BuiltTaskOpts<Key, Args> {
+export type BuiltTaskOpts<Key extends string, Args, State> = TaskOpts<
+  Key,
+  Args,
+  State
+>;
+
+export function declareTask<Key extends string, Args, State>(
+  opts: TaskOpts<Key, Args, State>
+): BuiltTaskOpts<Key, Args, State> {
   return opts;
 }

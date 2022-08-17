@@ -23,6 +23,7 @@ export type DefaultRollupConfigBuildOpts = {
    * https://esbuild.github.io/api/#minify
    */
   minify?: boolean;
+  analyze?: boolean;
 };
 
 export type RollupOptionsBuilder = (
@@ -88,9 +89,9 @@ export function defaultRollupConfig(opts?: DefaultRollupConfigBuildOpts) {
       entryFileNames: `[name].[format].js`,
       format: 'esm',
     },
-    watch: {
-      clearScreen: false,
-    },
+    // watch: {
+    //   clearScreen: false,
+    // },
   };
   return config;
 }
@@ -134,9 +135,10 @@ const plugins = (opts?: DefaultRollupConfigBuildOpts) => {
     //   sourceMaps: true,
     //   minify: true,
     // }),
-    analyze({
-      summaryOnly: true,
-      limit: 5,
-    }),
+    opts?.analyze &&
+      analyze({
+        summaryOnly: true,
+        limit: 5,
+      }),
   ].filter(isTruthy);
 };
