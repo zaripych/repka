@@ -1,5 +1,3 @@
-import type { PromiseType } from 'utility-types';
-
 import type { BivarianceHack } from './bivarianceHack';
 
 export type MemoizedFunctionStore<
@@ -8,12 +6,12 @@ export type MemoizedFunctionStore<
 > = {
   [P in K]: T;
 } & {
-  entries(): IterableIterator<[string, PromiseType<ReturnType<T>>]>;
+  entries(): IterableIterator<[string, Awaited<ReturnType<T>>]>;
   isPending(...args: Parameters<T>): boolean;
   has(...args: Parameters<T>): boolean;
-  get(...args: Parameters<T>): PromiseType<ReturnType<T>> | undefined;
+  get(...args: Parameters<T>): Awaited<ReturnType<T>> | undefined;
   set(...args: Parameters<T>): {
-    value(value: PromiseType<ReturnType<T>>): void;
+    value(value: Awaited<ReturnType<T>>): void;
   };
 };
 
@@ -25,18 +23,14 @@ export function memoizeFunction<
   opts: {
     memoizeFn: T;
     keyFromArgs: (...args: Parameters<T>) => string;
-    cache?: Map<string, PromiseType<ReturnType<T>>>;
+    cache?: Map<string, Awaited<ReturnType<T>>>;
   }
 ): MemoizedFunctionStore<K, T> {
-  const resultByArgs =
-    opts.cache ?? new Map<string, PromiseType<ReturnType<T>>>();
-  const pendingPromises = new Map<
-    string,
-    Promise<PromiseType<ReturnType<T>>>
-  >();
+  const resultByArgs = opts.cache ?? new Map<string, Awaited<ReturnType<T>>>();
+  const pendingPromises = new Map<string, Promise<Awaited<ReturnType<T>>>>();
   const cachedFn = async (
     ...args: Parameters<T>
-  ): Promise<PromiseType<ReturnType<T>>> => {
+  ): Promise<Awaited<ReturnType<T>>> => {
     const key = opts.keyFromArgs(...args);
     const existing = resultByArgs.get(key);
     if (existing) {
@@ -48,7 +42,7 @@ export function memoizeFunction<
     }
     try {
       const dataPromise = opts.memoizeFn(...args) as Promise<
-        PromiseType<ReturnType<T>>
+        Awaited<ReturnType<T>>
       >;
       pendingPromises.set(key, dataPromise);
       const data = await dataPromise;
@@ -69,12 +63,12 @@ export function memoizeFunction<
       const key = opts.keyFromArgs(...args);
       return resultByArgs.has(key);
     },
-    get: (...args: Parameters<T>): PromiseType<ReturnType<T>> | undefined => {
+    get: (...args: Parameters<T>): Awaited<ReturnType<T>> | undefined => {
       const key = opts.keyFromArgs(...args);
       return resultByArgs.get(key);
     },
     set: (...args: Parameters<T>) => ({
-      value: (value: PromiseType<ReturnType<T>>) => {
+      value: (value: Awaited<ReturnType<T>>) => {
         const key = opts.keyFromArgs(...args);
         resultByArgs.set(key, value);
       },
