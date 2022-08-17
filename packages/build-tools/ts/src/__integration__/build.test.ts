@@ -6,10 +6,12 @@ import { once } from '@utils/ts';
 
 const sandbox = once(() =>
   packageTestSandbox({
+    importMetaUrl: import.meta.url,
     tag: `build`,
+    templateName: 'solo-template',
     copyFiles: [
       {
-        source: new URL('./test-cases/build', import.meta.url).pathname,
+        source: new URL('./test-cases/solo/build', import.meta.url).pathname,
         include: ['**/*'],
       },
     ],
@@ -23,21 +25,7 @@ const sandbox = once(() =>
 
 beforeAll(async () => {
   await sandbox().create();
-});
 
-function sanitize(
-  result: { output: string; exitCode?: number },
-  sandboxDirectory: string
-) {
-  return {
-    ...result,
-    ...(result.output && {
-      output: result.output.replaceAll(sandboxDirectory + '/', './'),
-    }),
-  };
-}
-
-it('should build', async () => {
   const { sandboxDirectory } = await sandbox().props();
   expect(
     await sortedDirectoryContents(sandboxDirectory, {
@@ -51,26 +39,44 @@ it('should build', async () => {
       "src/index.ts",
     ]
   `);
+});
+
+it('should build via tsx', async () => {
+  const { sandboxDirectory } = await sandbox().props();
   expect(
-    sanitize(
-      await sandbox().runBin('tsx', './build.ts', '--log-level', 'error'),
-      sandboxDirectory
-    )
+    await sandbox().spawnBin('tsx', ['./build.ts', '--log-level', 'error'])
   ).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
-      "output": "-----------------------------
-    Rollup File Analysis
-    -----------------------------
-    bundle size:    38 Bytes
-    original size:  78 Bytes
-    code reduction: 51.28 %
-    module count:   1
+      "output": "",
+    }
+  `);
+  expect(
+    await sortedDirectoryContents(sandboxDirectory, {
+      exclude: ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'],
+    })
+  ).toMatchInlineSnapshot(`
+    Array [
+      "build.ts",
+      "dist/",
+      "dist/dist/",
+      "dist/dist/main.es.js",
+      "dist/package.json",
+      "package.json",
+      "src/",
+      "src/index.ts",
+    ]
+  `);
+});
 
-    /src/index.ts
-    ██████████████████████████████████████████████████ 100 % (38 Bytes)
-
-    ",
+it('should build via repka', async () => {
+  const { sandboxDirectory } = await sandbox().props();
+  expect(
+    await sandbox().spawnBin('repka', ['build:node', '--log-level', 'error'])
+  ).toMatchInlineSnapshot(`
+    Object {
+      "exitCode": 0,
+      "output": "",
     }
   `);
   expect(

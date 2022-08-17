@@ -7,12 +7,11 @@ import { once } from '@utils/ts';
 const sandbox = once(() =>
   packageTestSandbox({
     importMetaUrl: import.meta.url,
-    tag: `declarations`,
+    tag: `test`,
     templateName: 'solo-template',
     copyFiles: [
       {
-        source: new URL('./test-cases/solo/declarations', import.meta.url)
-          .pathname,
+        source: new URL('./test-cases/solo/test', import.meta.url).pathname,
         include: ['**/*'],
       },
     ],
@@ -33,36 +32,32 @@ beforeAll(async () => {
     })
   ).toMatchInlineSnapshot(`
     Array [
-      "declarations.ts",
       "package.json",
       "src/",
       "src/index.ts",
+      "src/sum.test.ts",
+      "src/sum.ts",
+      "test.ts",
     ]
   `);
 });
 
-it('should generate TypeScript declarations when run directly', async () => {
+it('should test via tsx', async () => {
   expect(
-    await sandbox().spawnBin('tsx', [
-      './declarations.ts',
-      '--log-level',
-      'error',
-    ])
-  ).toMatchInlineSnapshot(`
-    Object {
-      "exitCode": 0,
-      "output": "",
-    }
-  `);
+    await sandbox().spawnBin('tsx', ['./test.ts', '--log-level', 'error'])
+  ).toMatchObject({
+    exitCode: 0,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    output: expect.stringContaining('PASS'),
+  });
 });
 
-it('should generate TypeScript declarations when run via repka', async () => {
+it('should test via jest', async () => {
   expect(
-    await sandbox().spawnBin('repka', ['declarations', '--log-level', 'error'])
-  ).toMatchInlineSnapshot(`
-    Object {
-      "exitCode": 0,
-      "output": "",
-    }
-  `);
+    await sandbox().spawnBin('jest', ['--log-level', 'error'])
+  ).toMatchObject({
+    exitCode: 0,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    output: expect.stringContaining('PASS'),
+  });
 });

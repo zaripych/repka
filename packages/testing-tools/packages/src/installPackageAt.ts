@@ -11,20 +11,16 @@ export function isSupportedPackageManager(
   return supportedPackageManagers.includes(value as SupportedPackageManagers);
 }
 
-export async function installPackage(opts: {
+export async function installPackageAt(opts: {
   packageManager: 'pnpm' | 'npm' | 'yarn';
   directory: string;
 }) {
   switch (opts.packageManager) {
     case 'pnpm':
-      await spawnOutputConditional(
-        'pnpm',
-        ['install', '--virtual-store-dir', '../.pnpm'],
-        {
-          cwd: opts.directory,
-          exitCodes: [0],
-        }
-      );
+      await spawnOutputConditional('pnpm', ['install'], {
+        cwd: opts.directory,
+        exitCodes: [0],
+      });
       break;
     case 'npm':
       await spawnOutputConditional('npm', ['install', '--install-links'], {

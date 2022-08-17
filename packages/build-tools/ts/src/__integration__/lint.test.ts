@@ -6,10 +6,12 @@ import { once } from '@utils/ts';
 
 const sandbox = once(() =>
   packageTestSandbox({
+    importMetaUrl: import.meta.url,
+    templateName: 'solo-template',
     tag: `lint`,
     copyFiles: [
       {
-        source: new URL('./test-cases/lint', import.meta.url).pathname,
+        source: new URL('./test-cases/solo/lint', import.meta.url).pathname,
         include: ['**/*'],
       },
     ],
@@ -18,21 +20,6 @@ const sandbox = once(() =>
 
 beforeAll(async () => {
   await sandbox().create();
-});
-
-function sanitize(
-  result: { output: string; exitCode?: number },
-  sandboxDirectory: string
-) {
-  return {
-    ...result,
-    ...(result.output && {
-      output: result.output.replaceAll(sandboxDirectory + '/', './'),
-    }),
-  };
-}
-
-it('should lint', async () => {
   const { sandboxDirectory } = await sandbox().props();
   expect(
     await sortedDirectoryContents(sandboxDirectory, {
@@ -46,35 +33,72 @@ it('should lint', async () => {
       "src/index.ts",
     ]
   `);
+});
+
+it('should lint via direct tsx execution', async () => {
   expect(
-    sanitize(
-      await sandbox().runBin('tsx', './lint.ts', '--log-level', 'error'),
-      sandboxDirectory
-    )
+    await sandbox().spawnBin('tsx', [
+      './lint.ts',
+      '--cache',
+      '--log-level',
+      'error',
+    ])
   ).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
       "output": "",
     }
   `);
+});
+
+it('should lint via repka', async () => {
   expect(
-    await sortedDirectoryContents(sandboxDirectory, {
-      exclude: ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'],
-    })
+    await sandbox().spawnBin('repka', [
+      'lint',
+      '--cache',
+      '--log-level',
+      'error',
+    ])
   ).toMatchInlineSnapshot(`
-    Array [
-      ".eslintrc.cjs",
-      ".tsc-out/",
-      ".tsc-out/.tsbuildinfo",
-      ".tsc-out/src/",
-      ".tsc-out/src/index.d.ts",
-      ".tsc-out/src/index.js",
-      "lint.ts",
-      "package.json",
-      "src/",
-      "src/index.ts",
-      "tsconfig.eslint.json",
-      "tsconfig.json",
-    ]
+    Object {
+      "exitCode": 0,
+      "output": "",
+    }
+  `);
+});
+
+it('should lint via eslint', async () => {
+  expect(
+    await sandbox().spawnBin('eslint', [
+      '.',
+      '--cache',
+      '--fix',
+      '--log-level',
+      'error',
+    ])
+  ).toMatchInlineSnapshot(`
+    Object {
+      "exitCode": 0,
+      "output": "",
+    }
+  `);
+});
+
+it('should lint via pnpm exec eslint', async () => {
+  expect(
+    await sandbox().spawnResult('pnpm', [
+      'exec',
+      'eslint',
+      '.',
+      '--fix',
+      '--cache',
+      '--log-level',
+      'error',
+    ])
+  ).toMatchInlineSnapshot(`
+    Object {
+      "exitCode": 0,
+      "output": "",
+    }
   `);
 });

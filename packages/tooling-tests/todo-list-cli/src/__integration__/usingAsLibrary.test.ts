@@ -3,6 +3,7 @@ import { once } from '@utils/ts';
 
 const sandbox = once(() =>
   packageTestSandbox({
+    importMetaUrl: import.meta.url,
     tag: `usingAsLibrary`,
     copyFiles: [
       {
@@ -20,7 +21,7 @@ beforeAll(async () => {
 
 it('should be able to compile test cases', async () => {
   expect(
-    await sandbox().runBin('tsc', ...'--project ./tsconfig.json'.split(' '))
+    await sandbox().spawnBin('tsc', '--project ./tsconfig.json'.split(' '))
   ).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,

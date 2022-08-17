@@ -1,3 +1,4 @@
+export type { SpawnController } from './helpers/createSpawnApi';
 export {
   replaceTextInFiles,
   searchAndReplaceTextTransform,

@@ -1,8 +1,11 @@
 import { packageTestSandbox } from '@testing-tools/packages';
 import { once } from '@utils/ts';
+import { realpath } from 'node:fs/promises';
+import { join } from 'node:path';
 
 const sandbox = once(() =>
   packageTestSandbox({
+    importMetaUrl: import.meta.url,
     tag: `usingCli`,
   })
 );
@@ -11,61 +14,70 @@ beforeAll(async () => {
   await sandbox().create();
 });
 
+async function spawnMain(args?: string[]) {
+  const { packageUnderTest, sandboxDirectory } = await sandbox().props();
+  const path = await realpath(
+    join(sandboxDirectory, 'node_modules', packageUnderTest)
+  );
+  return sandbox().spawnResult(process.execPath, [path, ...(args || [])]);
+}
+
 it('should add, list and remove entries', async () => {
-  const { runMain } = sandbox();
-  expect(await runMain()).toMatchInlineSnapshot(`
+  expect(await spawnMain()).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
       "output": "[ - no entries found - ]
     ",
     }
   `);
-  expect(await runMain('add', 'my first todo entry')).toMatchInlineSnapshot(`
+  expect(await spawnMain(['add', 'my first todo entry']))
+    .toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
-      "output": "[32m+[39m [32m1[39m [32mmy first todo entry[39m
+      "output": "+ 1 my first todo entry
     ",
     }
   `);
-  expect(await runMain('add', 'my second todo entry')).toMatchInlineSnapshot(`
+  expect(await spawnMain(['add', 'my second todo entry']))
+    .toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
-      "output": "• [32m1[39m [37mmy first todo entry[39m
-    [32m+[39m [32m2[39m [32mmy second todo entry[39m
+      "output": "• 1 my first todo entry
+    + 2 my second todo entry
     ",
     }
   `);
-  expect(await runMain('list')).toMatchInlineSnapshot(`
+  expect(await spawnMain(['list'])).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
-      "output": "• [32m1[39m [37mmy first todo entry[39m
-    • [32m2[39m [37mmy second todo entry[39m
+      "output": "• 1 my first todo entry
+    • 2 my second todo entry
     ",
     }
   `);
-  expect(await runMain('add', 'third todo entry')).toMatchInlineSnapshot(`
+  expect(await spawnMain(['add', 'third todo entry'])).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
-      "output": "• [32m1[39m [37mmy first todo entry[39m
-    • [32m2[39m [37mmy second todo entry[39m
-    [32m+[39m [32m3[39m [32mthird todo entry[39m
+      "output": "• 1 my first todo entry
+    • 2 my second todo entry
+    + 3 third todo entry
     ",
     }
   `);
-  expect(await runMain('remove', '2')).toMatchInlineSnapshot(`
+  expect(await spawnMain(['remove', '2'])).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
-      "output": "• [32m1[39m [37mmy first todo entry[39m
-    [31m-[39m [31m2[39m [31mmy second todo entry[39m
-    • [32m3[39m [37mthird todo entry[39m
+      "output": "• 1 my first todo entry
+    - 2 my second todo entry
+    • 3 third todo entry
     ",
     }
   `);
-  expect(await runMain('list')).toMatchInlineSnapshot(`
+  expect(await spawnMain(['list'])).toMatchInlineSnapshot(`
     Object {
       "exitCode": 0,
-      "output": "• [32m1[39m [37mmy first todo entry[39m
-    • [32m3[39m [37mthird todo entry[39m
+      "output": "• 1 my first todo entry
+    • 3 third todo entry
     ",
     }
   `);

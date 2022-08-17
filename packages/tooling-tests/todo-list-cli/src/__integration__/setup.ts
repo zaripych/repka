@@ -1,6 +1,7 @@
 import { packageInstallTemplate } from '@testing-tools/packages';
 
 await packageInstallTemplate({
+  importMetaUrl: import.meta.url,
   packageJson: (json) => {
     return {
       ...json,
