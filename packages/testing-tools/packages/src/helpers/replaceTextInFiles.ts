@@ -176,30 +176,35 @@ export function searchAndReplaceTextTransform(opts: {
   const transform = new Transform({
     transform(chunk: string | Buffer, _, callback) {
       chunks += Buffer.isBuffer(chunk) ? chunk.toString('utf-8') : chunk;
-      if (chunks.length >= maxMatchLength) {
-        let result = filter(chunks);
-        while (result) {
-          if (opts.onEvent) {
-            opts.onEvent({
-              event: 'match',
-              filterIndex: result.filterIndex,
-              match: result.match,
-              position: totalRead + result.index,
-              length: result.length,
-            });
-          }
-          this.push([result.before, result.replacement()].join(''));
-          totalRead += chunks.length;
-          chunks = result.after;
-          result = filter(chunks);
+      // Below commented condition can lead to blocked pipes when
+      // stream is infinite, on the other hand consuming input earlier
+      // might lead to matching a shorter match and loosing opportunity
+      // to consume longer match that later wouldn't match because we already
+      // consumed the portion of a match.
+      // --
+      // if (chunks.length >= maxMatchLength) {
+      let result = filter(chunks);
+      while (result) {
+        if (opts.onEvent) {
+          opts.onEvent({
+            event: 'match',
+            filterIndex: result.filterIndex,
+            match: result.match,
+            position: totalRead + result.index,
+            length: result.length,
+          });
         }
-        if (chunks.length > maxMatchLength * 2) {
-          const cutPoint = chunks.length - maxMatchLength;
-          const before = chunks.slice(0, cutPoint);
-          this.push(before);
-          chunks = chunks.slice(cutPoint);
-          totalRead += cutPoint;
-        }
+        this.push([result.before, result.replacement()].join(''));
+        totalRead += chunks.length;
+        chunks = result.after;
+        result = filter(chunks);
+      }
+      if (chunks.length > maxMatchLength * 2) {
+        const cutPoint = chunks.length - maxMatchLength;
+        const before = chunks.slice(0, cutPoint);
+        this.push(before);
+        chunks = chunks.slice(cutPoint);
+        totalRead += cutPoint;
       }
       callback(null);
     },
