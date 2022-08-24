@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { getTestConfig } from './getTestConfig';
 import { copyFiles } from './helpers/copyFiles';
 import { deleteTurboCache } from './helpers/deleteTurboCache';
+import { emptyDir } from './helpers/emptyDir';
 import { findPackageUnderTest } from './helpers/findPackageUnderTest';
 import { ignoreErrors } from './helpers/ignoreErrors';
 import { randomText } from './helpers/randomText';
@@ -242,7 +243,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
           packageManager
         );
 
-        await ignoreErrors(rm(templateDirectory, { recursive: true }));
+        await ignoreErrors(emptyDir(templateDirectory));
         if (previousInstallResult?.cacheBustedInstallSource) {
           await ignoreErrors(
             rm(previousInstallResult.cacheBustedInstallSource, {

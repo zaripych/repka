@@ -2,7 +2,7 @@ import { logger } from '@build-tools/ts';
 import { onceAsync } from '@utils/ts';
 import fg from 'fast-glob';
 import assert from 'node:assert';
-import { mkdir, rm, stat, symlink } from 'node:fs/promises';
+import { stat, symlink } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { getTestConfig } from './getTestConfig';
 import { copyFiles } from './helpers/copyFiles';
 import { createTestSpawnApi } from './helpers/createSpawnApi';
+import { emptyDir } from './helpers/emptyDir';
 import { findPackageUnderTest } from './helpers/findPackageUnderTest';
 import { ignoreErrors } from './helpers/ignoreErrors';
 import type { PostActionsOpts } from './helpers/runPostActions';
@@ -79,10 +80,7 @@ export function packageTestSandbox(opts: PackageTestSandboxOpts) {
         );
       }
 
-      await rm(sandboxDirectory, { recursive: true }).catch(() => {
-        // ignore
-      });
-      await mkdir(sandboxDirectory);
+      await emptyDir(sandboxDirectory);
 
       await copyFiles({
         source: templateDirectory,
