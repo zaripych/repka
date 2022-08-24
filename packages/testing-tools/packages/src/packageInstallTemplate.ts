@@ -22,6 +22,7 @@ import { readPackageJson, writePackageJson } from './helpers/writePackageJson';
 import {
   installPackageAt,
   isSupportedPackageManager,
+  linkPackageAt,
 } from './installPackageAt';
 import { sortedDirectoryContents } from './sortedDirectoryContents';
 
@@ -71,6 +72,7 @@ type PackageInstallResult = {
     packageUnderTest: string;
     packageInstallSource: string;
     packageJsonContents: Record<string, unknown>;
+    linked: boolean;
   };
   turboHash: string | undefined;
   cacheBustedInstallSource: string;
@@ -90,6 +92,11 @@ export type PackageInstallTemplateOpts = {
    * dependency of the template package
    */
   packageUnderTestPublishDirectory?: string;
+
+  /**
+   * Link package under test after install from it's publish directory
+   */
+  linkPackageUnderTest?: boolean;
 
   /**
    * Whether package under test is a dev dependency or a regular dependency
@@ -150,6 +157,8 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
         opts.packageUnderTestPublishDirectory ||
           join(config.packageRootDirectory, './dist')
       ),
+      linkPackageUnderTest:
+        opts.linkPackageUnderTest && packageManager === 'pnpm',
       ...config,
       templateDirectory: join(
         config.testRootDirectory,
@@ -183,6 +192,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
         packageManager,
         randomId,
         cacheBustedInstallSource,
+        linkPackageUnderTest,
       } = allProps;
 
       logger.info(
@@ -220,6 +230,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
           packageManager: allProps.packageManager,
           packageUnderTest: allProps.packageUnderTest,
           packageInstallSource: allProps.packageInstallSource,
+          linked: Boolean(opts.linkPackageUnderTest),
           packageJsonContents: await readPackageJson(packageInstallSource),
         },
         turboHash: process.env['TURBO_HASH'],
@@ -296,7 +307,16 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
           directory: templateDirectory,
           packageManager,
         });
-      } else {
+
+        if (linkPackageUnderTest) {
+          await linkPackageAt({
+            packageManager,
+            from: packageInstallSource,
+            to: templateDirectory,
+            packageName: packageUnderTest,
+          });
+        }
+      } else if (!linkPackageUnderTest) {
         logger.debug(
           'Skipping full installation because package.json contents has not changed and props are same',
           Object.keys(expectedInstallResult.propsTriggeringReinstall)
@@ -336,6 +356,8 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
 
           copiedTo.push(target);
         }
+      } else {
+        logger.debug('Package under test is linked, so should be good to go!');
       }
 
       await writeFile(
