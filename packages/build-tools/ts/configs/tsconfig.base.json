@@ -8,10 +8,10 @@
       // Thes are relative to the config, so will include
       // types that we reference in devDependencies of the
       // @repka-kit/ts
-      "../../../node_modules/@types",
-      "../../node_modules/@types",
+      "../@types",
       "../node_modules/@types",
-      "node_modules/@types"
+      "../../node_modules/@types",
+      "../../../node_modules/@types"
     ],
     "sourceMap": false,
     "moduleResolution": "node",
