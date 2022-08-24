@@ -20,10 +20,7 @@ async function lookup(opts: { path: string; lookupPackageName: string }) {
  * Lookup location for devDependencies of "@repka-kit/ts" - this function will
  * lookup for "opts.lookupPackageName"
  */
-export async function findDevDependency(opts: {
-  wrapperPackageName?: string;
-  lookupPackageName: string;
-}) {
+export async function findDevDependency(opts: { lookupPackageName: string }) {
   const lookupPackageName = opts.lookupPackageName;
 
   return await lookup({
