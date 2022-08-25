@@ -3,6 +3,7 @@ import { ensureEslintConfigFilesExist } from '../eslint/ensureEslintConfigFilesE
 import { eslintBinPath } from '../eslint/eslint';
 import {
   cliArgsPipe,
+  includesAnyOf,
   removeLogLevelOption,
   setDefaultArgs,
 } from '../utils/cliArgsPipe';
@@ -22,6 +23,11 @@ const runEslint = async () => {
         setDefaultArgs(
           ['--config', '-c'],
           [configFilePath('./eslint/eslint-root.cjs')]
+        ),
+        setDefaultArgs(
+          ['--resolve-plugins-relative-to'],
+          [process.cwd()],
+          (state) => !includesAnyOf(state.inputArgs, ['-c', '--config'])
         ),
         (args) => ({
           ...args,

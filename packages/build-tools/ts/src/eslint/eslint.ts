@@ -8,7 +8,6 @@ import {
   setDefaultArgs,
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
-import { repositoryRootPath } from '../utils/repositoryRootPath';
 
 export const eslintBinPath = () =>
   binPath({
@@ -36,7 +35,8 @@ export const eslint = async (processArgs: string[]) => {
         ),
         setDefaultArgs(
           ['--resolve-plugins-relative-to'],
-          [await repositoryRootPath()]
+          [process.cwd()],
+          (state) => !includesAnyOf(state.inputArgs, ['-c', '--config'])
         ),
         // remove non-standard --no-fix parameter
         removeInputArgs(['--no-fix']),
