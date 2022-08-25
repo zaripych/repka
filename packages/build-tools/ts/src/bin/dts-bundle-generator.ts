@@ -46,6 +46,7 @@ async function run() {
   generateAndSaveDtsBundle(config);
 }
 
-run().catch(() => {
+run().catch((err) => {
+  console.error(err);
   process.exitCode = 1;
 });
