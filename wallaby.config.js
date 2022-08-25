@@ -9,6 +9,8 @@ export default () => {
     },
     testFramework: {
       path: './node_modules/@repka-kit/ts/node_modules/jest',
+      configFile:
+        './node_modules/@repka-kit/ts/configs/jest/jestConfigRootUnit.mjs',
     },
   };
 };
