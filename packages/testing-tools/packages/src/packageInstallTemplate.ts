@@ -154,8 +154,10 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
       packageManager,
       packageUnderTest,
       packageInstallSource: resolve(
-        opts.packageUnderTestPublishDirectory ||
-          join(config.packageRootDirectory, './dist')
+        join(
+          config.packageRootDirectory,
+          opts.packageUnderTestPublishDirectory ?? './dist'
+        )
       ),
       linkPackageUnderTest:
         opts.linkPackageUnderTest && packageManager === 'pnpm',
