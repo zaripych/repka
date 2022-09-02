@@ -13,7 +13,9 @@ async function tryReadingPnpmWorkspaceYaml(monorepoRoot: string) {
   const rootPath = load(text) as {
     packages?: string[];
   };
-  return rootPath.packages ?? [];
+  return Array.isArray(rootPath.packages) && rootPath.packages.length > 0
+    ? rootPath.packages
+    : undefined;
 }
 
 async function tryReadingPackageJsonWorkspaces(monorepoRoot: string) {
@@ -21,7 +23,10 @@ async function tryReadingPackageJsonWorkspaces(monorepoRoot: string) {
   const packageJson = JSON.parse(text) as {
     workspaces?: string[];
   };
-  return Array.isArray(packageJson.workspaces) ? packageJson.workspaces : [];
+  return Array.isArray(packageJson.workspaces) &&
+    packageJson.workspaces.length > 0
+    ? packageJson.workspaces
+    : undefined;
 }
 
 const readPackagesGlobsAt = async (monorepoRoot: string) => {
