@@ -6,4 +6,5 @@ if [ "$DISABLE_LINT_STAGED" != "" ]; then
   exit 0;
 fi;
 
-pnpm run lint-staged
+PATH=./node_modules/.bin:$PATH
+lint-staged
