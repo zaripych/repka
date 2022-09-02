@@ -15,6 +15,9 @@ export const repkaCommand = () =>
         .choices(['debug', 'info', 'warn', 'error', 'fatal'])
         .default('info')
     )
+    .addOption(
+      createOption('--cwd [dir]', 'override current directory for the command')
+    )
     .addCommand(lintCommand())
     .addCommand(testCommand())
     .addCommand(integrationCommand())

@@ -41,6 +41,10 @@ export async function commandTemplate(opts: {
   run: (opts: { help: boolean }) => Promise<void>;
 }) {
   const { root, type } = await loadRepositoryConfiguration();
+  const cwd = opts.command.parent?.opts<{ cwd?: string }>()?.cwd;
+  if (cwd) {
+    process.chdir(cwd);
+  }
   if (type === 'multiple-packages' && process.cwd() === root) {
     logger.error(
       `Running this command in the monorepo root is not supported - try using "turbo": \n\n﹥ ${bold(
