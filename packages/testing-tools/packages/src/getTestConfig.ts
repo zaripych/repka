@@ -104,7 +104,7 @@ export async function getTestConfig(relativeTo: string): Promise<TestConfig> {
       await mkdir(directoryPath, { recursive: true });
       await writeFile(
         filePath,
-        JSON.stringify(config, undefined, '  '),
+        JSON.stringify(created, undefined, '  '),
         'utf-8'
       );
       return created;
