@@ -6,4 +6,4 @@ if [ "$DISABLE_LINT_STAGED" != "" ]; then
   exit 0;
 fi;
 
-LOG_LEVEL=debug pnpm run lint-staged
+pnpm run lint-staged
