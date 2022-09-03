@@ -49,7 +49,7 @@ const stashIncludeUntrackedKeepIndex = async () => {
       }
     ).then(split);
   const listStashContents = () =>
-    spawnOutput('git', 'stash show stash@{0} --name-only'.split(' '), {
+    spawnOutput('git', 'stash show -u --name-only stash@{0}'.split(' '), {
       exitCodes: [0],
     }).then(split);
   const [staged, modified, untracked] = await Promise.all([
@@ -131,28 +131,14 @@ const applyStashed = async () =>
   });
 
 const run = async () => {
-  const { didStash, staged } = await stashIncludeUntrackedKeepIndex();
+  const { didStash } = await stashIncludeUntrackedKeepIndex();
   try {
     await lintStaged();
   } finally {
     if (didStash) {
-      const statusResult = await spawnOutput('git', ['status'], {
-        exitCodes: 'any',
-      });
       await applyStashed().then((result) => {
-        if (result.error) {
-          console.error('git status before error:');
-          console.error(statusResult);
-          console.error(result.error.message);
-        }
         if (result.status !== 0) {
           console.error(result.output.join(''));
-          console.log(
-            '\nTo at least restore list of staged files after resolution, try this: \n\n',
-            `git reset && git add ${staged
-              .map((file) => `'${file}'`)
-              .join(' ')} \n\n`
-          );
         }
         return Promise.resolve();
       });
