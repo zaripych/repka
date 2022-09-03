@@ -74,6 +74,7 @@ export async function runTurboTasksForSinglePackage(opts: {
         ...opts.tasks,
         '--filter=' + rootDir.replace(cwd, '.'),
         '--output-logs=new-only',
+        '--color',
       ]
     ),
     {
