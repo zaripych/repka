@@ -3,28 +3,40 @@ import { join } from 'node:path';
 
 import { configFilePath } from '../utils/configFilePath';
 import { readMonorepoPackagesGlobs } from '../utils/readPackagesGlobs';
-import { repositoryRootPath } from '../utils/repositoryRootPath';
 
-async function ensureEslintTsConfigExists() {
-  const { root, packagesGlobs } = await readMonorepoPackagesGlobs();
-  const expected = join(root, 'tsconfig.eslint.json');
-  const eslintConfigExists = await stat(expected)
-    .then((result) => result.isFile())
-    .catch(() => false);
+const defaultDeps = {
+  fileExists: (path: string) =>
+    stat(path)
+      .then((result) => result.isFile())
+      .catch(() => false),
+  readFile: (path: string) => readFile(path, { encoding: 'utf-8' }),
+  writeFile: (path: string, data: string) =>
+    writeFile(path, data, { encoding: 'utf-8' }),
+};
+
+export async function ensureEslintTsConfigExists(
+  opts: {
+    directory: string;
+    packagesGlobs: string[];
+  },
+  deps = defaultDeps
+) {
+  const path = join(opts.directory, 'tsconfig.eslint.json');
+  const eslintConfigExists = await deps.fileExists(path);
 
   if (eslintConfigExists) {
     return;
   }
-  const text = await readFile(configFilePath('eslint/tsconfig.eslint.json'), {
-    encoding: 'utf-8',
-  });
-
-  const globs = new Set(
-    packagesGlobs.map((glob) => (glob !== '*' ? `${glob}/*.ts` : `*.ts`))
+  const text = await deps.readFile(
+    configFilePath('eslint/tsconfig.eslint.json')
   );
 
-  await writeFile(
-    expected,
+  const globs = new Set(
+    opts.packagesGlobs.map((glob) => (glob !== '*' ? `${glob}/*.ts` : `*.ts`))
+  );
+
+  await deps.writeFile(
+    path,
     text.replace(
       '["GLOBS"]',
       JSON.stringify(globs.size === 0 ? ['*.ts'] : [...globs])
@@ -32,25 +44,29 @@ async function ensureEslintTsConfigExists() {
   );
 }
 
-async function ensureEslintRootConfigExists() {
-  const root = await repositoryRootPath();
-  const expected = join(root, '.eslintrc.cjs');
-  const eslintConfigExists = await stat(expected)
-    .then((result) => result.isFile())
-    .catch(() => false);
+export async function ensureEslintRootConfigExists(
+  opts: { directory: string },
+  deps = defaultDeps
+) {
+  const path = join(opts.directory, '.eslintrc.cjs');
+  const eslintConfigExists = await deps.fileExists(path);
 
   if (eslintConfigExists) {
     return;
   }
-  const text = await readFile(configFilePath('eslint/eslint-ref.cjs'), {
-    encoding: 'utf-8',
-  });
-  await writeFile(expected, text);
+  const text = await deps.readFile(configFilePath('eslint/eslint-ref.cjs'));
+  await deps.writeFile(path, text);
 }
 
 export async function ensureEslintConfigFilesExist() {
+  const { root, packagesGlobs } = await readMonorepoPackagesGlobs();
   await Promise.all([
-    ensureEslintTsConfigExists(),
-    ensureEslintRootConfigExists(),
+    ensureEslintTsConfigExists({
+      directory: root,
+      packagesGlobs,
+    }),
+    ensureEslintRootConfigExists({
+      directory: root,
+    }),
   ]);
 }

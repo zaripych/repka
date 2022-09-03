@@ -25,22 +25,23 @@ async function writeFile(path: string, data: string) {
 
 export async function ensureTsConfigExists(
   opts?: {
-    ensurePackageJsonInCurrentDirectory?: boolean;
+    directory?: string;
   },
   deps = { fileExists, readFile, writeFile }
 ) {
-  if (opts?.ensurePackageJsonInCurrentDirectory) {
-    const cwdPackageJsonPath = join(process.cwd(), 'package.json');
+  const directory = opts?.directory ?? process.cwd();
+  if (!opts?.directory) {
+    const cwdPackageJsonPath = join(directory, 'package.json');
     const packageJsonExists = await deps.fileExists(cwdPackageJsonPath);
     if (!packageJsonExists) {
       return;
     }
   }
-  const expected = join(process.cwd(), 'tsconfig.json');
-  const configExists = await deps.fileExists(expected);
+  const path = join(directory, 'tsconfig.json');
+  const configExists = await deps.fileExists(path);
   if (configExists) {
     return;
   }
   const text = await deps.readFile(configFilePath('tsconfig.pkg.json'));
-  await deps.writeFile(expected, text);
+  await deps.writeFile(path, text);
 }
