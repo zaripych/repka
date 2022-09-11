@@ -1,7 +1,7 @@
 /// <reference types="./@types/rollup-plugin-generate-package-json" />
 
 import { allFulfilled } from '@utils/ts';
-import type { Plugin, RollupWatchOptions } from 'rollup';
+import type { Plugin, PluginContext, RollupWatchOptions } from 'rollup';
 
 import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from './config/loadNodePackageConfigs';
@@ -31,6 +31,7 @@ export type BuildOpts = {
    * that do not resolve on their own, have them setup here
    */
   resolveId?: (
+    this: PluginContext,
     id: string,
     importer?: string
   ) => ReturnType<NonNullable<Plugin['resolveId']>>;

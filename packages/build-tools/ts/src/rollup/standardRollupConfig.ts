@@ -4,7 +4,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
 import { isTruthy } from '@utils/ts';
-import type { Plugin, RollupWatchOptions } from 'rollup';
+import type { Plugin, PluginContext, RollupWatchOptions } from 'rollup';
 import analyze from 'rollup-plugin-analyzer';
 
 import type { NodePackageConfig } from '../config/nodePackageConfig';
@@ -15,6 +15,7 @@ import { extensions } from './rollupPluginExtensions';
 export type DefaultRollupConfigBuildOpts = {
   external?: string[];
   resolveId?: (
+    this: PluginContext,
     id: string,
     importer?: string
   ) => ReturnType<NonNullable<Plugin['resolveId']>>;
@@ -102,8 +103,8 @@ const plugins = (opts?: DefaultRollupConfigBuildOpts) => {
     ...(opts?.plugins ? opts.plugins : []),
     resolveIdFn && {
       name: 'rollupNodeConfig:resolveId',
-      async resolveId(id: string, importer?: string) {
-        return await Promise.resolve(resolveIdFn(id, importer));
+      async resolveId(this: PluginContext, id: string, importer?: string) {
+        return await Promise.resolve(resolveIdFn.bind(this)(id, importer));
       },
     },
     resolveNodeBuiltinsPlugin(),
