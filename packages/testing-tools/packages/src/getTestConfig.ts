@@ -22,6 +22,10 @@ export type TestConfig = {
    * ```
    */
   testRootDirectory: string;
+  /**
+   * Path to the test that has initialized this configuration
+   */
+  testFilePath: string;
 };
 
 const waitJustABit = () => new Promise((res) => setTimeout(res, 3));
@@ -74,11 +78,11 @@ const handleConfigReadError =
     }
   };
 
-export async function getTestConfig(relativeTo: string): Promise<TestConfig> {
-  const packageRootDirectory = await findPackageRootDir(relativeTo);
+export async function getTestConfig(testFilePath: string): Promise<TestConfig> {
+  const packageRootDirectory = await findPackageRootDir(testFilePath);
   if (!packageRootDirectory) {
     throw new Error(
-      `Following along parent directories of "${relativeTo}" no package.json in sight`
+      `Following along parent directories of "${testFilePath}" no package.json in sight`
     );
   }
   const directoryPath = join(packageRootDirectory, './.integration');
@@ -116,5 +120,8 @@ export async function getTestConfig(relativeTo: string): Promise<TestConfig> {
     `Integration test root directory is "${config.testRootDirectory}"`
   );
 
-  return config;
+  return {
+    ...config,
+    testFilePath: testFilePath,
+  };
 }

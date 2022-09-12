@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { isAbsolute, join } from 'node:path';
+import { dirname, isAbsolute, join } from 'node:path';
 
 import type { CopyGlobOpts } from './copyFiles';
 import { copyFiles } from './copyFiles';
@@ -29,13 +29,15 @@ export type PostActionsOpts<Props> = {
   replaceTextInFiles?: OptionallyAsync<Props, Array<ReplaceTextOpts>>;
   packageJson?: (
     entries: Record<string, unknown>,
-    path: string
+    packageJsonPath: string,
+    props: Props
   ) => Record<string, unknown>;
 };
 
 export async function runPostActions<Props>(
   props: Props,
   opts: {
+    testFilePath: string;
     targetDirectory: string;
   } & PostActionsOpts<Props>
 ) {
@@ -51,6 +53,10 @@ export async function runPostActions<Props>(
       copyFilesOpt.map((copyOpts) =>
         copyFiles({
           ...copyOpts,
+          source:
+            copyOpts.source && !isAbsolute(copyOpts.source)
+              ? join(dirname(opts.testFilePath), copyOpts.source)
+              : copyOpts.source,
           destination: join(opts.targetDirectory, copyOpts.destination || './'),
         })
       )
@@ -75,9 +81,12 @@ export async function runPostActions<Props>(
     );
   }
   if (opts.packageJson) {
+    const packageJson = opts.packageJson;
     await transformPackageJsonInWorkspace({
       directory: opts.targetDirectory,
-      packageJson: opts.packageJson,
+      packageJson: (entries, path) => {
+        return packageJson(entries, path, props);
+      },
     });
   }
 }

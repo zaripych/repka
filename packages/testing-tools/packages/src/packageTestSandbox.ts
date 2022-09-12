@@ -113,6 +113,7 @@ export function packageTestSandbox(opts: PackageTestSandboxOpts) {
       }
 
       await runPostActions(allProps, {
+        testFilePath: allProps.testFilePath,
         targetDirectory: sandboxDirectory,
         ...opts,
       });

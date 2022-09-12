@@ -1,7 +1,7 @@
 import type { TaskTypes } from '@build-tools/ts';
 import { runTurboTasksForSinglePackage } from '@build-tools/ts';
 import { logger } from '@build-tools/ts';
-import { onceAsync } from '@utils/ts';
+import { hasOne, onceAsync } from '@utils/ts';
 import fg from 'fast-glob';
 import assert from 'node:assert';
 import { mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
@@ -106,7 +106,7 @@ export type PackageInstallTemplateOpts = {
   /**
    * Tasks to run before the integration test
    */
-  buildTasks?: [TaskTypes, ...TaskTypes[]];
+  buildTasks?: TaskTypes[];
 
   /**
    * Install via this package manager
@@ -177,14 +177,34 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
     };
   });
 
+  const runBuild = onceAsync(async () => {
+    const { packageRootDirectory } = await props();
+    const buildTasks = opts.buildTasks ?? ['build', 'declarations'];
+    if (!hasOne(buildTasks)) {
+      return { buildTime: 0 };
+    }
+    const buildStart = performance.now();
+    await runTurboTasksForSinglePackage({
+      tasks: buildTasks,
+      packageDir: packageRootDirectory,
+      spawnOpts: {
+        exitCodes: [0],
+      },
+    });
+    const buildStop = performance.now();
+    return {
+      buildTime: buildStop - buildStart,
+    };
+  });
+
   return {
     props,
+    runBuild,
     create: async () => {
       const start = performance.now();
 
       const allProps = await props();
       const {
-        packageRootDirectory,
         testRootDirectory,
         templateDirectory,
         packageUnderTest,
@@ -203,17 +223,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
 
       const templateName = basename(templateDirectory);
 
-      const buildStart = performance.now();
-
-      await runTurboTasksForSinglePackage({
-        tasks: opts.buildTasks ?? ['build', 'declarations'],
-        packageDir: packageRootDirectory,
-        spawnOpts: {
-          exitCodes: [0],
-        },
-      });
-
-      const buildStop = performance.now();
+      const { buildTime } = await runBuild();
 
       if (logger.logLevel === 'debug') {
         logger.debug(
@@ -301,6 +311,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
         });
 
         await runPostActions<PackageInstallTemplateProps>(allProps, {
+          testFilePath: allProps.testFilePath,
           targetDirectory: templateDirectory,
           ...opts,
         });
@@ -381,7 +392,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
 
       logger.debug(
         `Total time to create ${templateName}
-  Re-Build Time:      ${((buildStop - buildStart) / 1000).toFixed(2)}s
+  Re-Build Time:      ${(buildTime / 1000).toFixed(2)}s
   ${
     shouldFullInstall
       ? `Full Install Time:  ${((stop - start) / 1000).toFixed(2)}s`

@@ -4,7 +4,7 @@ import type {
   SpawnResultReturn,
 } from '@build-tools/ts';
 import { spawnResult as spawnResultCore } from '@build-tools/ts';
-import { escapeRegExp } from '@utils/ts';
+import { captureStackTrace, escapeRegExp } from '@utils/ts';
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { Transform } from 'node:stream';
@@ -89,26 +89,34 @@ export function createTestSpawnApi(
       },
     });
 
-    const stripAnsiTransform = new Transform({
-      transform(this, chunk: Buffer, _, callback) {
-        this.push(stripAnsi(chunk.toString('utf8')));
-        callback();
-      },
-    });
-
     const waitForOutput = async (
       output: string | RegExp,
       timeoutMs: number | 'no-timeout' = 500
     ) => {
-      if (!child.stdout) {
+      if (!child.stdout || !child.stderr) {
         throw new Error('There is no .stdout');
       }
       const out = child.stdout;
+      const err = child.stderr;
+
+      const stripAnsiTransform = new Transform({
+        transform(this, chunk: Buffer, _, callback) {
+          this.push(stripAnsi(chunk.toString('utf8')));
+          callback();
+        },
+      });
 
       return new Promise<void>((res, rej) => {
         const stop = () => {
           out.unpipe(stripAnsiTransform);
+          err.unpipe(stripAnsiTransform);
           stripAnsiTransform.unpipe(search);
+          if (out.isPaused() && out.listenerCount('data') > 0) {
+            out.resume();
+          }
+          if (err.isPaused() && err.listenerCount('data') > 0) {
+            err.resume();
+          }
         };
 
         const search = searchAndReplaceTextTransform({
@@ -154,6 +162,7 @@ export function createTestSpawnApi(
         }
 
         out.pipe(stripAnsiTransform, { end: false });
+        err.pipe(stripAnsiTransform, { end: false });
         stripAnsiTransform.pipe(search, { end: false });
       });
     };
@@ -162,6 +171,7 @@ export function createTestSpawnApi(
       if (!child.stdin) {
         throw new Error('There is no .stdin');
       }
+      const { rethrow } = captureStackTrace();
       const stdin = child.stdin;
       stdin.setDefaultEncoding('utf-8');
       await new Promise<void>((res, rej) => {
@@ -177,12 +187,14 @@ export function createTestSpawnApi(
             res();
           });
         }
-      }).then(() => {
-        if (end) {
-          return new Promise<void>((res) => stdin.end(res));
-        }
-        return;
-      });
+      })
+        .then(() => {
+          if (end) {
+            return new Promise<void>((res) => stdin.end(res));
+          }
+          return;
+        })
+        .catch(rethrow);
     };
 
     const waitForResult = async () => {
@@ -197,35 +209,45 @@ export function createTestSpawnApi(
     };
 
     const readOutput = async (timeoutMs: number | 'no-timeout' = 500) => {
-      if (!child.stdout) {
+      if (!child.stdout || !child.stderr) {
         throw new Error('There is no .stdout');
       }
-      const out = child.stdout;
       if (combined.length > 0) {
         return nextSnapshot();
       }
       if (child.killed) {
         throw new Error('Process has already finished');
       }
+      const stdout = child.stdout;
+      const stderr = child.stderr;
       return await new Promise<string>((res, rej) => {
         const cleanup = () => {
-          out.removeListener('data', onData);
-          out.removeListener('error', onError);
-          out.removeListener('end', onData);
+          stdout.removeListener('data', onData);
+          stdout.removeListener('error', onError);
+          stdout.removeListener('end', onData);
+
+          stderr.removeListener('data', onData);
+          stderr.removeListener('error', onError);
+          stderr.removeListener('end', onData);
         };
 
         const onData = () => {
           cleanup();
           res(nextSnapshot());
         };
+
         const onError = (err: unknown) => {
           cleanup();
           rej(err);
         };
 
-        out.addListener('data', onData);
-        out.addListener('error', onError);
-        out.addListener('end', onData);
+        stdout.addListener('data', onData);
+        stdout.addListener('error', onError);
+        stdout.addListener('end', onData);
+
+        stderr.addListener('data', onData);
+        stderr.addListener('error', onError);
+        stderr.addListener('end', onData);
 
         if (typeof timeoutMs === 'number') {
           setTimeout(() => {

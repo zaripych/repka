@@ -1,4 +1,4 @@
-import { lstat, mkdir, readdir, unlink } from 'node:fs/promises';
+import { lstat, mkdir, readdir, rm, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
 export async function emptyDir(dir: string) {
@@ -16,7 +16,7 @@ export async function emptyDir(dir: string) {
       if (result.isSymbolicLink()) {
         await unlink(path);
       } else if (result.isDirectory()) {
-        await emptyDir(path);
+        await rm(path, { recursive: true });
       } else {
         await unlink(path);
       }
