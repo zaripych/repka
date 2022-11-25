@@ -331,7 +331,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
         }
       } else if (!linkPackageUnderTest) {
         logger.debug(
-          'Skipping full installation because package.json contents has not changed and props are same',
+          `Skipping full installation of "${templateName}" because package.json contents has not changed and props are same`,
           Object.keys(expectedInstallResult.propsTriggeringReinstall)
         );
 
@@ -370,7 +370,9 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
           copiedTo.push(target);
         }
       } else {
-        logger.debug('Package under test is linked, so should be good to go!');
+        logger.debug(
+          `Package under test for "${templateName}" is linked, so should be good to go!`
+        );
       }
 
       await writeFile(
@@ -391,8 +393,12 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
       }
 
       logger.debug(
-        `Total time to create ${templateName}
-  Re-Build Time:      ${(buildTime / 1000).toFixed(2)}s
+        `Total time to create ${templateName}${
+          opts.buildTasks && opts.buildTasks.length > 0
+            ? `
+  Re-Build Time:      ${(buildTime / 1000).toFixed(2)}s`
+            : ``
+        }
   ${
     shouldFullInstall
       ? `Full Install Time:  ${((stop - start) / 1000).toFixed(2)}s`

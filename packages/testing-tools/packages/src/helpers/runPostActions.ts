@@ -31,7 +31,7 @@ export type PostActionsOpts<Props> = {
     entries: Record<string, unknown>,
     packageJsonPath: string,
     props: Props
-  ) => Record<string, unknown>;
+  ) => Record<string, unknown> | Promise<Record<string, unknown>>;
 };
 
 export async function runPostActions<Props>(

@@ -1,11 +1,12 @@
+import { logger } from '@build-tools/ts';
 import fg from 'fast-glob';
 import type { Stats } from 'node:fs';
-import { copyFile, mkdir, realpath, stat, symlink } from 'node:fs/promises';
-import { dirname, join, relative } from 'node:path';
+import { copyFile, mkdir, readlink, realpath, symlink } from 'node:fs/promises';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 
 export type CopyOptsExtra = Pick<
   fg.Options,
-  'cwd' | 'deep' | 'dot' | 'onlyDirectories' | 'followSymbolicLinks'
+  'cwd' | 'deep' | 'dot' | 'onlyDirectories'
 >;
 
 export type CopyGlobOpts = {
@@ -27,25 +28,20 @@ export type CopyGlobOpts = {
   };
 };
 
-export type CopyBasicOpts = {
-  source?: string;
-  files: string[];
-  destination: string;
-  options?: {
-    followSymbolicLinks?: boolean;
-    dryRun?: boolean;
-  };
+export type CopyOpts = CopyGlobOpts;
+
+type Entry = {
+  path: string;
+  stats: Stats;
 };
 
-export type CopyOpts = CopyGlobOpts | CopyBasicOpts;
-
-async function entriesFromGlobs({
+function entriesFromGlobs({
   source,
   exclude,
   include,
   options,
 }: Pick<CopyGlobOpts, 'source' | 'include' | 'exclude' | 'options'>) {
-  const entries = await fg(
+  const entries = fg.stream(
     [
       ...(exclude ? exclude.map((glob) => `!${source || '.'}/${glob}`) : []),
       ...include.map((glob) => `${source || '.'}/${glob}`),
@@ -58,56 +54,30 @@ async function entriesFromGlobs({
       objectMode: true,
     }
   );
-  return entries as Array<{
-    path: string;
-    stats: Stats;
-  }>;
-}
-
-async function entriesFromBasic({ files, source }: CopyBasicOpts) {
-  const entries = await Promise.all(
-    files.map((path) =>
-      stat(join(source || '.', path)).then((stats) => {
-        if (stats.isDirectory()) {
-          return entriesFromGlobs({
-            source,
-            include: [`${path}**/*`],
-            options: {
-              dot: true,
-            },
-          });
-        }
-        return [
-          {
-            path: join(source || '.', path),
-            stats,
-          },
-        ];
-      })
-    )
-  );
-  return entries.flatMap((entries) => entries);
+  return entries as AsyncIterable<Entry>;
 }
 
 function getDeps(opts: CopyOpts) {
   const normalDeps = {
-    mkdir,
     realpath,
+    readlink,
+    mkdir,
     symlink,
     copyFile,
   };
   const dryRunDeps = {
+    realpath,
+    readlink,
     mkdir: (...[directory]: Parameters<typeof mkdir>) => {
-      console.log('mkdir', { directory });
+      logger.debug('mkdir', { directory });
       return Promise.resolve();
     },
-    realpath,
     symlink: (...[source, target]: Parameters<typeof symlink>) => {
-      console.log('symlink', { source, target });
+      logger.debug('symlink', { source, target });
       return Promise.resolve();
     },
     copyFile: (...[source, target]: Parameters<typeof copyFile>) => {
-      console.log('copyFile', { source, target });
+      logger.debug('copyFile', { source, target });
       return Promise.resolve();
     },
   };
@@ -117,59 +87,82 @@ function getDeps(opts: CopyOpts) {
 
 export async function copyFiles(opts: CopyOpts) {
   const deps = getDeps(opts);
-  const entries =
-    'include' in opts
-      ? await entriesFromGlobs(opts)
-      : 'files' in opts
-      ? await entriesFromBasic(opts)
-      : [];
 
-  if (opts.options?.dryRun) {
-    console.log(
-      'entries',
-      entries.map((entry) => entry.path)
-    );
-  }
-
-  const followSymbolicLinks = opts.options?.followSymbolicLinks ?? false;
   const createdDirs = new Set<string>();
+  const symlinkEntries: Array<Entry> = [];
+  const source = resolve(opts.source || '.');
 
-  for (const entry of entries) {
-    const sourcePath = entry.path;
-    const relativePath = relative(opts.source || '.', sourcePath);
-    const targetPath = join(opts.destination, relativePath);
-    const info = entry.stats;
-
-    const targetDirectory = dirname(targetPath);
-    if (!info.isDirectory() && !createdDirs.has(targetDirectory)) {
-      await deps.mkdir(targetDirectory, {
-        recursive: true,
-      });
-      createdDirs.add(targetDirectory);
+  for await (const entry of entriesFromGlobs(opts)) {
+    if (opts.options?.dryRun) {
+      console.log('found entry', entry);
     }
 
-    if (info.isSymbolicLink() && !followSymbolicLinks) {
-      const realSourcePath = await realpath(sourcePath);
+    const { path: sourcePath, stats } = entry;
+    const targetPath = join(opts.destination, relative(source, sourcePath));
+
+    if (stats.isSymbolicLink()) {
+      // skip symbolic links for now as they might be pointing to the
+      // files in the directory tree being copied, this allows us to
+      // create identical symbolic links later
+      symlinkEntries.push(entry);
+    } else if (stats.isFile()) {
+      const targetDirectory = dirname(targetPath);
+      if (!stats.isDirectory() && !createdDirs.has(targetDirectory)) {
+        await deps.mkdir(targetDirectory, {
+          recursive: true,
+        });
+        createdDirs.add(targetDirectory);
+      }
+      await deps.copyFile(sourcePath, targetPath);
+    } else if (stats.isDirectory()) {
+      await deps.mkdir(targetPath, {
+        recursive: true,
+      });
+      createdDirs.add(targetPath);
+    } else {
+      // ignore
+    }
+  }
+
+  const realSource = await deps.realpath(source);
+  for (const entry of symlinkEntries) {
+    const sourcePath = entry.path;
+    const targetPath = join(opts.destination, relative(source, sourcePath));
+
+    const link = await deps.readlink(sourcePath);
+    const realLinkTarget = await deps.realpath(sourcePath);
+
+    const linkTargetIsWithinSourceDir = realLinkTarget.startsWith(realSource);
+    const relativeLinkAndTargetDirectoryNameSame =
+      !isAbsolute(link) && dirname(source) === dirname(opts.destination);
+
+    if (linkTargetIsWithinSourceDir || relativeLinkAndTargetDirectoryNameSame) {
       await deps
-        .symlink(realSourcePath, targetPath)
+        .symlink(link, targetPath)
         .catch(async (err: NodeJS.ErrnoException) => {
           if (err.code === 'EEXIST') {
-            const existingRealSourcePath = await realpath(targetPath);
-            if (existingRealSourcePath !== realSourcePath) {
+            const existingLink = await readlink(targetPath);
+            if (existingLink !== link) {
               return Promise.reject(err);
             } else {
               return Promise.resolve();
             }
           }
         });
-    } else if (info.isFile()) {
-      await deps.copyFile(sourcePath, targetPath);
-    } else if (info.isDirectory()) {
-      await deps.mkdir(targetPath, {
-        recursive: true,
-      });
     } else {
-      // ignore
+      // no way but to create a symlink to the target outside destination:
+      await deps
+        .symlink(realLinkTarget, targetPath)
+        .catch(async (err: NodeJS.ErrnoException) => {
+          if (err.code === 'EEXIST') {
+            const existingRealSourcePath = await realpath(targetPath);
+            if (existingRealSourcePath !== realLinkTarget) {
+              return Promise.reject(err);
+            } else {
+              return Promise.resolve();
+            }
+          }
+        });
     }
   }
 }

@@ -9,7 +9,7 @@ export async function transformPackageJsonInWorkspace(opts: {
   packageJson: (
     entries: Record<string, unknown>,
     path: string
-  ) => Record<string, unknown>;
+  ) => Record<string, unknown> | Promise<Record<string, unknown>>;
 }) {
   const packageJsonFiles = fg.stream('**/package.json', {
     cwd: opts.directory,
@@ -20,7 +20,7 @@ export async function transformPackageJsonInWorkspace(opts: {
   for await (const filePath of packageJsonFiles) {
     const json = await readPackageJson(dirname(filePath));
     const initial = JSON.stringify(json);
-    const result = opts.packageJson(json, filePath);
+    const result = await opts.packageJson(json, filePath);
 
     if (initial !== JSON.stringify(result)) {
       await writePackageJson(dirname(filePath), result);
