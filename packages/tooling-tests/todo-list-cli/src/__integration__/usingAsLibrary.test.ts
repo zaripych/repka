@@ -23,7 +23,7 @@ it('should be able to compile test cases', async () => {
   expect(
     await sandbox().spawnBin('tsc', '--project ./tsconfig.json'.split(' '))
   ).toMatchInlineSnapshot(`
-    Object {
+    {
       "exitCode": 0,
       "output": "",
     }

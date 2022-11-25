@@ -24,7 +24,7 @@ async function spawnMain(args?: string[]) {
 
 it('should add, list and remove entries', async () => {
   expect(await spawnMain()).toMatchInlineSnapshot(`
-    Object {
+    {
       "exitCode": 0,
       "output": "[ - no entries found - ]
     ",
@@ -32,7 +32,7 @@ it('should add, list and remove entries', async () => {
   `);
   expect(await spawnMain(['add', 'my first todo entry']))
     .toMatchInlineSnapshot(`
-    Object {
+    {
       "exitCode": 0,
       "output": "+ 1 my first todo entry
     ",
@@ -40,7 +40,7 @@ it('should add, list and remove entries', async () => {
   `);
   expect(await spawnMain(['add', 'my second todo entry']))
     .toMatchInlineSnapshot(`
-    Object {
+    {
       "exitCode": 0,
       "output": "• 1 my first todo entry
     + 2 my second todo entry
@@ -48,7 +48,7 @@ it('should add, list and remove entries', async () => {
     }
   `);
   expect(await spawnMain(['list'])).toMatchInlineSnapshot(`
-    Object {
+    {
       "exitCode": 0,
       "output": "• 1 my first todo entry
     • 2 my second todo entry
@@ -56,7 +56,7 @@ it('should add, list and remove entries', async () => {
     }
   `);
   expect(await spawnMain(['add', 'third todo entry'])).toMatchInlineSnapshot(`
-    Object {
+    {
       "exitCode": 0,
       "output": "• 1 my first todo entry
     • 2 my second todo entry
@@ -65,7 +65,7 @@ it('should add, list and remove entries', async () => {
     }
   `);
   expect(await spawnMain(['remove', '2'])).toMatchInlineSnapshot(`
-    Object {
+    {
       "exitCode": 0,
       "output": "• 1 my first todo entry
     - 2 my second todo entry
@@ -74,7 +74,7 @@ it('should add, list and remove entries', async () => {
     }
   `);
   expect(await spawnMain(['list'])).toMatchInlineSnapshot(`
-    Object {
+    {
       "exitCode": 0,
       "output": "• 1 my first todo entry
     • 3 third todo entry
