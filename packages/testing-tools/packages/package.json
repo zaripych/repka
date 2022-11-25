@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@build-tools/ts": "workspace:@repka-kit/ts@*",
+    "@jest/globals": "29.2.2",
     "@utils/ts": "workspace:*"
   }
 }
