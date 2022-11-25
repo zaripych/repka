@@ -1,6 +1,7 @@
 export * from './allFulfilled';
 export * from './asyncToErrorCallback';
 export * from './bivarianceHack';
+export * from './depsOf';
 export * from './escapeRegExp';
 export * from './filterTruthy';
 export * from './hasOne';
