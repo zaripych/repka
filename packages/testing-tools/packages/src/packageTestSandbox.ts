@@ -28,6 +28,16 @@ export type PackageTestSandboxOpts = {
   tag: string;
   importMetaUrl: string;
   templateName?: string;
+  /**
+   * Type of the sandbox. Defaults to `symlink`.
+   *
+   * The sandbox type can be `symlink` when the tests do not make any
+   * changes to the `node_modules` directory.
+   *
+   * When tests add/remove dependencies or re-install dependencies the
+   * sandbox type must be `copy` to make sure different tests do not affect
+   * each other.
+   */
   sandboxType?: 'symlink' | 'copy';
 
   env?: Record<string, string>;

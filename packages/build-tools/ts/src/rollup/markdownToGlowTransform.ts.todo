@@ -1,0 +1,164 @@
+import type { FilterPattern } from '@rollup/pluginutils';
+import { createFilter } from '@rollup/pluginutils';
+import MagicString from 'magic-string';
+import type { Plugin } from 'rollup';
+
+import { glowFormat } from '../markdown/glowFormat';
+import { once } from '@utils/ts';
+import { randomText } from '../utils/randomText';
+
+type PluginOptions = {};
+
+type RollupOptions = {
+  include?: FilterPattern;
+  exclude?: FilterPattern;
+};
+
+export type MarkdownTransformPluginOptions = PluginOptions & RollupOptions;
+
+declare global {
+  interface RegExpExecArray {
+    indices?: Array<[number, number]>;
+  }
+}
+
+async function regExpWalk(opts: {
+  text: string;
+  regExp: RegExp;
+  process: (result: {
+    match: RegExpExecArray;
+    text: string;
+    start: number;
+    end: number;
+  }) => string | undefined | Promise<string | undefined>;
+  sourcemap: boolean;
+}) {
+  let hasModifications = false;
+  const text = once(() => {
+    hasModifications = true;
+    return new MagicString(opts.text);
+  });
+  const regex = new RegExp(opts.regExp.source, 'dg');
+  let result = regex.exec(opts.text);
+  while (result) {
+    const matchedText = result[0];
+    const indices = result.indices?.[0];
+    if (!indices || !matchedText) {
+      throw new Error('Expected indices in the RegExpExecArray');
+    }
+    const modification = await Promise.resolve(
+      opts.process({
+        match: result,
+        text: matchedText,
+        start: indices[0],
+        end: indices[1],
+      })
+    );
+    if (modification) {
+      text().overwrite(indices[0], indices[1], modification);
+    }
+    result = regex.exec(opts.text);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (!hasModifications) {
+    return {
+      result: opts.text,
+    };
+  }
+  return {
+    result: text().toString(),
+    ...(opts.sourcemap && {
+      map: text().generateMap(),
+    }),
+  };
+}
+
+async function substituteVars(template: string) {
+  const regExp = /\$\{[^}]*\}/dg;
+  const substituted = new Map<string, string>();
+  const { result } = await regExpWalk({
+    text: template,
+    regExp,
+    sourcemap: false,
+    process: ({ text }) => {
+      const varName = '$' + randomText(8);
+      substituted.set(varName, text);
+      return varName;
+    },
+  });
+  const restore = (text: string) => {
+    if (substituted.size === 0) {
+      return text;
+    }
+    return restoreVars(text, substituted);
+  };
+  return {
+    result,
+    restore,
+  };
+}
+
+function restoreVars(template: string, substituted: Map<string, string>) {
+  let result = template;
+  for (const [key, value] of substituted.entries()) {
+    result = result.replace(key, value);
+  }
+  return result;
+}
+
+export const markdownToGlowTransform = (
+  pluginOptions: MarkdownTransformPluginOptions = {}
+): Plugin => {
+  const { include, exclude } = pluginOptions;
+
+  const filter = createFilter(include, exclude);
+
+  return {
+    name: 'markdownToGlowTransform',
+    async transform(code, filename) {
+      if (!filter(filename)) {
+        return null;
+      }
+
+      const regExp = /markdown`(([^`]|(\\`))*[^\\])`/dg;
+
+      const { result, map } = await regExpWalk({
+        regExp,
+        text: code,
+        sourcemap: true,
+        process: async ({ match }) => {
+          const template = match[1];
+          if (!template) {
+            return;
+          }
+          const { result, restore } = await substituteVars(template);
+
+          const cleaned = result
+            .replace(/\\`/g, '`')
+            .replace(/^\s*/gm, '')
+            .replace(/^\n/gm, '')
+            .replace(/\n$/gm, '')
+            .trim();
+
+          const escape = (text: string) => text.replace(/`/g, '\\`');
+
+          const [naughty, styled] = await Promise.all([
+            glowFormat(cleaned, 'notty').then(escape).then(restore),
+            glowFormat(cleaned, 'light').then(escape).then(restore),
+          ]);
+
+          return `markdown({ naughty: \`${naughty}\`, styled: \`${styled}\` })`;
+        },
+      });
+
+      if (!map) {
+        return null;
+      }
+
+      return {
+        code: result,
+        map: map,
+      };
+    },
+  };
+};

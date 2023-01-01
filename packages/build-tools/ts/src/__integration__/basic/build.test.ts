@@ -1,3 +1,4 @@
+import { beforeAll, expect, it } from '@jest/globals';
 import {
   packageTestSandbox,
   sortedDirectoryContents,
@@ -8,10 +9,10 @@ const sandbox = once(() =>
   packageTestSandbox({
     importMetaUrl: import.meta.url,
     tag: `build`,
-    templateName: 'solo-template',
+    templateName: 'template-solo',
     copyFiles: [
       {
-        source: new URL('./test-cases/solo/build', import.meta.url).pathname,
+        source: new URL('../test-cases/solo/build', import.meta.url).pathname,
         include: ['**/*'],
       },
     ],
@@ -32,7 +33,7 @@ beforeAll(async () => {
       exclude: ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'],
     })
   ).toMatchInlineSnapshot(`
-    Array [
+    [
       "build.ts",
       "package.json",
       "src/",
@@ -45,18 +46,16 @@ it('should build via tsx', async () => {
   const { sandboxDirectory } = await sandbox().props();
   expect(
     await sandbox().spawnBin('tsx', ['./build.ts', '--log-level', 'error'])
-  ).toMatchInlineSnapshot(`
-    Object {
-      "exitCode": 0,
-      "output": "",
-    }
-  `);
+  ).toMatchObject({
+    exitCode: 0,
+    output: '',
+  });
   expect(
     await sortedDirectoryContents(sandboxDirectory, {
       exclude: ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'],
     })
   ).toMatchInlineSnapshot(`
-    Array [
+    [
       "build.ts",
       "dist/",
       "dist/dist/",
@@ -73,18 +72,16 @@ it('should build via repka', async () => {
   const { sandboxDirectory } = await sandbox().props();
   expect(
     await sandbox().spawnBin('repka', ['build:node', '--log-level', 'error'])
-  ).toMatchInlineSnapshot(`
-    Object {
-      "exitCode": 0,
-      "output": "",
-    }
-  `);
+  ).toMatchObject({
+    exitCode: 0,
+    output: '',
+  });
   expect(
     await sortedDirectoryContents(sandboxDirectory, {
       exclude: ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'],
     })
   ).toMatchInlineSnapshot(`
-    Array [
+    [
       "build.ts",
       "dist/",
       "dist/dist/",

@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 
 import { getModuleRootDirectoryForImportMetaUrl } from './moduleRootDirectory';

@@ -4,7 +4,14 @@ import { logger } from '@build-tools/ts';
 import { hasOne, onceAsync } from '@utils/ts';
 import fg from 'fast-glob';
 import assert from 'node:assert';
-import { mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import {
+  mkdir,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
@@ -94,7 +101,9 @@ export type PackageInstallTemplateOpts = {
   packageUnderTestPublishDirectory?: string;
 
   /**
-   * Link package under test after install from it's publish directory
+   * Link package under test after install from it's publish directory to
+   * the node_modules path at the install location so that changes to the
+   * code in publish directory affect the test results
    */
   linkPackageUnderTest?: boolean;
 
@@ -282,15 +291,21 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
 
         await mkdir(templateDirectory, { recursive: true });
 
-        await copyFiles({
-          source: packageInstallSource,
-          destination: cacheBustedInstallSource,
-          include: ['**'],
-          exclude: ['node_modules'],
-          options: {
-            dot: true,
-          },
-        });
+        // TODO: Determine if just doing symlink here is safe here for
+        // other package managers
+        if (packageManager === 'pnpm') {
+          await symlink(packageInstallSource, cacheBustedInstallSource);
+        } else {
+          await copyFiles({
+            source: packageInstallSource,
+            destination: cacheBustedInstallSource,
+            include: ['**'],
+            exclude: ['node_modules'],
+            options: {
+              dot: true,
+            },
+          });
+        }
 
         await writePackageJson(templateDirectory, {
           name: `package-${randomId}`,

@@ -1,3 +1,6 @@
-import { generateConfig } from './jestConfigRoot.mjs';
+import { createJestConfigForMonorepo } from './jestConfigHelpers.gen.mjs';
 
-export default await generateConfig('unit-test');
+export default () =>
+  createJestConfigForMonorepo({
+    flavor: 'unit',
+  });

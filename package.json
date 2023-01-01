@@ -22,7 +22,8 @@
     "test": "pnpm turbo run test",
     "test:all": "pnpm turbo run test",
     "test:changed": "pnpm turbo run test --filter='...[HEAD]'",
-    "turbo": "turbo"
+    "turbo": "turbo",
+    "what-key": "tsx ./packages/build-tools/ts/src/utils/what-key"
   },
   "dependencies": {},
   "devDependencies": {

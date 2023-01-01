@@ -20,9 +20,9 @@ export function markdown(
 export async function format(markdown: string, deps = { glowFormat }) {
   return await deps.glowFormat({
     input: markdown
-      .replace(/^\s*/gm, '')
-      .replace(/^\n/gm, '')
-      .replace(/\n$/gm, '')
+      .replace(/^\s*/g, '')
+      .replace(/^\n/g, '')
+      .replace(/\n$/g, '')
       .trim(),
   });
 }
@@ -30,9 +30,9 @@ export async function format(markdown: string, deps = { glowFormat }) {
 export async function print(markdown: string, deps = { glowPrint }) {
   await deps.glowPrint({
     input: markdown
-      .replace(/^\s*/gm, '')
-      .replace(/^\n/gm, '')
-      .replace(/\n$/gm, '')
+      .replace(/^\s*/g, '')
+      .replace(/^\n/g, '')
+      .replace(/\n$/g, '')
       .trim(),
   });
 }

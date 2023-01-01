@@ -1,3 +1,5 @@
+import { describe, expect, it } from '@jest/globals';
+
 import { validateEntryPoints } from './validateEntryPoints';
 
 describe('validateEntryPoints', () => {
@@ -13,7 +15,7 @@ describe('validateEntryPoints', () => {
     expect(() => {
       validateEntryPoints(null);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Expected \\"string\\" or \\"object\\" as exports entry - got \\"null\\""`
+      `"Expected "string" or "object" as exports entry - got "null""`
     );
   });
 

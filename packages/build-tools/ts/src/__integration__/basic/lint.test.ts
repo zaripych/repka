@@ -1,3 +1,4 @@
+import { beforeAll, expect, it } from '@jest/globals';
 import {
   packageTestSandbox,
   sortedDirectoryContents,
@@ -7,11 +8,11 @@ import { once } from '@utils/ts';
 const sandbox = once(() =>
   packageTestSandbox({
     importMetaUrl: import.meta.url,
-    templateName: 'solo-template',
     tag: `lint`,
+    templateName: 'template-solo',
     copyFiles: [
       {
-        source: new URL('./test-cases/solo/lint', import.meta.url).pathname,
+        source: new URL('../test-cases/solo/lint', import.meta.url).pathname,
         include: ['**/*'],
       },
     ],
@@ -26,7 +27,7 @@ beforeAll(async () => {
       exclude: ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'],
     })
   ).toMatchInlineSnapshot(`
-    Array [
+    [
       "lint.ts",
       "package.json",
       "src/",
@@ -43,12 +44,10 @@ it('should lint via direct tsx execution', async () => {
       '--log-level',
       'error',
     ])
-  ).toMatchInlineSnapshot(`
-    Object {
-      "exitCode": 0,
-      "output": "",
-    }
-  `);
+  ).toMatchObject({
+    exitCode: 0,
+    output: '',
+  });
 });
 
 it('should lint via repka', async () => {
@@ -59,12 +58,10 @@ it('should lint via repka', async () => {
       '--log-level',
       'error',
     ])
-  ).toMatchInlineSnapshot(`
-    Object {
-      "exitCode": 0,
-      "output": "",
-    }
-  `);
+  ).toMatchObject({
+    exitCode: 0,
+    output: '',
+  });
 });
 
 it('should lint via eslint', async () => {
@@ -76,12 +73,10 @@ it('should lint via eslint', async () => {
       '--log-level',
       'error',
     ])
-  ).toMatchInlineSnapshot(`
-    Object {
-      "exitCode": 0,
-      "output": "",
-    }
-  `);
+  ).toMatchObject({
+    exitCode: 0,
+    output: '',
+  });
 });
 
 it('should lint via pnpm exec eslint', async () => {
@@ -95,10 +90,8 @@ it('should lint via pnpm exec eslint', async () => {
       '--log-level',
       'error',
     ])
-  ).toMatchInlineSnapshot(`
-    Object {
-      "exitCode": 0,
-      "output": "",
-    }
-  `);
+  ).toMatchObject({
+    exitCode: 0,
+    output: '',
+  });
 });

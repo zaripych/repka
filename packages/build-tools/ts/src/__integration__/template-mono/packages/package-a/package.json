@@ -1,0 +1,19 @@
+{
+  "name": "package-a",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "repka lint",
+    "test": "repka test"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

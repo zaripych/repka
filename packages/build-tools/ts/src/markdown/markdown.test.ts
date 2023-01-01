@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { expect, it, jest } from '@jest/globals';
 
 import { glowFormat, glowFormat_defaultDeps } from './glowFormat';
 import { glowPrint, glowPrint_defaultDeps } from './glowPrint';

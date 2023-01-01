@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import { searchTextInFiles } from '@testing-tools/packages';
 
 import { binPath, determineBinScriptPath } from './binPath';

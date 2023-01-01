@@ -2,6 +2,7 @@ import { Command, createOption } from 'commander';
 
 import { buildNodeCommand } from './buildNode';
 import { declarationsCommand } from './declarations';
+import { initCommand } from './init';
 import { integrationCommand } from './integration';
 import { lintCommand } from './lint';
 import { testCommand } from './test';
@@ -18,6 +19,7 @@ export const repkaCommand = () =>
     .addOption(
       createOption('--cwd [dir]', 'override current directory for the command')
     )
+    .addCommand(initCommand())
     .addCommand(lintCommand())
     .addCommand(testCommand())
     .addCommand(integrationCommand())

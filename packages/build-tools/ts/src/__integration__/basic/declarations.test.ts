@@ -1,17 +1,21 @@
+import { beforeAll, expect, it, jest } from '@jest/globals';
 import {
   packageTestSandbox,
   sortedDirectoryContents,
 } from '@testing-tools/packages';
 import { once } from '@utils/ts';
 
+jest.setTimeout(10000);
+
 const sandbox = once(() =>
   packageTestSandbox({
     importMetaUrl: import.meta.url,
-    tag: `test`,
-    templateName: 'solo-template',
+    tag: `declarations`,
+    templateName: 'template-solo',
     copyFiles: [
       {
-        source: new URL('./test-cases/solo/test', import.meta.url).pathname,
+        source: new URL('../test-cases/solo/declarations', import.meta.url)
+          .pathname,
         include: ['**/*'],
       },
     ],
@@ -31,33 +35,33 @@ beforeAll(async () => {
       exclude: ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'],
     })
   ).toMatchInlineSnapshot(`
-    Array [
+    [
+      "declarations.ts",
       "package.json",
       "src/",
       "src/index.ts",
-      "src/sum.test.ts",
-      "src/sum.ts",
-      "test.ts",
     ]
   `);
 });
 
-it('should test via tsx', async () => {
+it('should generate TypeScript declarations when run directly', async () => {
   expect(
-    await sandbox().spawnBin('tsx', ['./test.ts', '--log-level', 'error'])
+    await sandbox().spawnBin('tsx', [
+      './declarations.ts',
+      '--log-level',
+      'error',
+    ])
   ).toMatchObject({
     exitCode: 0,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    output: expect.stringContaining('PASS'),
+    output: '',
   });
 });
 
-it('should test via jest', async () => {
+it('should generate TypeScript declarations when run via repka', async () => {
   expect(
-    await sandbox().spawnBin('jest', ['--log-level', 'error'])
+    await sandbox().spawnBin('repka', ['declarations', '--log-level', 'error'])
   ).toMatchObject({
     exitCode: 0,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    output: expect.stringContaining('PASS'),
+    output: '',
   });
 });

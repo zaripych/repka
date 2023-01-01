@@ -12,6 +12,24 @@ export const ignoredByNodeExportConditions = [
   'production',
 ] as const;
 
+export const dependencyKeys = Object.freeze([
+  'dependencies',
+  'devDependencies',
+  'peerDependencies',
+] as const);
+export type DependencyKeys = typeof dependencyKeys[number];
+
+export function getDependenciesRecord(
+  packageJson: Record<string, JsonType>,
+  key: DependencyKeys
+): Record<string, string> {
+  const packageDependencies = packageJson[key];
+  if (typeof packageDependencies !== 'object' || !packageDependencies) {
+    return {};
+  }
+  return packageDependencies as Record<string, string>;
+}
+
 export type NodeExportsConditions = typeof nodeExportsConditions[number];
 
 export type ExportsConditions =
