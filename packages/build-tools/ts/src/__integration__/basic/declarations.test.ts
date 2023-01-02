@@ -1,11 +1,9 @@
-import { beforeAll, expect, it, jest } from '@jest/globals';
+import { beforeAll, expect, it } from '@jest/globals';
 import {
   packageTestSandbox,
   sortedDirectoryContents,
 } from '@testing-tools/packages';
 import { once } from '@utils/ts';
-
-jest.setTimeout(10000);
 
 const sandbox = once(() =>
   packageTestSandbox({
