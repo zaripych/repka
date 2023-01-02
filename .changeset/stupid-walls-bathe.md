@@ -2,4 +2,4 @@
 "@repka-kit/ts": major
 ---
 
-Initial beta version of the @repka-kit/ts
+feat(beta): initial beta version of the @repka-kit/ts
