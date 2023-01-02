@@ -46,7 +46,7 @@ jobs:
         run: pnpm turbo run test
 
       - name: Integration
-        run: pnpm turbo run integration
+        run: pnpm turbo run integration --color
 
       - name: Access To Node Bins
         run: echo "${GITHUB_WORKSPACE}/node_modules/.bin" >> $GITHUB_PATH
