@@ -47,7 +47,11 @@ export const install = taskFactory(
             directory: opts.directory,
             packageJson,
           });
-          await spawnToPromise(command, ['install'], {
+          const args: string[] = ['install'];
+          if (command === 'pnpm') {
+            args.push('--no-frozen-lockfile');
+          }
+          await spawnToPromise(command, args, {
             cwd: opts.directory,
             stdio: 'inherit',
             exitCodes: [0],
