@@ -5,6 +5,7 @@ import { join, relative } from 'path';
 import { spawnToPromise } from '../child-process';
 import type { PackageConfigBuilder } from '../config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from '../config/loadNodePackageConfigs';
+import { loadTsConfigJson } from '../config/loadTsConfigJson';
 import { logger } from '../logger/logger';
 import { loadMonorepoDependencies } from '../utils/loadMonorepoDependencies';
 import { moduleRootDirectory } from '../utils/moduleRootDirectory';
@@ -23,19 +24,27 @@ export type DeclarationsOpts = {
 export async function declarationsViaDtsBundleGenerator(
   opts?: DeclarationsOpts
 ) {
-  const [packageConfig, dependencies] = await Promise.all([
+  const [tsConfig, packageConfig, dependencies] = await Promise.all([
+    loadTsConfigJson(),
     loadNodePackageConfigs(opts),
     loadMonorepoDependencies(),
   ]);
 
-  await Promise.all(
+  const dependencyOutDirs = await Promise.all(
     [
       ...dependencies.map((directory) => directory.packageDirectory),
       process.cwd(),
-    ].map((directory) => tscCompositeTypeCheckAt(directory))
+    ].map((directory) =>
+      Promise.all([
+        loadTsConfigJson(directory),
+        tscCompositeTypeCheckAt(directory),
+      ]).then(([tsconfig]) => tsconfig.compilerOptions?.outDir)
+    )
   );
 
   const entryPoints = packageConfig.entryPoints;
+
+  const outDir = tsConfig.compilerOptions?.outDir || '.tsc-out';
 
   const dtsBundleGeneratorConfigFile: BundlerConfig = {
     compilationOptions: {
@@ -44,12 +53,16 @@ export async function declarationsViaDtsBundleGenerator(
         composite: false,
         baseUrl: '.',
         paths: Object.fromEntries(
-          dependencies.map((dep) => [
+          dependencies.map((dep, i) => [
             dep.aliasName,
             [
               relative(
                 process.cwd(),
-                join(dep.packageDirectory, '.tsc-out', 'src')
+                join(
+                  dep.packageDirectory,
+                  dependencyOutDirs[i] || '.tsc-out',
+                  'src'
+                )
               ),
             ],
           ])
@@ -57,7 +70,7 @@ export async function declarationsViaDtsBundleGenerator(
       },
     },
     entries: entryPoints.map((entry) => {
-      const input = join('.tsc-out', entry.sourcePath);
+      const input = join(outDir, entry.sourcePath);
       const output = join('./dist/dist', entry.chunkName + '.es.d.ts');
       return {
         filePath: input,

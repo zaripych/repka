@@ -46,11 +46,11 @@ export type PackageJsonExports =
 
 export type JsonPrimitive = boolean | number | string | null;
 
-export type JsonType =
-  | {
-      [key: string]: JsonType | JsonPrimitive;
-    }
-  | JsonPrimitive;
+export type JsonObject = {
+  [key: string]: JsonType | JsonPrimitive;
+};
+
+export type JsonType = JsonObject | JsonPrimitive;
 
 export type PackageJson = {
   name?: string;

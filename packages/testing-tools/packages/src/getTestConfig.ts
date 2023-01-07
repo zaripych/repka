@@ -85,8 +85,12 @@ export async function getTestConfig(testFilePath: string): Promise<TestConfig> {
       `Following along parent directories of "${testFilePath}" no package.json in sight`
     );
   }
-  const directoryPath = join(packageRootDirectory, './.integration');
-  const filePath = join(packageRootDirectory, './.integration', 'config.json');
+  const directoryPath = join(packageRootDirectory, 'node_modules/.integration');
+  const filePath = join(
+    packageRootDirectory,
+    'node_modules/.integration',
+    'config.json'
+  );
 
   const readConfig = () =>
     readConfigAt({
