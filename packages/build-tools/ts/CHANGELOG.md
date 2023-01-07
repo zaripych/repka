@@ -1,5 +1,11 @@
 # @repka-kit/ts
 
+## 1.0.0-beta.5
+
+### Minor Changes
+
+- [#5](https://github.com/zaripych/repka/pull/5) [`4cc3889`](https://github.com/zaripych/repka/commit/4cc388912e3e2659bb57dd126f551e85c02b3e83) Thanks [@zaripych](https://github.com/zaripych)! - feat(init): adds init command which allows to initialize your repository to start using repka
+
 ## 1.0.0-beta.4
 
 ### Minor Changes
