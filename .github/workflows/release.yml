@@ -46,10 +46,10 @@ jobs:
         run: pnpm install
 
       - name: Test
-        run: pnpm turbo run test
+        run: pnpm jest --color
 
       - name: Integration
-        run: pnpm turbo run integration
+        run: pnpm jest --integration --color
 
       - name: Access To Node Bins
         run: echo "${GITHUB_WORKSPACE}/node_modules/.bin" >> $GITHUB_PATH
