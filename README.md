@@ -10,7 +10,8 @@ This is a work in progress at the moment.
 
 - single dependency linting, bundling, testing and packaging for TypeScript projects
 - supports both monorepo with multiple packages and single package repos
-- minimum configuration required, driven by `package.json` and TypeScript scripts
+- minimum configuration required, driven by `package.json`
+- configuration via TypeScript scripts with auto-completion
 - ESM support by default
 
 ## Core Dependencies
@@ -29,7 +30,8 @@ This is a work in progress at the moment.
 
 ## Roadmap
 
-- [ ] `init` command for first time initialization and migration of a repository to repka
+- [x] `init` command for first time initialization
+- [ ] `init` command supporting migration of an existing project
 - [ ] test on `Windows OS`, test with `npm` and `yarn` package managers
 - [ ] `@repka-kit/node` to be split out of `@repka-kit/ts` in preparation of `@repka-kit/web`
 
@@ -38,5 +40,7 @@ This is a work in progress at the moment.
 TODO
 
 ### Attributions
+
+<a href="https://github.com/timocov/dts-bundle-generator" title="dts-bundle-generator">Forked version of the DTS Bundle Generator is used to generate .d.ts files</a>
 
 <a href="https://www.flaticon.com/free-icons/turnip" title="turnip icons">Turnip icons created by Ridho Imam Prayogi - Flaticon</a>
