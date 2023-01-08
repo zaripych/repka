@@ -118,6 +118,8 @@ export async function createJestConfigForMonorepo({
     ...(testTimeout !== 0 && {
       testTimeout,
     }),
-    projects,
+    projects: projects.map(
+      ({ coverageDirectory, testTimeout, ...project }) => project
+    ),
   };
 }
