@@ -27,17 +27,20 @@ yarn-error.log*
 dist
 .log
 `;
-      const existingArr = existing
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean);
+      const existingArr = existing.split('\n');
+
       const candidateSet = new Set(
         candidate
           .split('\n')
           .map((line) => line.trim())
           .filter(Boolean)
       );
-      existingArr.forEach(candidateSet.delete.bind(candidateSet));
+
+      existingArr.forEach((existing) => {
+        candidateSet.delete(existing.trim());
+        candidateSet.delete(existing.trim() + '/');
+      });
+
       await writeFile(path, [...existingArr, ...candidateSet].join('\n'));
     },
   };
