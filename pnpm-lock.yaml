@@ -12,7 +12,7 @@ importers:
         version: 2.26.1
       '@repka-kit/ts':
         specifier: workspace:*
-        version: link:packages/build-tools/ts/dist
+        version: link:packages/build-tools/ts
       husky:
         specifier: 8.0.3
         version: 8.0.3
@@ -25,7 +25,7 @@ importers:
     devDependencies:
       '@build-tools/ts':
         specifier: workspace:@repka-kit/ts@*
-        version: link:../ts/dist
+        version: link:../ts
       '@rollup/plugin-replace':
         specifier: 5.0.2
         version: 5.0.2(rollup@3.21.2)
@@ -195,7 +195,7 @@ importers:
     devDependencies:
       '@build-tools/ts':
         specifier: workspace:@repka-kit/ts@*
-        version: link:../../build-tools/ts/dist
+        version: link:../../build-tools/ts
       '@jest/globals':
         specifier: 29.5.0
         version: 29.5.0
@@ -207,7 +207,7 @@ importers:
     devDependencies:
       '@repka-kit/ts':
         specifier: workspace:*
-        version: link:../../build-tools/ts/dist
+        version: link:../../build-tools/ts
       '@testing-tools/packages':
         specifier: workspace:*
         version: link:../../testing-tools/packages
@@ -231,13 +231,13 @@ importers:
     devDependencies:
       '@repka-kit/ts':
         specifier: workspace:*
-        version: link:../../build-tools/ts/dist
+        version: link:../../build-tools/ts
 
   packages/utils/ts:
     devDependencies:
       '@build-tools/ts':
         specifier: workspace:@repka-kit/ts@*
-        version: link:../../build-tools/ts/dist
+        version: link:../../build-tools/ts
 
 packages:
 

@@ -101,6 +101,7 @@
     "utility-types": "3.10.0"
   },
   "publishConfig": {
-    "directory": "dist"
+    "directory": "dist",
+    "linkDirectory": false
   }
 }
