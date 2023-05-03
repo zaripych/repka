@@ -1,6 +1,7 @@
-import { onceAsync } from '@utils/ts';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { onceAsync } from '@utils/ts';
 
 import { moduleRootDirectory } from '../utils/moduleRootDirectory';
 import type { PackageJson } from './packageJson';

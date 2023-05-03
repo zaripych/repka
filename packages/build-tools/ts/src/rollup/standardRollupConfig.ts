@@ -4,7 +4,12 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import resolve from '@rollup/plugin-node-resolve';
 import { isTruthy } from '@utils/ts';
-import type { Plugin, PluginContext, RollupWatchOptions } from 'rollup';
+import type {
+  InputPluginOption,
+  Plugin,
+  ResolveIdHook,
+  RollupWatchOptions,
+} from 'rollup';
 import analyze from 'rollup-plugin-analyzer';
 
 import type { NodePackageConfig } from '../config/nodePackageConfig';
@@ -14,12 +19,8 @@ import { extensions } from './rollupPluginExtensions';
 
 export type DefaultRollupConfigBuildOpts = {
   external?: string[];
-  resolveId?: (
-    this: PluginContext,
-    id: string,
-    importer?: string
-  ) => ReturnType<NonNullable<Plugin['resolveId']>>;
-  plugins?: Plugin[];
+  resolveId?: ResolveIdHook;
+  plugins?: InputPluginOption;
   /**
    * https://esbuild.github.io/api/#minify
    */
@@ -61,9 +62,18 @@ export const combineExternalProp = (before?: string[], after?: string[]) =>
   combineArrays('external', before, after);
 
 export const combinePluginsProp = (
-  before?: FalsyMix<Plugin>[],
-  after?: FalsyMix<Plugin>[]
-) => combineArrays('plugins', before, after);
+  before?: InputPluginOption,
+  after?: InputPluginOption
+) => combineInputPluginsOptionsProp(before, after);
+
+export const combineInputPluginsOptionsProp = (
+  before?: InputPluginOption,
+  after?: InputPluginOption
+): { plugins: InputPluginOption } => {
+  return {
+    plugins: [before, after],
+  };
+};
 
 export function combineDefaultRollupConfigBuildOpts(
   before: DefaultRollupConfigBuildOpts,
@@ -76,7 +86,7 @@ export function combineDefaultRollupConfigBuildOpts(
     ...before,
     ...after,
     ...combineExternalProp(before.external, after?.external),
-    ...combinePluginsProp(before.plugins, after?.plugins),
+    ...combineInputPluginsOptionsProp(before.plugins, after?.plugins),
   };
 }
 
@@ -87,28 +97,32 @@ export function defaultRollupConfig(opts?: DefaultRollupConfigBuildOpts) {
     output: {
       sourcemap: 'inline',
       chunkFileNames: `chunk.[hash].js`,
-      entryFileNames: `[name].[format].js`,
+      entryFileNames: `[name].js`,
       format: 'esm',
     },
-    // watch: {
-    //   clearScreen: false,
-    // },
   };
   return config;
 }
 
-const plugins = (opts?: DefaultRollupConfigBuildOpts) => {
+export const declareRollupPlugin = (plugin: Plugin) => plugin;
+
+const plugins = (opts?: DefaultRollupConfigBuildOpts): InputPluginOption => {
   const resolveIdFn = opts?.resolveId;
   return [
-    ...(opts?.plugins ? opts.plugins : []),
-    resolveIdFn && {
-      name: 'rollupNodeConfig:resolveId',
-      async resolveId(this: PluginContext, id: string, importer?: string) {
-        return await Promise.resolve(resolveIdFn.bind(this)(id, importer));
-      },
-    },
+    opts?.plugins,
+    resolveIdFn &&
+      declareRollupPlugin({
+        name: 'rollupNodeConfig:resolveId',
+        async resolveId(this, id, importer, options) {
+          return await Promise.resolve(
+            resolveIdFn.bind(this)(id, importer, options)
+          );
+        },
+      }),
     resolveNodeBuiltinsPlugin(),
-    resolve(),
+    resolve({
+      exportConditions: ['node'],
+    }),
     commonjs({
       ignoreTryCatch: true,
     }),
@@ -122,6 +136,15 @@ const plugins = (opts?: DefaultRollupConfigBuildOpts) => {
       minify: opts?.minify ?? false,
       format: 'esm',
       loader: 'tsx',
+      include: ['**/*.tsx'],
+    }),
+    esbuild({
+      target: 'node16',
+      sourcemap: true,
+      minify: opts?.minify ?? false,
+      format: 'esm',
+      loader: 'ts',
+      include: ['**/*.ts'],
     }),
     // swc({
     //   module: {
@@ -141,5 +164,5 @@ const plugins = (opts?: DefaultRollupConfigBuildOpts) => {
         summaryOnly: true,
         limit: 5,
       }),
-  ].filter(isTruthy);
+  ];
 };

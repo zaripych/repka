@@ -1,7 +1,8 @@
-import type { Command } from 'commander';
-import { bgBlack, bold, white } from 'kleur/colors';
 import { stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
+
+import type { Command } from 'commander';
+import { bgBlack, bold, white } from 'kleur/colors';
 
 import { spawnToPromise } from '../child-process';
 import { logger } from '../logger/logger';

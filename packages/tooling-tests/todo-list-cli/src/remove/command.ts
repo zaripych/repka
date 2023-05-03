@@ -1,3 +1,5 @@
+import assert from 'node:assert';
+
 import {
   listEntries,
   removeEntryById,
@@ -5,7 +7,6 @@ import {
 } from '@tooling-tests/todo-list-store';
 import { isEntryId } from '@tooling-tests/todo-list-store';
 import { createCommand } from 'commander';
-import assert from 'node:assert';
 
 import { printEntries } from '../print/printEntries';
 import { printEntry } from '../print/printEntry';

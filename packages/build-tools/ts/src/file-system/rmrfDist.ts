@@ -1,4 +1,5 @@
 import { rm, stat } from 'node:fs/promises';
+
 import { join } from 'path';
 
 export async function rmrfDist(root = process.cwd()) {

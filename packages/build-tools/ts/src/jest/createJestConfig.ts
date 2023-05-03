@@ -1,6 +1,7 @@
+import { join } from 'node:path';
+
 import type { Config } from 'jest';
 import { readInitialOptions } from 'jest-config';
-import { join } from 'node:path';
 
 import { readPackageJson } from '../package-json/readPackageJson';
 import { loadRepositoryConfiguration } from '../utils/loadRepositoryConfiguration';
@@ -50,10 +51,12 @@ async function createConfig(
     skipMultipleConfigError: true,
   });
 
+  const resolvedConfig = (await jestConfig).config;
+
   const config = {
     ...baseConfig,
     ...jestTransformConfigProp(await pluginRoot),
-    ...(await jestConfig).config,
+    ...resolvedConfig,
     globalSetup: await globalSetup,
     globalTeardown: await globalTeardown,
   };

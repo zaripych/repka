@@ -1,6 +1,7 @@
-import { memoizeFunction } from '@utils/ts';
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
+
+import { memoizeFunction } from '@utils/ts';
 
 import { latestPackageVersion } from '../../../package-json/latestPackageVersion';
 import { ourPackageJson } from '../../../package-json/readPackageJson';

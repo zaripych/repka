@@ -21,13 +21,19 @@ export function isNodeNamedDeclaration(node: ts.Node): node is ts.NamedDeclarati
 }
 
 export function hasNodeModifier(node: ts.Node, modifier: ts.SyntaxKind): boolean {
-	return Boolean(node.modifiers && node.modifiers.some((nodeModifier: NonNullable<ts.Node['modifiers']>[number]) => nodeModifier.kind === modifier));
+	const nodeWithModifiers = node as ts.Node & {
+		modifiers?: ts.NodeArray<ts.ModifierLike>
+	}
+	return Boolean(nodeWithModifiers.modifiers && nodeWithModifiers.modifiers.some((nodeModifier: ts.ModifierLike) => nodeModifier.kind === modifier));
 }
 
 export function getNodeName(node: ts.Node): NodeName | undefined {
 	const nodeName = (node as unknown as ts.NamedDeclaration).name;
 	if (nodeName === undefined) {
-		const defaultModifier = node.modifiers?.find((mod: NonNullable<ts.Node['modifiers']>[number]) => mod.kind === ts.SyntaxKind.DefaultKeyword);
+		const nodeWithModifiers = node as ts.Node & {
+			modifiers?: ts.NodeArray<ts.ModifierLike>
+		}
+		const defaultModifier = nodeWithModifiers.modifiers?.find((mod: ts.ModifierLike) => mod.kind === ts.SyntaxKind.DefaultKeyword);
 		if (defaultModifier !== undefined) {
 			return defaultModifier as NodeName;
 		}

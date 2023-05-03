@@ -11,42 +11,56 @@ export function transformPackageJson(opts: {
   const main = opts.entryPoints.find((entry) => entry.chunkName === 'main');
   assert(!!main);
   return (packageJson: Record<string, JsonType>): Record<string, JsonType> => {
-    const license = packageJson['license'];
-    const name = packageJson['name'];
-    const version = packageJson['version'];
-    const type = packageJson['type'];
-    const bin = packageJson['bin'];
-    assert(!!name);
-    assert(!!version);
-    assert(!!type);
+    const keys = [
+      'name',
+      'version',
+      'type',
+      'license',
+      'description',
+      'author',
+      'keywords',
+      'bugs',
+      'repository',
+      'version',
+      'type',
+      'bin',
+    ] as const;
+
+    type Key = (typeof keys)[number];
+
+    const copyValues = Object.fromEntries(
+      Object.entries(packageJson).filter(([key]) => keys.includes(key as Key))
+    ) as Record<Key, JsonType>;
+
+    const { name, version, type, ...rest } = copyValues;
+
+    assert(!!name && typeof name === 'string');
+    assert(!!version && typeof version === 'string');
+    assert(!!type && typeof type === 'string');
+
     const next = {
       name,
       version,
       type,
-      ...(license && {
-        license,
-      }),
-      ...(bin && {
-        bin,
-      }),
+      ...rest,
       ...('main' in packageJson && {
-        main: `./dist/${main.chunkName}.es.js`,
+        main: `./dist/${main.chunkName}.js`,
       }),
       ...(entries.length === 1
         ? {
             exports:
               Object.entries(opts.ignoredEntryPoints).length === 0
-                ? `./dist/${main.chunkName}.es.js`
+                ? `./dist/${main.chunkName}.js`
                 : {
                     ...opts.ignoredEntryPoints,
-                    '.': `./dist/${main.chunkName}.es.js`,
+                    '.': `./dist/${main.chunkName}.js`,
                   },
           }
         : {
             exports: entries.reduce(
               (acc, entry) => ({
                 ...acc,
-                [entry.entryPoint]: `./dist/${entry.chunkName}.es.js`,
+                [entry.entryPoint]: `./dist/${entry.chunkName}.js`,
               }),
               {
                 ...opts.ignoredEntryPoints,
@@ -54,6 +68,7 @@ export function transformPackageJson(opts: {
             ),
           }),
     };
+
     return next;
   };
 }

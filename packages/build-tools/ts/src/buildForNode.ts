@@ -1,11 +1,12 @@
 /// <reference types="./@types/rollup-plugin-generate-package-json" />
 
 import { allFulfilled } from '@utils/ts';
-import type { Plugin, PluginContext, RollupWatchOptions } from 'rollup';
+import type { Plugin, ResolveIdHook, RollupWatchOptions } from 'rollup';
 
 import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from './config/loadNodePackageConfigs';
 import { rmrfDist } from './file-system/rmrfDist';
+import type { JsonType } from './package-json/packageJson';
 import { buildBinsBundleConfig } from './rollup/buildBinsBundleConfig';
 import { rollupBuild } from './rollup/rollupBuild';
 import { rollupPackageJsonPlugin } from './rollup/rollupPackageJsonPlugin';
@@ -30,11 +31,7 @@ export type BuildOpts = {
    * Module resolution function, in case you have weird dependencies
    * that do not resolve on their own, have them setup here
    */
-  resolveId?: (
-    this: PluginContext,
-    id: string,
-    importer?: string
-  ) => ReturnType<NonNullable<Plugin['resolveId']>>;
+  resolveId?: ResolveIdHook;
 
   /**
    * Entries in package.json "exports" represent inputs for Rollup.
@@ -69,6 +66,18 @@ export type BuildOpts = {
    * Override core configuration options that are normally read from package.json
    */
   packageConfig?: PackageConfigBuilder;
+
+  /**
+   * Override output package.json - the output package.json is built from your
+   * regular package.json, but written to the `./dist` directory. This package.json
+   * should be used to publish your package.
+   *
+   * This eliminates dependencies that were already bundled up to the output
+   * by rollup, but you might want to override some extra details.
+   */
+  outputPackageJson?: (
+    packageJson: Record<string, JsonType>
+  ) => Record<string, JsonType>;
 };
 
 const externalsFromDependencies = (
@@ -117,9 +126,9 @@ export function buildForNode(opts?: BuildOpts) {
         : [];
 
       const buildExportsConfig = (
-        opts?: DefaultRollupConfigBuildOpts
+        rollupOpts?: DefaultRollupConfigBuildOpts
       ): RollupWatchOptions => {
-        const config = defaultConfig(opts);
+        const config = defaultConfig(rollupOpts);
         return {
           ...config,
           input: {
@@ -141,6 +150,7 @@ export function buildForNode(opts?: BuildOpts) {
               entryPoints,
               ignoredEntryPoints,
               externals: allExternals,
+              packageJson: opts?.outputPackageJson,
             }),
           ]),
         };

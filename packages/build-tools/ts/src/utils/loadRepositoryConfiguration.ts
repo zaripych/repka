@@ -1,5 +1,6 @@
-import fg from 'fast-glob';
 import { dirname } from 'node:path';
+
+import fg from 'fast-glob';
 
 import { hasTurboJson } from '../turbo';
 import { readMonorepoPackagesGlobs } from './readPackagesGlobs';

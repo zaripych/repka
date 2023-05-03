@@ -26,7 +26,7 @@ type PromptFactoryFn<Args> = (context: Args) => AnyPrompt | Promise<AnyPrompt>;
 
 type AnyPromptFactoryFn = (context: AnyArgs) => AnyPrompt | Promise<AnyPrompt>;
 
-export type ExtractPromptAnswers<T> = Join<
+export type ExtractPromptAnswers<T extends unknown[]> = Join<
   ValuesType<T> extends AnyPromptFactoryFn
     ? Awaited<ReturnType<ValuesType<T>>> extends PromptObject
       ? PromptAnswer<Awaited<ReturnType<ValuesType<T>>>>

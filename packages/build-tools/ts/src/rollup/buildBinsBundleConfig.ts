@@ -88,18 +88,18 @@ async function buildBinsPlugins(entryPoints: PackageBinEntryPoint[]) {
 
   const bundledEsmBinsInfo = new Map(
     bundledEsmBins.map(({ binName }) => [
-      `../dist/${binName}.es.js`,
+      `../dist/${binName}.js`,
       {
         virtualModuleLocation: `./src/bin/${binName}.bundled.ts`,
-        bundledEsmBinFileName: `../dist/${binName}.es.js`,
-        proxySourceCode: `export * from "${`../dist/${binName}.es.js`}";`,
+        bundledEsmBinFileName: `../dist/${binName}.js`,
+        proxySourceCode: `export * from "${`../dist/${binName}.js`}";`,
       },
     ])
   );
 
   // for bins which are declared in package.json and exist in
   // the ./src/bin directory we create a virtual module that
-  // uses "export * from '../dist/bin.es.js';"
+  // uses "export * from '../dist/bin.js';"
   const bundledEsmBinsPlugins: Plugin[] =
     bundledEsmBins.length > 0
       ? [
@@ -150,7 +150,7 @@ export async function buildBinsBundleConfig({
   // output to ./bin directory so developers can run these bins
   const shared: RollupWatchOptions = {
     ...standard,
-    plugins: [...plugins, ...(standard.plugins ? standard.plugins : [])],
+    plugins: [...plugins, standard.plugins],
   };
 
   const devBinOutput: OutputOptions = {
@@ -256,6 +256,8 @@ export async function buildBinsBundleConfig({
      * Entry points for the above bins to be merged with main entry points
      */
     bundledEsmBinsInputs: buildBinInputs(bundledEsmBins),
-    binConfigs: [cjsConfig, ...esmDevConfig].filter(isTruthy),
+    binConfigs: [cjsConfig, ...esmDevConfig]
+      .filter(isTruthy)
+      .filter((m) => m.input && Object.keys(m.input).length > 0),
   };
 }

@@ -13,7 +13,7 @@
       "../../../.pnpm/node_modules/@types"
     ],
     "sourceMap": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,

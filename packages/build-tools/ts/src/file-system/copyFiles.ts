@@ -1,7 +1,8 @@
-import fg from 'fast-glob';
 import type { Stats } from 'node:fs';
 import { copyFile, mkdir, readlink, realpath, symlink } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+
+import fg from 'fast-glob';
 
 import { logger } from '../logger/logger';
 

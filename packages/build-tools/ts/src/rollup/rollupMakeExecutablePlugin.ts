@@ -1,5 +1,6 @@
 import { chmod, stat } from 'node:fs/promises';
 import { join } from 'node:path';
+
 import type { Plugin } from 'rollup';
 
 const makeExecutable = async (binPath: string) => {

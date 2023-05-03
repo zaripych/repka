@@ -1,5 +1,6 @@
-import { onceAsync } from '@utils/ts';
 import { dirname } from 'node:path';
+
+import { onceAsync } from '@utils/ts';
 
 import { logger } from '../logger/logger';
 import { findDevDependency } from '../utils/findDevDependency';

@@ -1,24 +1,59 @@
-import type { Config } from 'jest';
 import { join } from 'node:path';
 
-export const extensions = ['js', 'jsx', 'ts', 'tsx'];
+import type { Config } from 'jest';
+import { defaults } from 'jest-config';
+
+export const extensions = [
+  'js',
+  'cjs',
+  'mjs',
+  'jsx',
+  'ts',
+  'cts',
+  'mts',
+  'tsx',
+];
 
 export const ignoreDirs = ['/node_modules/', '/dist/', '/.tsc-out/'];
 
 export const jestTransformConfigProp = (
   jestPluginRoot?: string
 ): Pick<Config, 'transform'> => {
+  const esbuild = jestPluginRoot
+    ? join(jestPluginRoot, 'esbuild-jest')
+    : 'esbuild-jest';
+
+  const esbuildDefaultOpts = {
+    target: `node${process.versions.node}`,
+    sourcemap: true,
+  };
+
+  const loaderByExt = {
+    ts: { loader: 'ts', format: 'esm' },
+    cts: { loader: 'ts', format: 'cjs' },
+    mts: { loader: 'ts', format: 'esm' },
+    ctsx: { loader: 'tsx', format: 'cjs' },
+    mtsx: { loader: 'tsx', format: 'esm' },
+    tsx: { loader: 'tsx', format: 'esm' },
+  };
+
   return {
-    transform: {
-      '^.+\\.tsx?$': [
-        jestPluginRoot ? join(jestPluginRoot, 'esbuild-jest') : 'esbuild-jest',
-        {
-          target: `node${process.versions.node}`,
-          format: 'esm',
-          sourcemap: true,
-        },
-      ],
-    },
+    transform: Object.fromEntries(
+      Object.entries(loaderByExt).map(([ext, opts]) => [
+        `^.+\\.${ext}$`,
+        [
+          esbuild,
+          {
+            ...esbuildDefaultOpts,
+            format: opts.format,
+            loaders: {
+              [`.${ext}`]: opts.loader,
+              [`.test.${ext}`]: opts.loader,
+            },
+          },
+        ],
+      ])
+    ),
   };
 };
 
@@ -31,11 +66,11 @@ export const commonDefaults: Config = {
   transformIgnorePatterns: [...ignoreDirs.map((dir) => `<rootDir>${dir}`)],
   coveragePathIgnorePatterns: [...ignoreDirs.map((dir) => `<rootDir>${dir}`)],
   modulePathIgnorePatterns: [...ignoreDirs.map((dir) => `<rootDir>${dir}`)],
-  extensionsToTreatAsEsm: extensions
-    .filter((entry) => !['js'].includes(entry))
-    .map((ext) => `.${ext}`),
+  moduleFileExtensions: [
+    ...new Set([...defaults.moduleFileExtensions, ...extensions]),
+  ],
+  extensionsToTreatAsEsm: ['.jsx', '.ts', '.mts', '.tsx'],
   rootDir: process.cwd(),
-  ...jestTransformConfigProp(),
 };
 
 const flavorRegex = /\w+/;

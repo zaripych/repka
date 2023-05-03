@@ -1,3 +1,7 @@
+import { spawn } from 'node:child_process';
+import { join } from 'node:path';
+import { Transform } from 'node:stream';
+
 import type {
   SpawnOptionsWithExtra,
   SpawnResultOpts,
@@ -5,9 +9,6 @@ import type {
 } from '@build-tools/ts';
 import { spawnResult as spawnResultCore } from '@build-tools/ts';
 import { captureStackTrace, escapeRegExp } from '@utils/ts';
-import { spawn } from 'node:child_process';
-import { join } from 'node:path';
-import { Transform } from 'node:stream';
 
 import { searchAndReplaceTextTransform } from './replaceTextInFiles';
 import { stripAnsi } from './stripAnsi';

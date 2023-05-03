@@ -1,6 +1,7 @@
-import { logger } from '@build-tools/ts';
 import { rm, stat } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { logger } from '@build-tools/ts';
 
 import { ignoreErrors } from './ignoreErrors';
 import { repositoryRootPath } from './repositoryRootPath';

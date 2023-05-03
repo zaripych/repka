@@ -1,3 +1,3 @@
 module.exports = {
-  ignorePatterns: ['sub-repo'],
+  ignorePatterns: ['sub-repo', 'src/main.d.ts'],
 };

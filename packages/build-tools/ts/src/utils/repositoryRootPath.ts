@@ -1,7 +1,8 @@
-import { isTruthy, onceAsync } from '@utils/ts';
-import fg from 'fast-glob';
 import assert from 'node:assert';
 import { dirname, join } from 'node:path';
+
+import { isTruthy, onceAsync } from '@utils/ts';
+import fg from 'fast-glob';
 
 const getRepositoryRootScanCandidates = (currentDirectory: string) => {
   // having 'packages/*' in the root of a monorepo is super common

@@ -1,3 +1,7 @@
+import { createReadStream, createWriteStream } from 'node:fs';
+import { Transform } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
 import {
   allFulfilled,
   escapeRegExp,
@@ -5,9 +9,6 @@ import {
   UnreachableError,
 } from '@utils/ts';
 import fg from 'fast-glob';
-import { createReadStream, createWriteStream } from 'node:fs';
-import { Transform } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 
 export type SearchAndReplaceOptsExtra = Pick<
   fg.Options,

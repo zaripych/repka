@@ -9,5 +9,6 @@
     "incremental": true,
     "composite": true
   },
-  "include": ["src", "sub-repo/src"]
+  "include": ["src", "sub-repo/src"],
+  "exclude": ["src/*.d.ts"]
 }

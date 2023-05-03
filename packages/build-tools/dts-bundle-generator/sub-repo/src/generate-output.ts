@@ -116,10 +116,10 @@ function prettifyStatementsText(statementsText: string, helpers: OutputHelpers):
 						// but at the moment it seems that it's the fastest and most easiest way to remove `import('./module').` form the code
 						// if you read this and know how to make it better - feel free to share your ideas/PR with fixes
 						// tslint:disable-next-line:deprecation
-						return ts.createTypeQueryNode(node.qualifier);
+						return ts.factory.createTypeQueryNode(node.qualifier);
 					}
 
-					return ts.createTypeReferenceNode(node.qualifier, node.typeArguments);
+					return ts.factory.createTypeReferenceNode(node.qualifier, node.typeArguments);
 				}
 
 				return node;

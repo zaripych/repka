@@ -26,7 +26,11 @@ export async function rollupWatch(configs: RollupWatchOptions[]) {
       addTask(watcher.close());
     });
     await new Promise<void>((res) => {
-      watcher.once('close', res);
+      const stop = () => {
+        watcher.off('close', stop);
+        res();
+      };
+      watcher.on('close', stop);
     });
     await Promise.all([...tasks]);
   } finally {

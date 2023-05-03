@@ -19,6 +19,16 @@ export type DeclarationsOpts = {
    * Override core configuration options that are normally read from package.json
    */
   packageConfig?: PackageConfigBuilder;
+
+  /**
+   * Ignore TypeScript errors in dependencies when generating declarations
+   */
+  unstable_ignoreTypeScriptErrors?: boolean;
+
+  /**
+   * Skip TypeScript type checking for dependencies
+   */
+  unstable_skipDependencies?: string[];
 };
 
 export async function declarationsViaDtsBundleGenerator(
@@ -32,12 +42,20 @@ export async function declarationsViaDtsBundleGenerator(
 
   const dependencyOutDirs = await Promise.all(
     [
-      ...dependencies.map((directory) => directory.packageDirectory),
+      ...dependencies
+        .filter(
+          (dependency) =>
+            !opts?.unstable_skipDependencies ||
+            !opts.unstable_skipDependencies.includes(dependency.packageName)
+        )
+        .map((directory) => directory.packageDirectory),
       process.cwd(),
     ].map((directory) =>
       Promise.all([
         loadTsConfigJson(directory),
-        tscCompositeTypeCheckAt(directory),
+        tscCompositeTypeCheckAt(directory, {
+          exitCodes: opts?.unstable_ignoreTypeScriptErrors ? [0] : 'any',
+        }),
       ]).then(([tsconfig]) => tsconfig.compilerOptions?.outDir)
     )
   );
@@ -71,7 +89,7 @@ export async function declarationsViaDtsBundleGenerator(
     },
     entries: entryPoints.map((entry) => {
       const input = join(outDir, entry.sourcePath);
-      const output = join('./dist/dist', entry.chunkName + '.es.d.ts');
+      const output = join('./dist/dist', entry.chunkName + '.d.ts');
       return {
         filePath: input,
         outFile: output,
@@ -80,6 +98,7 @@ export async function declarationsViaDtsBundleGenerator(
             (f) => !f.startsWith('@types')
           ),
         },
+        noCheck: opts?.unstable_ignoreTypeScriptErrors,
       };
     }),
   };
