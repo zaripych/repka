@@ -7,5 +7,12 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [
+    "@build-tools/dts-bundle-generator",
+    "@templates/ts-package",
+    "@testing-tools/packages",
+    "@tooling-tests/todo-list-cli",
+    "@tooling-tests/todo-list-store",
+    "@utils/ts"
+  ]
 }
