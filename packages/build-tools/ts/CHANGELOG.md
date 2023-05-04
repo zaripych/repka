@@ -1,5 +1,13 @@
 # @repka-kit/ts
 
+## 1.0.0-beta.7
+
+### Patch Changes
+
+- [`cbc189f`](https://github.com/zaripych/repka/commit/cbc189f5e586bd3455e9139b82132fd93bb7c5fe)
+  Thanks [@zaripych](https://github.com/zaripych)! - Make sure experimental VM
+  modules node warning is silenced.
+
 ## 1.0.0-beta.6
 
 ### Minor Changes
