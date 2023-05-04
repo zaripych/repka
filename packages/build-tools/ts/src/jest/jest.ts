@@ -67,6 +67,11 @@ export const jest = async (
           /\(node:\d+\) ExperimentalWarning: VM Modules is an experimental feature\. This feature could change at any time\s+\(Use `node --trace-warnings ...` to show where the warning was created\)\n/gm,
         replaceWith: '',
       },
+      {
+        regExp:
+          /\(node:\d+\) ExperimentalWarning: VM Modules is an experimental feature and might change at any time\s+\(Use `node --trace-warnings ...` to show where the warning was created\)\n/gm,
+        replaceWith: '',
+      },
     ]);
   }
   await spawnToPromise(child, spawnOpts);
