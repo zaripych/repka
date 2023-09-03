@@ -69,11 +69,15 @@ export async function commandTemplate(opts: {
   const runUsingConfig = async () => {
     logger.debug(`Found a "${configLocation}", running it with "tsx": `);
     await spawnToPromise(
-      await binPath({
-        binName: 'tsx',
-        binScriptPath: 'tsx/dist/cli.js',
-      }),
-      [configLocation, ...opts.command.args],
+      process.execPath,
+      [
+        await binPath({
+          binName: 'tsx',
+          binScriptPath: 'tsx/dist/cli.js',
+        }),
+        configLocation,
+        ...opts.command.args,
+      ],
       {
         stdio: 'inherit',
         exitCodes: 'inherit',

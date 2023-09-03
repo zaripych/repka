@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 import { spawnOutputConditional } from './child-process';
 import { logger } from './logger/logger';
+import { binPath } from './utils/binPath';
 
 export async function runTsScript(opts: {
   location: string;
@@ -20,8 +21,15 @@ export async function runTsScript(opts: {
     }
 
     return await spawnOutputConditional(
-      'tsx',
-      [location, ...(opts.args || [])],
+      process.execPath,
+      [
+        await binPath({
+          binName: 'tsx',
+          binScriptPath: 'tsx/dist/cli.js',
+        }),
+        location,
+        ...(opts.args || []),
+      ],
       {
         exitCodes: [0],
         ...(logger.logLevel === 'debug' && {

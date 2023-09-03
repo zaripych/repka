@@ -12,8 +12,7 @@ const sandbox = once(() =>
     templateName: 'template-solo',
     copyFiles: [
       {
-        source: new URL('../test-cases/solo/declarations', import.meta.url)
-          .pathname,
+        source: '../test-cases/solo/declarations',
         include: ['**/*'],
       },
     ],

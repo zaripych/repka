@@ -2,6 +2,7 @@ import { allFulfilled } from '@utils/ts';
 import { red } from 'kleur/colors';
 import { performance } from 'perf_hooks';
 
+import { rmrfDist } from './file-system/rmrfDist';
 import { logger } from './logger/logger';
 import { readCwdPackageJson } from './package-json/readPackageJson';
 import type { TaskExecuteFn, TaskWatchFn } from './tasks/declareTask';
@@ -107,6 +108,10 @@ export async function pipeline<Args extends [Task, ...Task[]]>(
         return Promise.reject(err);
       }
     };
+
+    if (main.find((task) => task.name === 'build')) {
+      await rmrfDist();
+    }
 
     const mainAndCustom = await allFulfilled(
       [...main, ...custom].map(executeTask)

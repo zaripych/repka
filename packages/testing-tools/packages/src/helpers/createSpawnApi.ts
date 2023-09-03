@@ -22,6 +22,7 @@ export type SpawnController = Awaited<
 export function createTestSpawnApi(
   opts: () => Promise<{
     cwd: string;
+    packageInstallSource: string;
     env?: Record<string, string>;
   }>
 ) {
@@ -41,11 +42,12 @@ export function createTestSpawnApi(
   const spawnResult = async (
     executable: string,
     args: string[],
-    spawnOpts?: SpawnOptionsWithExtra<SpawnResultOpts>
+    spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>>
   ) => {
     const { cwd, env } = await opts();
 
     const result = await spawnResultCore(executable, args, {
+      shell: process.platform === 'win32',
       cwd,
       exitCodes: 'any',
       ...(env && {
@@ -63,11 +65,14 @@ export function createTestSpawnApi(
   const spawnController = async (
     executable: string,
     args: string[],
-    spawnOpts?: SpawnOptionsWithExtra<SpawnResultOpts>
+    spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>> & {
+      searchAndReplace?: Parameters<typeof searchAndReplaceTextTransform>[0];
+    }
   ) => {
     const { cwd, env } = await opts();
 
     const activeOpts = {
+      shell: process.platform === 'win32',
       cwd,
       ...(env && {
         env: {
@@ -90,6 +95,10 @@ export function createTestSpawnApi(
       },
     });
 
+    const userReplace = spawnOpts?.searchAndReplace
+      ? searchAndReplaceTextTransform(spawnOpts.searchAndReplace)
+      : undefined;
+
     const waitForOutput = async (
       output: string | RegExp,
       timeoutMs: number | 'no-timeout' = 500
@@ -111,7 +120,12 @@ export function createTestSpawnApi(
         const stop = () => {
           out.unpipe(stripAnsiTransform);
           err.unpipe(stripAnsiTransform);
-          stripAnsiTransform.unpipe(search);
+          if (userReplace) {
+            stripAnsiTransform.unpipe(userReplace);
+            userReplace.unpipe(search);
+          } else {
+            stripAnsiTransform.unpipe(search);
+          }
           if (out.isPaused() && out.listenerCount('data') > 0) {
             out.resume();
           }
@@ -164,7 +178,12 @@ export function createTestSpawnApi(
 
         out.pipe(stripAnsiTransform, { end: false });
         err.pipe(stripAnsiTransform, { end: false });
-        stripAnsiTransform.pipe(search, { end: false });
+        if (userReplace) {
+          stripAnsiTransform.pipe(userReplace, { end: false });
+          userReplace.pipe(search, { end: false });
+        } else {
+          stripAnsiTransform.pipe(search, { end: false });
+        }
       });
     };
 
@@ -289,7 +308,7 @@ export function createTestSpawnApi(
     spawnBin: async (
       bin: string,
       args: string[],
-      spawnOpts?: SpawnOptionsWithExtra<SpawnResultOpts>
+      spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>>
     ) => {
       const path = join('./node_modules/.bin/', bin);
       return await spawnResult(path, args, spawnOpts);
@@ -297,10 +316,26 @@ export function createTestSpawnApi(
     spawnBinController: async (
       bin: string,
       args: string[],
-      spawnOpts?: SpawnOptionsWithExtra<SpawnResultOpts>
+      spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>> & {
+        searchAndReplace?: Parameters<typeof searchAndReplaceTextTransform>[0];
+      }
     ) => {
       const path = join('./node_modules/.bin/', bin);
       return await spawnController(path, args, spawnOpts);
+    },
+    spawnBinControllerFromPackageInstallSource: async (
+      bin: string,
+      args: string[],
+      spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>> & {
+        searchAndReplace?: Parameters<typeof searchAndReplaceTextTransform>[0];
+      }
+    ) => {
+      const { packageInstallSource } = await opts();
+      return await spawnController(
+        'npx',
+        ['--package', packageInstallSource, '-y', '--', bin].concat(args),
+        spawnOpts
+      );
     },
   };
 }

@@ -49,12 +49,19 @@ export const install = taskFactory(
           });
           const args: string[] = ['install'];
           if (command === 'pnpm') {
+            args.push('--prefer-offline');
             args.push('--no-frozen-lockfile');
+            args.push('--reporter=default');
           }
           await spawnToPromise(command, args, {
             cwd: opts.directory,
-            stdio: 'inherit',
+            stdio: 'pipe',
             exitCodes: [0],
+            shell: process.platform === 'win32',
+            env: {
+              ...process.env,
+              CI: 'true',
+            },
           });
         });
       },

@@ -25,7 +25,20 @@ describe('user installs @repka-kit/ts package as devDependency, then runs repka 
   let controller: SpawnController;
 
   beforeAll(async () => {
-    controller = await sandbox().spawnBinController('repka', ['init']);
+    controller = await sandbox().spawnBinControllerFromPackageInstallSource(
+      'repka',
+      ['init'],
+      {
+        searchAndReplace: {
+          filters: [
+            {
+              substring: '❯',
+              replaceWith: '>',
+            },
+          ],
+        },
+      }
+    );
   });
 
   afterAll(async () => {
@@ -33,8 +46,8 @@ describe('user installs @repka-kit/ts package as devDependency, then runs repka 
   });
 
   it('should initialize fresh mono repo successfully', async () => {
-    await controller.waitForOutput('select the type of repository', 1000);
-    expect(controller.nextSnapshot()).toContain('❯   monorepo - ');
+    await controller.waitForOutput('select the type of repository', 30_000);
+    expect(controller.nextSnapshot()).toContain(`>   monorepo - `);
     await controller.writeInput(keys.enter);
 
     await controller.waitForOutput('Please confirm the name of the package');

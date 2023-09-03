@@ -72,14 +72,13 @@ function filesStream({
   options,
 }: Pick<ReplaceTextOpts, 'target' | 'include' | 'exclude' | 'options'>) {
   return fg.stream(
-    [
-      ...(exclude ? exclude.map((glob) => `!${source || '.'}/${glob}`) : []),
-      ...include.map((glob) => `${source || '.'}/${glob}`),
-    ],
+    [...(exclude ? exclude.map((glob) => `!${glob}`) : []), ...include],
     {
       followSymbolicLinks: false,
       ...options,
       onlyFiles: true,
+      cwd: source,
+      absolute: true,
     }
   );
 }

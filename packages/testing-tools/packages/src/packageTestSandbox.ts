@@ -16,6 +16,7 @@ import { findPackageUnderTest } from './helpers/findPackageUnderTest';
 import { ignoreErrors } from './helpers/ignoreErrors';
 import type { PostActionsOpts } from './helpers/runPostActions';
 import { runPostActions } from './helpers/runPostActions';
+import { readPackageJson } from './helpers/writePackageJson';
 
 type PackageTestSandboxProps = {
   packageRootDirectory: string;
@@ -62,15 +63,37 @@ export function packageTestSandbox(opts: PackageTestSandboxOpts) {
       config.testRootDirectory,
       `sandbox-${opts.tag}`
     );
-    return {
+    const templateDirectory = join(
+      config.testRootDirectory,
+      opts.templateName ?? 'template'
+    );
+
+    const packageJson = (await readPackageJson(templateDirectory)) as {
+      devDependencies?: {
+        [key: string]: string;
+      };
+      dependencies?: {
+        [key: string]: string;
+      };
+    };
+
+    const packageInstallSource =
+      packageJson['devDependencies']?.[packageUnderTest] ??
+      packageJson['dependencies']?.[packageUnderTest];
+
+    assert(
+      packageInstallSource,
+      'Cannot determine install source of the package under test'
+    );
+
+    const result = {
       ...config,
       packageUnderTest,
-      templateDirectory: join(
-        config.testRootDirectory,
-        opts.templateName ?? 'template'
-      ),
+      templateDirectory,
       sandboxDirectory,
+      packageInstallSource,
     };
+    return result;
   });
 
   return {
@@ -120,7 +143,8 @@ export function packageTestSandbox(opts: PackageTestSandboxOpts) {
         for await (const nodeModulesDir of dirs) {
           await symlink(
             join(templateDirectory, nodeModulesDir),
-            join(sandboxDirectory, nodeModulesDir)
+            join(sandboxDirectory, nodeModulesDir),
+            'dir'
           );
         }
       } else {
@@ -151,9 +175,10 @@ export function packageTestSandbox(opts: PackageTestSandboxOpts) {
       );
     },
     ...createTestSpawnApi(async () => {
-      const { sandboxDirectory } = await props();
+      const { sandboxDirectory, packageInstallSource } = await props();
       return {
         cwd: sandboxDirectory,
+        packageInstallSource,
         env: opts.env,
       };
     }),

@@ -33,6 +33,15 @@ export function removeArgsFrom(
   return result;
 }
 
+export function setScript(script: string) {
+  return (state: CliArgs): CliArgs => {
+    return {
+      ...state,
+      preArgs: [script, ...state.preArgs],
+    };
+  };
+}
+
 export function removeInputArgs(
   args: Array<string | RegExp>,
   opts?: { numValues: number }

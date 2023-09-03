@@ -116,8 +116,8 @@ export function unitTestDefaults(): Config {
     ...commonDefaults,
     testPathIgnorePatterns: [
       ...(commonDefaults.testPathIgnorePatterns || []),
-      `<rootDir>/(?!__tests__)__${flavorRegex.source}__/`,
-      `<rootDir>/src/(?!__tests__)__${flavorRegex.source}__/`,
+      `<rootDir>/(?!__tests__)(__[a-zA-Z0-9]+__)/`,
+      `<rootDir>/src/(?!__tests__)(__[a-zA-Z0-9]+__)/`,
     ],
   };
 }

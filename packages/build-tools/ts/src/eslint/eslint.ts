@@ -6,6 +6,7 @@ import {
   removeInputArgs,
   removeLogLevelOption,
   setDefaultArgs,
+  setScript,
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
 
@@ -19,9 +20,10 @@ const eslintConfigPath = () => configFilePath('./eslint/eslint-root.cjs');
 
 export const eslint = async (processArgs: string[]) => {
   return spawnToPromise(
-    await eslintBinPath(),
+    process.execPath,
     cliArgsPipe(
       [
+        setScript(await eslintBinPath()),
         removeLogLevelOption(),
         setDefaultArgs(
           ['--ext'],

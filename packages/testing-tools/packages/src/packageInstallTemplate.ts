@@ -157,7 +157,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
     const randomId = randomText(8);
     const cacheBustedInstallSource = join(
       config.testRootDirectory,
-      `.${randomId}`
+      `_${randomId}`
     );
 
     return {
@@ -295,7 +295,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
         // TODO: Determine if just doing symlink here is safe here for
         // other package managers
         if (packageManager === 'pnpm') {
-          await symlink(packageInstallSource, cacheBustedInstallSource);
+          await symlink(packageInstallSource, cacheBustedInstallSource, 'dir');
         } else {
           await copyFiles({
             source: packageInstallSource,

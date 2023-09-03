@@ -10,15 +10,24 @@ import {
   cliArgsPipe,
   includesAnyOf,
   removeLogLevelOption,
+  setScript,
 } from '../utils/cliArgsPipe';
 
 const lintStaged = async () => {
   await spawnToPromise(
-    await binPath({
-      binName: 'lint-staged',
-      binScriptPath: 'lint-staged/bin/lint-staged.js',
-    }),
-    cliArgsPipe([removeLogLevelOption()], process.argv.slice(2)),
+    process.execPath,
+    cliArgsPipe(
+      [
+        setScript(
+          await binPath({
+            binName: 'lint-staged',
+            binScriptPath: 'lint-staged/bin/lint-staged.js',
+          })
+        ),
+        removeLogLevelOption(),
+      ],
+      process.argv.slice(2)
+    ),
     {
       stdio: 'inherit',
       exitCodes: 'inherit',
