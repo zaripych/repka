@@ -2,7 +2,7 @@
 // NOTE: This file is bundled up from './src/bin/*' and needs to be committed
 import { spawn } from 'node:child_process';
 import { stat } from 'node:fs/promises';
-import { join, sep, dirname } from 'node:path';
+import { sep, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const isFile = async (file) => {
@@ -33,14 +33,7 @@ async function findBinScript(startWith, binScriptPath) {
 }
 
 async function binPath(binName, binScriptPath) {
-  const useShortcut = process.platform !== 'win32';
   const root = fileURLToPath(new URL('../', import.meta.url));
-  if (useShortcut) {
-    const bestGuess = join(root, 'node_modules', '.bin', binName);
-    if (await isFile(bestGuess)) {
-      return bestGuess;
-    }
-  }
   const result = await findBinScript(root, binScriptPath);
   if (result) {
     return result;
@@ -72,4 +65,4 @@ binPath('tsx', 'tsx/dist/cli.js').then((result) => {
     }
   });
 }, onError);
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGludC1zdGFnZWQuZ2VuLm1qcyIsInNvdXJjZXMiOltdLCJzb3VyY2VzQ29udGVudCI6W10sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7In0=
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGludC1zdGFnZWQuZ2VuLm1qcyIsInNvdXJjZXMiOltdLCJzb3VyY2VzQ29udGVudCI6W10sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OzsifQ==

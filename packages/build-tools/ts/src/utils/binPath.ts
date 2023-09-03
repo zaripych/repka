@@ -33,16 +33,8 @@ async function findBinScript(startWith: string, binScriptPath: string) {
 export async function binPath(opts: {
   binName: string;
   binScriptPath: string;
-  useShortcut?: boolean;
 }) {
-  const useShortcut = opts.useShortcut ?? process.platform !== 'win32';
   const root = moduleRootDirectory();
-  if (useShortcut) {
-    const bestGuess = join(root, 'node_modules', '.bin', opts.binName);
-    if (await isFile(bestGuess)) {
-      return bestGuess;
-    }
-  }
   const result = await findBinScript(root, opts.binScriptPath);
   if (result) {
     return result;
