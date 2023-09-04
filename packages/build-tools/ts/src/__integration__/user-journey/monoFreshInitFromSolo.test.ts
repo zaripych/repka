@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import type { SpawnController } from '@testing-tools/packages';
 import { packageTestSandbox } from '@testing-tools/packages';
 import { once } from '@utils/ts';
