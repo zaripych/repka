@@ -10,7 +10,7 @@ on:
 jobs:
   checks:
     name: Checks
-    timeout-minutes: 7
+    timeout-minutes: 30
     runs-on: ${{ inputs.os }}
 
     steps:
