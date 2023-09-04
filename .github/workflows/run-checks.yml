@@ -9,7 +9,8 @@ on:
 
 jobs:
   checks:
-    name: All Checks
+    name: Checks
+    timeout-minutes: 7
     runs-on: ${{ inputs.os }}
 
     steps:
@@ -53,3 +54,5 @@ jobs:
 
       - name: Integration
         run: pnpm jest --integration --color --maxWorkers=2
+        env:
+          LOG_LEVEL: debug

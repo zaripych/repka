@@ -6,6 +6,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   quick-checks:
+    name: Ubuntu
     uses: ./.github/workflows/run-checks.yml
     strategy:
       matrix:
@@ -14,6 +15,7 @@ jobs:
       os: ${{ matrix.os }}
 
   extra-checks:
+    name: ${{ matrix.os }}
     uses: ./.github/workflows/run-checks.yml
     strategy:
       matrix:
