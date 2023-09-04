@@ -1,16 +1,17 @@
-name: Release
+name: Checks
 
 on:
-  push:
-    branches:
-      - main
-
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
 
 jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
+  checks:
+    name: All Checks
+    runs-on: ${{ inputs.os }}
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -52,19 +53,3 @@ jobs:
 
       - name: Integration
         run: pnpm jest --integration --color --maxWorkers=2
-
-      - name: Access To Node Bins
-        run: |
-          echo "${GITHUB_WORKSPACE}/node_modules/.bin" >> $GITHUB_PATH
-          echo "${GITHUB_WORKSPACE}/node_modules/.bin" >> $Env:GITHUB_PATH
-
-      - name: Create and Publish Versions
-        uses: changesets/action@v1
-        with:
-          commit: 'chore: update versions'
-          title: 'chore: update versions'
-          version: pnpm run ci:version
-          publish: pnpm run ci:publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
