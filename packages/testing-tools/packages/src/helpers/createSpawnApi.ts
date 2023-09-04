@@ -117,6 +117,7 @@ export function createTestSpawnApi(
       });
 
       return new Promise<void>((res, rej) => {
+        let timer: NodeJS.Timeout | undefined;
         const stop = () => {
           out.unpipe(stripAnsiTransform);
           err.unpipe(stripAnsiTransform);
@@ -131,6 +132,10 @@ export function createTestSpawnApi(
           }
           if (err.isPaused() && err.listenerCount('data') > 0) {
             err.resume();
+          }
+          if (timer) {
+            clearTimeout(timer);
+            timer = undefined;
           }
         };
 
@@ -162,7 +167,7 @@ export function createTestSpawnApi(
 
         if (timeoutMs !== 'no-timeout') {
           const timeout = timeoutMs;
-          setTimeout(() => {
+          timer = setTimeout(() => {
             stop();
             rej(
               new Error(
