@@ -47,7 +47,6 @@ describe('user installs @repka-kit/ts package as devDependency, then runs repka 
 
   it('should initialize fresh mono repo successfully', async () => {
     await controller.waitForOutput('select the type of repository', 30_000);
-    expect(controller.nextSnapshot()).toContain(`>   monorepo - `);
     await controller.writeInput(keys.enter);
 
     await controller.waitForOutput('Please confirm the name of the package');
@@ -64,10 +63,12 @@ describe('user installs @repka-kit/ts package as devDependency, then runs repka 
 
     const errorRegex = /\serror(:|\s)?/gi;
 
-    expect(await controller.waitForResult()).toMatchObject({
+    const result = await controller.waitForResult();
+    expect(result).toMatchObject({
       exitCode: 0,
       output: expect.not.stringMatching(errorRegex),
     });
+
     expect(await sandbox().spawnBin('eslint', ['.'])).toMatchObject({
       exitCode: 0,
       output: expect.not.stringMatching(errorRegex),

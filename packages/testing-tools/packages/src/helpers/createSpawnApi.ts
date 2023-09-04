@@ -90,10 +90,12 @@ export function createTestSpawnApi(
     const resultPromise = spawnResultCore(child, {
       exitCodes: 'any',
       ...activeOpts,
-      buffers: {
-        combined,
-      },
+      output: [],
     });
+
+    const collectOutput = (data: Buffer | string) => {
+      combined.push(data instanceof Buffer ? data.toString('utf8') : data);
+    };
 
     const userReplace = spawnOpts?.searchAndReplace
       ? searchAndReplaceTextTransform(spawnOpts.searchAndReplace)
@@ -124,8 +126,10 @@ export function createTestSpawnApi(
           if (userReplace) {
             stripAnsiTransform.unpipe(userReplace);
             userReplace.unpipe(search);
+            userReplace.off('data', collectOutput);
           } else {
             stripAnsiTransform.unpipe(search);
+            stripAnsiTransform.off('data', collectOutput);
           }
           if (out.isPaused() && out.listenerCount('data') > 0) {
             out.resume();
@@ -156,7 +160,7 @@ export function createTestSpawnApi(
                 new Error(
                   `Expected output "${String(
                     output
-                  )}" was not generated, got:\n${stripAnsi(combined.join(''))}`
+                  )}" was not generated, got:\n${combined.join('')}`
                 )
               );
             } else {
@@ -186,8 +190,10 @@ export function createTestSpawnApi(
         if (userReplace) {
           stripAnsiTransform.pipe(userReplace, { end: false });
           userReplace.pipe(search, { end: false });
+          userReplace.on('data', collectOutput);
         } else {
           stripAnsiTransform.pipe(search, { end: false });
+          stripAnsiTransform.on('data', collectOutput);
         }
       });
     };
@@ -224,11 +230,14 @@ export function createTestSpawnApi(
 
     const waitForResult = async () => {
       const result = await resultPromise;
-      return spawnResultConvert(result);
+      return {
+        ...spawnResultConvert(result),
+        output: combined.join(''),
+      };
     };
 
     const nextSnapshot = () => {
-      const result = stripAnsi(combined.join(''));
+      const result = combined.join('');
       combined.splice(0, combined.length);
       return result;
     };
@@ -246,6 +255,8 @@ export function createTestSpawnApi(
       const stdout = child.stdout;
       const stderr = child.stderr;
       return await new Promise<string>((res, rej) => {
+        let timer: NodeJS.Timeout | undefined;
+
         const cleanup = () => {
           stdout.removeListener('data', onData);
           stdout.removeListener('error', onError);
@@ -254,6 +265,11 @@ export function createTestSpawnApi(
           stderr.removeListener('data', onData);
           stderr.removeListener('error', onError);
           stderr.removeListener('end', onData);
+
+          if (timer) {
+            clearTimeout(timer);
+            timer = undefined;
+          }
         };
 
         const onData = () => {
@@ -275,7 +291,7 @@ export function createTestSpawnApi(
         stderr.addListener('end', onData);
 
         if (typeof timeoutMs === 'number') {
-          setTimeout(() => {
+          timer = setTimeout(() => {
             cleanup();
             rej(
               new Error(
@@ -296,7 +312,7 @@ export function createTestSpawnApi(
 
     return {
       outputSnapshot: () => {
-        return stripAnsi(combined.join(''));
+        return combined.join('');
       },
       readOutput,
       nextSnapshot,
