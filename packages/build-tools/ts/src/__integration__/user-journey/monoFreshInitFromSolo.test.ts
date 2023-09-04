@@ -5,6 +5,8 @@ import { once } from '@utils/ts';
 
 import * as keys from './keys';
 
+jest.setTimeout(60_000 * 4);
+
 const sandbox = once(() =>
   packageTestSandbox({
     importMetaUrl: import.meta.url,

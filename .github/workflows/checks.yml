@@ -22,6 +22,7 @@ jobs:
       - name: Get Node Version
         run: |
           echo "NODE_VERSION=$(jq -r .engines.node package.json)" >> $GITHUB_ENV
+          echo "NODE_VERSION=$(jq -r .engines.node package.json)" >> "$Env:GITHUB_ENV"
 
       - name: Setup Node
         uses: actions/setup-node@v3

@@ -1,9 +1,11 @@
-import { beforeAll, describe, expect, it } from '@jest/globals';
+import { beforeAll, describe, expect, it, jest } from '@jest/globals';
 import type { SpawnController } from '@testing-tools/packages';
 import { packageTestSandbox } from '@testing-tools/packages';
 import { once } from '@utils/ts';
 
 import * as keys from './keys';
+
+jest.setTimeout(60_000 * 4);
 
 const sandbox = once(() =>
   packageTestSandbox({
