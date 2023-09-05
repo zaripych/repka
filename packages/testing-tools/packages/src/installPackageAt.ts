@@ -63,7 +63,7 @@ export async function linkPackageAt(opts: {
 }) {
   switch (opts.packageManager) {
     case 'pnpm':
-      await spawnOutputConditional('pnpm', ['link', opts.from], {
+      await spawnOutputConditional('pnpm', ['link', '--dir', opts.from], {
         cwd: opts.to,
         exitCodes: [0],
         shell: process.platform === 'win32',

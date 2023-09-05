@@ -1,12 +1,5 @@
 import assert from 'node:assert';
-import {
-  mkdir,
-  readFile,
-  realpath,
-  rm,
-  symlink,
-  writeFile,
-} from 'node:fs/promises';
+import { mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
@@ -15,7 +8,6 @@ import type { TaskTypes } from '@build-tools/ts';
 import { runTurboTasksForSinglePackage } from '@build-tools/ts';
 import { logger } from '@build-tools/ts';
 import { hasOne, onceAsync } from '@utils/ts';
-import fg from 'fast-glob';
 
 import { getTestConfig } from './getTestConfig';
 import { copyFiles } from './helpers/copyFiles';
@@ -30,7 +22,6 @@ import { readPackageJson, writePackageJson } from './helpers/writePackageJson';
 import {
   installPackageAt,
   isSupportedPackageManager,
-  linkPackageAt,
 } from './installPackageAt';
 import { sortedDirectoryContents } from './sortedDirectoryContents';
 
@@ -224,7 +215,6 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
         packageManager,
         randomId,
         cacheBustedInstallSource,
-        linkPackageUnderTest,
       } = allProps;
 
       logger.info(
@@ -336,59 +326,6 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
           directory: templateDirectory,
           packageManager,
         });
-
-        if (linkPackageUnderTest) {
-          await linkPackageAt({
-            packageManager,
-            from: packageInstallSource,
-            to: templateDirectory,
-            packageName: packageUnderTest,
-          });
-        }
-      } else if (!linkPackageUnderTest) {
-        logger.debug(
-          `Skipping full installation of "${templateName}" because package.json contents has not changed and props are same`,
-          Object.keys(expectedInstallResult.propsTriggeringReinstall)
-        );
-
-        const dirs = fg.stream(`**/node_modules/${packageUnderTest}`, {
-          cwd: templateDirectory,
-          absolute: true,
-          onlyDirectories: false,
-          markDirectories: true,
-          onlyFiles: false,
-        }) as AsyncIterable<string>;
-
-        const copiedTo: string[] = [];
-
-        const realSource = await realpath(packageInstallSource);
-
-        for await (const dir of dirs) {
-          const target = await realpath(dir);
-          if (realSource === target) {
-            // no need to copy if symlinked
-            return;
-          }
-          if (copiedTo.includes(target)) {
-            return;
-          }
-
-          await copyFiles({
-            source: packageInstallSource,
-            destination: dir,
-            include: ['**'],
-            exclude: ['node_modules'],
-            options: {
-              dot: true,
-            },
-          });
-
-          copiedTo.push(target);
-        }
-      } else {
-        logger.debug(
-          `Package under test for "${templateName}" is linked, so should be good to go!`
-        );
       }
 
       await writeFile(
