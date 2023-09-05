@@ -35,13 +35,17 @@ export async function installPackageAt(opts: {
           // our direct dependency
           shell: process.platform === 'win32',
         });
-        await spawnOutputConditional('pnpm', ['install', '--offline'], {
-          cwd: opts.directory,
-          exitCodes: [0],
-          // NOTE: No way not to use the shell as pnpm is not
-          // our direct dependency
-          shell: process.platform === 'win32',
-        });
+        await spawnOutputConditional(
+          'pnpm',
+          ['install', '--offline', '--no-frozen-lockfile'],
+          {
+            cwd: opts.directory,
+            exitCodes: [0],
+            // NOTE: No way not to use the shell as pnpm is not
+            // our direct dependency
+            shell: process.platform === 'win32',
+          }
+        );
       }
       break;
     case 'npm':
