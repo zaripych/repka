@@ -1,5 +1,9 @@
 import { spawnOutputConditional } from '@build-tools/ts';
 import { UnreachableError } from '@utils/ts';
+import { copyFile } from 'fs/promises';
+import { join } from 'path';
+
+import { repositoryRootPath } from './helpers/repositoryRootPath';
 
 export type SupportedPackageManagers =
   (typeof supportedPackageManagers)[number];
@@ -18,13 +22,27 @@ export async function installPackageAt(opts: {
 }) {
   switch (opts.packageManager) {
     case 'pnpm':
-      await spawnOutputConditional('pnpm', ['install', '--offline'], {
-        cwd: opts.directory,
-        exitCodes: [0],
-        // NOTE: No way not to use the shell as pnpm is not
-        // our direct dependency
-        shell: process.platform === 'win32',
-      });
+      {
+        const rootDir = await repositoryRootPath();
+        await copyFile(
+          join(rootDir, 'pnpm-lock.yaml'),
+          join(opts.directory, 'pnpm-lock.yaml')
+        );
+        await spawnOutputConditional('pnpm', ['fetch'], {
+          cwd: opts.directory,
+          exitCodes: [0],
+          // NOTE: No way not to use the shell as pnpm is not
+          // our direct dependency
+          shell: process.platform === 'win32',
+        });
+        await spawnOutputConditional('pnpm', ['install', '--offline'], {
+          cwd: opts.directory,
+          exitCodes: [0],
+          // NOTE: No way not to use the shell as pnpm is not
+          // our direct dependency
+          shell: process.platform === 'win32',
+        });
+      }
       break;
     case 'npm':
       await spawnOutputConditional('npm', ['install', '--install-links'], {
