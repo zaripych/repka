@@ -18,7 +18,7 @@ export async function installPackageAt(opts: {
 }) {
   switch (opts.packageManager) {
     case 'pnpm':
-      await spawnOutputConditional('pnpm', ['install', '--prefer-offline'], {
+      await spawnOutputConditional('pnpm', ['install', '--offline'], {
         cwd: opts.directory,
         exitCodes: [0],
         // NOTE: No way not to use the shell as pnpm is not
