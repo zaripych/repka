@@ -5,7 +5,6 @@ import type { Plugin, ResolveIdHook, RollupWatchOptions } from 'rollup';
 
 import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from './config/loadNodePackageConfigs';
-import { rmrfDist } from './file-system/rmrfDist';
 import type { JsonType } from './package-json/packageJson';
 import { buildBinsBundleConfig } from './rollup/buildBinsBundleConfig';
 import { rollupBuild } from './rollup/rollupBuild';
@@ -94,8 +93,6 @@ export function buildForNode(opts?: BuildOpts) {
     args: opts,
     execute: async () => {
       const config = await loadNodePackageConfigs(opts);
-
-      await rmrfDist();
 
       const { entryPoints, ignoredEntryPoints } = config;
 

@@ -1,5 +1,5 @@
-import { addEntry } from './addEntry';
-import { listEntries } from './listEntries';
+import { addEntry } from '../addEntry';
+import { listEntries } from '../listEntries';
 
 it('adds entry', () => {
   const timestamp = Date.now();

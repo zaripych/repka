@@ -7,7 +7,7 @@ const sandbox = once(() =>
     tag: `usingAsLibrary`,
     copyFiles: [
       {
-        source: new URL('./test-cases', import.meta.url).pathname,
+        source: './test-cases',
         include: ['*.ts', '*.json'],
         destination: './',
       },

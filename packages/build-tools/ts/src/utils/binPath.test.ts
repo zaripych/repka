@@ -66,22 +66,7 @@ describe('all usages of binPath', () => {
         usages.map((entry) =>
           binPath({
             binName: entry.binName,
-            binScriptPath: 'ignore',
-            useShortcut: true,
-          }).catch((err: Error) =>
-            Promise.reject(new Error(`${err.message} in ${entry.fileName}`))
-          )
-        )
-      )
-    ).resolves.toBeTruthy();
-
-    await expect(
-      Promise.all(
-        usages.map((entry) =>
-          binPath({
-            binName: entry.binName,
             binScriptPath: entry.binScriptPath,
-            useShortcut: false,
           }).catch((err: Error) =>
             Promise.reject(new Error(`${err.message} in ${entry.fileName}`))
           )

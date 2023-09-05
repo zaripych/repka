@@ -11,15 +11,17 @@ import {
   includesAnyOf,
   insertAfterAnyOf,
   setDefaultArgs,
+  setScript,
 } from '../utils/cliArgsPipe';
 import { repositoryRootPath } from '../utils/repositoryRootPath';
 
 const runTurbo = async () => {
   const root = await repositoryRootPath();
   await spawnToPromise(
-    await turboBinPath(),
+    process.execPath,
     cliArgsPipe(
       [
+        setScript(await turboBinPath()),
         setDefaultArgs(
           [`--filter`],
           ['./' + relative(root, process.cwd())],

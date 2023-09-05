@@ -18,7 +18,7 @@ const tsc = async (
   args: string[],
   opts?: SpawnOptionsWithExtra<Partial<SpawnToPromiseOpts>>
 ) =>
-  spawnToPromise(await tscPath(), args, {
+  spawnToPromise(process.execPath, [await tscPath(), ...args], {
     stdio: 'inherit',
     // based on the monorepo "packages/*/*" directory structure
     // for full paths in TypeScript errors just do this:

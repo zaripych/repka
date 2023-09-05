@@ -50,16 +50,21 @@ export async function runPostActions<Props>(
       'destination copy paths cannot be absolute, please specify directory relative to the target directory'
     );
     await Promise.all(
-      copyFilesOpt.map((copyOpts) =>
-        copyFiles({
+      copyFilesOpt.map((copyOpts) => {
+        const source =
+          copyOpts.source && !isAbsolute(copyOpts.source)
+            ? join(dirname(opts.testFilePath), copyOpts.source)
+            : copyOpts.source;
+        const destination = join(
+          opts.targetDirectory,
+          copyOpts.destination || './'
+        );
+        return copyFiles({
           ...copyOpts,
-          source:
-            copyOpts.source && !isAbsolute(copyOpts.source)
-              ? join(dirname(opts.testFilePath), copyOpts.source)
-              : copyOpts.source,
-          destination: join(opts.targetDirectory, copyOpts.destination || './'),
-        })
-      )
+          source,
+          destination,
+        });
+      })
     );
   }
 

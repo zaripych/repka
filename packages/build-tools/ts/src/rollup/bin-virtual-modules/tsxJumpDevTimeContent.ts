@@ -12,8 +12,9 @@ const onError = (err) => {
 
 binPath('tsx', 'tsx/dist/cli.js').then((result) => {
   const cp = spawn(
-    result,
+    process.execPath,
     [
+      result,
       fileURLToPath(new URL('../src/bin/${binName}.ts', import.meta.url)),
       ...process.argv.slice(2),
     ],

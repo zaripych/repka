@@ -1,7 +1,7 @@
 export const js = String.raw;
 
 export const binPathContent = () => `import { stat } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const isFile = async (file) => {
@@ -10,24 +10,30 @@ const isFile = async (file) => {
     .catch(() => false);
 };
 
-async function findBin(startWith, binScriptPath) {
+async function* iterateNodeModules(startWith, path) {
   let current = startWith;
-  while (current !== '/' && current !== '~/') {
-    const candidate = join(current, 'node_modules', binScriptPath);
+  while (current !== sep && current !== '~/') {
+    const candidate = join(current, 'node_modules', path);
     if (await isFile(candidate)) {
-      return candidate;
+      yield candidate;
+    }
+    if (current === dirname(current)) {
+      break;
     }
     current = dirname(current);
   }
 }
 
-const binPath = async (binName, binScriptPath) => {
-  const root = fileURLToPath(new URL('../', import.meta.url));
-  const bestGuess = join(root, 'node_modules', '.bin', binName);
-  if (await isFile(bestGuess)) {
-    return bestGuess;
+async function findBinScript(startWith, binScriptPath) {
+  for await (const path of iterateNodeModules(startWith, binScriptPath)) {
+    return path;
   }
-  const result = await findBin(root, binScriptPath);
+  return undefined;
+}
+
+async function binPath(binName, binScriptPath) {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const result = await findBinScript(root, binScriptPath);
   if (result) {
     return result;
   }

@@ -1,6 +1,21 @@
 import type { Stats } from 'node:fs';
-import { copyFile, mkdir, readlink, realpath, symlink } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import {
+  copyFile,
+  mkdir,
+  readlink,
+  realpath,
+  stat,
+  symlink,
+  unlink,
+} from 'node:fs/promises';
+import {
+  dirname,
+  isAbsolute,
+  join,
+  normalize,
+  relative,
+  resolve,
+} from 'node:path';
 
 import { logger } from '@build-tools/ts';
 import fg from 'fast-glob';
@@ -24,8 +39,11 @@ export type CopyGlobOpts = {
   include: string[];
   exclude?: string[];
   destination: string;
+  accessError?: 'ignore' | 'throw' | 'overwrite';
+  existsError?: 'ignore' | 'throw' | 'overwrite';
   options?: CopyOptsExtra & {
     dryRun?: boolean;
+    verbose?: boolean;
   };
 };
 
@@ -43,47 +61,83 @@ function entriesFromGlobs({
   options,
 }: Pick<CopyGlobOpts, 'source' | 'include' | 'exclude' | 'options'>) {
   const entries = fg.stream(
-    [
-      ...(exclude ? exclude.map((glob) => `!${source || '.'}/${glob}`) : []),
-      ...include.map((glob) => `${source || '.'}/${glob}`),
-    ],
+    [...(exclude ? exclude.map((glob) => `!${glob}`) : []), ...include],
     {
       followSymbolicLinks: false,
       ...options,
       onlyFiles: false,
       stats: true,
       objectMode: true,
+      cwd: source,
+      absolute: true,
     }
   );
   return entries as AsyncIterable<Entry>;
 }
 
 function getDeps(opts: CopyOpts) {
+  const rethrowToCaptureStackTrace = (err: NodeJS.ErrnoException) => {
+    throw Object.assign(new Error(err.message, { cause: err }), {
+      code: err.code,
+      path: err.path,
+      errno: err.errno,
+      syscall: err.syscall,
+    });
+  };
   const normalDeps = {
+    stat,
     realpath,
     readlink,
     mkdir,
     symlink,
     copyFile,
+    unlink,
   };
   const dryRunDeps = {
+    stat,
     realpath,
     readlink,
-    mkdir: (...[directory]: Parameters<typeof mkdir>) => {
-      logger.debug('mkdir', { directory });
+    mkdir: () => {
       return Promise.resolve();
     },
-    symlink: (...[source, target]: Parameters<typeof symlink>) => {
-      logger.debug('symlink', { source, target });
+    symlink: () => {
       return Promise.resolve();
     },
-    copyFile: (...[source, target]: Parameters<typeof copyFile>) => {
-      logger.debug('copyFile', { source, target });
+    copyFile: () => {
+      return Promise.resolve();
+    },
+    unlink: () => {
       return Promise.resolve();
     },
   };
-  const deps = opts.options?.dryRun ? dryRunDeps : normalDeps;
-  return deps;
+  const nonVerboseDeps = opts.options?.dryRun ? dryRunDeps : normalDeps;
+  const verboseDeps = Object.fromEntries(
+    Object.entries(nonVerboseDeps).map(([key, value]) => [
+      key,
+      async (...args: unknown[]) => {
+        let result: unknown;
+        try {
+          result = await (value as (...args: unknown[]) => unknown)(...args);
+          return result;
+        } finally {
+          if (typeof result !== 'undefined') {
+            logger.debug(key, ...args, '->', result);
+          } else {
+            logger.debug(key, ...args);
+          }
+        }
+      },
+    ])
+  );
+  const deps = opts.options?.verbose ? verboseDeps : nonVerboseDeps;
+  return Object.fromEntries(
+    Object.entries(deps).map(
+      ([key, fn]: [string, (...args: unknown[]) => Promise<unknown>]) => [
+        key,
+        (...args: unknown[]) => fn(...args).catch(rethrowToCaptureStackTrace),
+      ]
+    )
+  ) as typeof normalDeps;
 }
 
 export async function copyFiles(opts: CopyOpts) {
@@ -98,7 +152,8 @@ export async function copyFiles(opts: CopyOpts) {
       console.log('found entry', entry);
     }
 
-    const { path: sourcePath, stats } = entry;
+    const { stats } = entry;
+    const sourcePath = normalize(entry.path);
     const targetPath = join(opts.destination, relative(source, sourcePath));
 
     if (stats.isSymbolicLink()) {
@@ -114,7 +169,33 @@ export async function copyFiles(opts: CopyOpts) {
         });
         createdDirs.add(targetDirectory);
       }
-      await deps.copyFile(sourcePath, targetPath);
+      await deps
+        .copyFile(sourcePath, targetPath)
+        .catch(async (err: NodeJS.ErrnoException) => {
+          const handle = async (
+            handleCase: 'throw' | 'ignore' | 'overwrite' = 'throw'
+          ) => {
+            if (handleCase === 'overwrite') {
+              await deps.unlink(targetPath);
+              await deps.copyFile(sourcePath, targetPath);
+              return Promise.resolve();
+            } else if (handleCase === 'ignore') {
+              return Promise.resolve();
+            } else {
+              return Promise.reject(err);
+            }
+          };
+
+          if (err.code === 'EACCES' || err.code === 'EPERM') {
+            return handle(opts.accessError);
+          }
+
+          if (err.code === 'EEXIST') {
+            return handle(opts.existsError);
+          }
+
+          return Promise.reject(err);
+        });
     } else if (stats.isDirectory()) {
       await deps.mkdir(targetPath, {
         recursive: true,
@@ -127,43 +208,87 @@ export async function copyFiles(opts: CopyOpts) {
 
   const realSource = await deps.realpath(source);
   for (const entry of symlinkEntries) {
-    const sourcePath = entry.path;
-    const targetPath = join(opts.destination, relative(source, sourcePath));
+    const sourcePath = normalize(entry.path);
+    const linkPath = join(opts.destination, relative(source, sourcePath));
 
     const link = await deps.readlink(sourcePath);
-    const realLinkTarget = await deps.realpath(sourcePath);
 
-    const linkTargetIsWithinSourceDir = realLinkTarget.startsWith(realSource);
-    const relativeLinkAndTargetDirectoryNameSame =
-      !isAbsolute(link) && dirname(source) === dirname(opts.destination);
+    const realLinkTarget = await deps
+      .realpath(sourcePath)
+      .catch((err: NodeJS.ErrnoException) => {
+        if (err.code === 'ENOENT') {
+          // broken link
+          return Promise.resolve(null);
+        } else {
+          return Promise.reject(err);
+        }
+      });
 
-    if (linkTargetIsWithinSourceDir || relativeLinkAndTargetDirectoryNameSame) {
-      await deps
-        .symlink(link, targetPath)
-        .catch(async (err: NodeJS.ErrnoException) => {
-          if (err.code === 'EEXIST') {
-            const existingLink = await readlink(targetPath);
-            if (existingLink !== link) {
-              return Promise.reject(err);
-            } else {
-              return Promise.resolve();
-            }
+    const realLinkStats =
+      process.platform === 'win32' && realLinkTarget
+        ? await deps.stat(realLinkTarget)
+        : undefined;
+
+    const symlinkType = (stats: Stats) =>
+      stats.isDirectory() ? 'dir' : 'file';
+
+    const linkTargetIsWithinSourceDir = realLinkTarget
+      ? realLinkTarget.startsWith(realSource)
+      : sourcePath.startsWith(source);
+
+    const isExistingLinkDifferent = async () => {
+      const existingLink = await readlink(linkPath);
+      if (isAbsolute(existingLink) && isAbsolute(link)) {
+        if (
+          relative(opts.destination, existingLink) !== relative(source, link)
+        ) {
+          return true;
+        }
+      } else if (normalize(existingLink) !== normalize(link)) {
+        return true;
+      }
+
+      return false;
+    };
+
+    const targetWithinDest = isAbsolute(link)
+      ? join(opts.destination, relative(source, link))
+      : link;
+
+    const target = linkTargetIsWithinSourceDir
+      ? targetWithinDest
+      : // no way but to create a symlink to the target
+        // outside destination or try to create the broken link
+        realLinkTarget || sourcePath;
+
+    await deps
+      .symlink(
+        target,
+        linkPath,
+        realLinkStats ? symlinkType(realLinkStats) : undefined
+      )
+      .catch(async (err: NodeJS.ErrnoException) => {
+        const handle = async (
+          handleCase: 'throw' | 'ignore' | 'overwrite' = 'throw'
+        ) => {
+          if (handleCase === 'overwrite') {
+            await deps.unlink(linkPath);
+            await deps.symlink(
+              target,
+              linkPath,
+              realLinkStats ? symlinkType(realLinkStats) : undefined
+            );
+            return Promise.resolve();
+          } else if (handleCase === 'ignore') {
+            return Promise.resolve();
+          } else {
+            return Promise.reject(err);
           }
-        });
-    } else {
-      // no way but to create a symlink to the target outside destination:
-      await deps
-        .symlink(realLinkTarget, targetPath)
-        .catch(async (err: NodeJS.ErrnoException) => {
-          if (err.code === 'EEXIST') {
-            const existingRealSourcePath = await realpath(targetPath);
-            if (existingRealSourcePath !== realLinkTarget) {
-              return Promise.reject(err);
-            } else {
-              return Promise.resolve();
-            }
-          }
-        });
-    }
+        };
+
+        if (err.code === 'EEXIST' && (await isExistingLinkDifferent())) {
+          return handle(opts.existsError);
+        }
+      });
   }
 }

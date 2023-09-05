@@ -14,6 +14,7 @@ import {
   includesAnyOf,
   removeLogLevelOption,
   setDefaultArgs,
+  setScript,
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
 
@@ -32,9 +33,10 @@ export const jest = async (
     '--help',
   ]);
   const { child } = spawnWithSpawnParameters([
-    await jestPath(),
+    process.execPath,
     cliArgsPipe(
       [
+        setScript(await jestPath()),
         removeLogLevelOption(),
         // when stdio is "pipe" pass --color option:
         canUseStdioPipeToFilterOutput &&

@@ -1,5 +1,5 @@
 import { readFile, stat } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, sep } from 'node:path';
 
 import { moduleRootDirectory } from './moduleRootDirectory';
 
@@ -11,10 +11,13 @@ async function isFile(filePath: string) {
 
 async function* iterateNodeModules(startWith: string, path: string) {
   let current = startWith;
-  while (current !== '/' && current !== '~/') {
+  while (current !== sep && current !== '~/') {
     const candidate = join(current, 'node_modules', path);
     if (await isFile(candidate)) {
       yield candidate;
+    }
+    if (current === dirname(current)) {
+      break;
     }
     current = dirname(current);
   }
@@ -30,16 +33,8 @@ async function findBinScript(startWith: string, binScriptPath: string) {
 export async function binPath(opts: {
   binName: string;
   binScriptPath: string;
-  useShortcut?: boolean;
 }) {
-  const useShortcut = opts.useShortcut ?? true;
   const root = moduleRootDirectory();
-  if (useShortcut) {
-    const bestGuess = join(root, 'node_modules', '.bin', opts.binName);
-    if (await isFile(bestGuess)) {
-      return bestGuess;
-    }
-  }
   const result = await findBinScript(root, opts.binScriptPath);
   if (result) {
     return result;
@@ -88,7 +83,9 @@ export async function determineBinScriptPath(opts: {
 
     const candidate = join(dirname(path), scriptPath);
     if (await isFile(candidate)) {
-      return join(opts.binPackageName, scriptPath);
+      // denormalize and make this consistent on all platforms
+      // as the path will work both for windows and non-windows
+      return join(opts.binPackageName, scriptPath).replaceAll(sep, '/');
     }
   }
   return undefined;

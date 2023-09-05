@@ -1,14 +1,15 @@
 import assert from 'node:assert';
-import { dirname, join } from 'node:path';
+import { dirname, normalize, sep } from 'node:path';
 
-import { isTruthy, onceAsync } from '@utils/ts';
+import { escapeRegExp, isTruthy, onceAsync } from '@utils/ts';
 import fg from 'fast-glob';
 
 const getRepositoryRootScanCandidates = (currentDirectory: string) => {
+  const esc = escapeRegExp(sep);
   // having 'packages/*' in the root of a monorepo is super common
-  const result = /(.*(?=\/packages\/))|(.*(?=\/node_modules\/))|(.*)/.exec(
-    currentDirectory
-  );
+  const result = new RegExp(
+    `(.*(?=${esc}packages${esc}))|(.*(?=${esc}node_modules${esc}))|(.*)`
+  ).exec(currentDirectory);
   assert(!!result);
   const [, packagesRoot, nodeModulesRoot] = result;
   return [packagesRoot, nodeModulesRoot].filter(isTruthy);
@@ -18,7 +19,7 @@ const getRepositoryRootScanCandidates = (currentDirectory: string) => {
 // directories can have them - whichever read first will be returned
 // so if order is important - scanning should be separated to multiple jobs
 // via prioritizedHasMonorepoMarkers
-const hasRootMarkers = async (candidates: string[]) => {
+const hasRootMarkersFor = async (candidate: string) => {
   const markers = [
     '.git',
     'yarn.lock',
@@ -26,13 +27,12 @@ const hasRootMarkers = async (candidates: string[]) => {
     'package-lock.json',
     'pnpm-workspace.yaml',
   ];
-  const markersStream = fg.stream(
-    candidates.flatMap((dir) => markers.map((marker) => join(dir, marker))),
-    {
-      markDirectories: true,
-      onlyFiles: false,
-    }
-  );
+  const markersStream = fg.stream(markers, {
+    markDirectories: true,
+    onlyFiles: false,
+    cwd: candidate,
+    absolute: true,
+  });
   for await (const entry of markersStream) {
     assert(typeof entry === 'string');
     return dirname(entry);
@@ -40,10 +40,18 @@ const hasRootMarkers = async (candidates: string[]) => {
   return undefined;
 };
 
+const hasRootMarkers = async (candidates: string[]) => {
+  const results = await Promise.all(
+    candidates.map((candidate) => hasRootMarkersFor(candidate))
+  );
+  return results.filter(isTruthy)[0];
+};
+
 const prioritizedHasMarkers = (jobs: string[][]) => {
   if (jobs.length === 0) {
     return Promise.resolve(undefined);
   }
+
   return new Promise<string | undefined>((res) => {
     const results = new Map<number, string | undefined>();
 
@@ -101,7 +109,7 @@ export const repositoryRootPathViaDirectoryScan = async (
   const parent = uniqueDirname(lookupDirectory);
   const superParent = uniqueDirname(parent);
 
-  return (
+  const result =
     (await prioritizedHasMarkers(
       // scan in most likely locations first with current lookup directory taking priority
       [
@@ -113,8 +121,9 @@ export const repositoryRootPathViaDirectoryScan = async (
       ]
         .map((dirs) => dirs.filter(isTruthy))
         .filter((job) => job.length > 0)
-    )) || lookupDirectory /* fallback to current directory in worse scenario */
-  );
+    )) || lookupDirectory; /* fallback to current directory in worse scenario */
+
+  return normalize(result);
 };
 
 /**

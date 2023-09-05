@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 
 import fg from 'fast-glob';
 
@@ -21,8 +21,26 @@ export async function generateScript(opts: {
     }
   ) as AsyncIterable<string>;
 
-  for await (const script of stream) {
-    if (script) {
+  for await (const scriptLoc of stream) {
+    if (scriptLoc) {
+      const root = moduleRootDirectory();
+      const location = resolve(join(rootDir, scriptLoc));
+
+      const modulePath = (input: string) =>
+        process.platform === 'win32'
+          ? `file://${input.replaceAll(sep, '/')}`
+          : input;
+
+      const script = `import { runTsScript } from ${JSON.stringify(
+        modulePath(join(root, 'configs/jest/jestConfigHelpers.gen.mjs'))
+      )};
+
+export default async () => {
+await runTsScript({
+  location: ${JSON.stringify(location)}
+})
+}`;
+
       const hash = createHash('sha1')
         .update(rootDir)
         .update(flavor)
@@ -35,21 +53,7 @@ export async function generateScript(opts: {
 
       await mkdir(dir, { recursive: true });
 
-      const root = moduleRootDirectory();
-
-      await writeFile(
-        file,
-        `import { runTsScript } from '${join(
-          root,
-          'configs/jest/jestConfigHelpers.gen.mjs'
-        )}';
-
-export default async () => {
-  await runTsScript({
-    location: '${resolve(join(rootDir, script))}'
-  })
-}`
-      );
+      await writeFile(file, script);
 
       return file;
     }

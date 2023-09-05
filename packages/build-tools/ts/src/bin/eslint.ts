@@ -6,15 +6,17 @@ import {
   includesAnyOf,
   removeLogLevelOption,
   setDefaultArgs,
+  setScript,
 } from '../utils/cliArgsPipe';
 import { configFilePath } from '../utils/configFilePath';
 
 const runEslint = async () => {
   await ensureEslintConfigFilesExist();
   await spawnToPromise(
-    await eslintBinPath(),
+    process.execPath,
     cliArgsPipe(
       [
+        setScript(await eslintBinPath()),
         removeLogLevelOption(),
         setDefaultArgs(
           ['--ext'],

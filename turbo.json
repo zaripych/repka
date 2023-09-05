@@ -1,6 +1,5 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "baseBranch": "origin/master",
   "pipeline": {
     "build:tools": {
       "dependsOn": ["^build:tools"],
@@ -8,8 +7,8 @@
         "src/*.ts",
         "src/*/*.ts",
         "src/**/*.ts",
-        ":!:src/__integration__",
-        ":!:src/__tests__/**/*.test.ts",
+        "!src/__integration__",
+        "!src/__tests__/**/*.test.ts",
         "configs",
         "build.ts",
         "package.json",
@@ -24,8 +23,8 @@
         "src/*.ts",
         "src/*/*.ts",
         "src/**/*.ts",
-        ":!:src/__integration__",
-        ":!:src/__tests__/**/*.test.ts",
+        "!src/__integration__",
+        "!src/__tests__/**/*.test.ts",
         "build.ts",
         "package.json",
         "tsconfig.json"

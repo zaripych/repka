@@ -22,6 +22,7 @@ export type SpawnController = Awaited<
 export function createTestSpawnApi(
   opts: () => Promise<{
     cwd: string;
+    packageInstallSource: string;
     env?: Record<string, string>;
   }>
 ) {
@@ -41,11 +42,12 @@ export function createTestSpawnApi(
   const spawnResult = async (
     executable: string,
     args: string[],
-    spawnOpts?: SpawnOptionsWithExtra<SpawnResultOpts>
+    spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>>
   ) => {
     const { cwd, env } = await opts();
 
     const result = await spawnResultCore(executable, args, {
+      shell: process.platform === 'win32',
       cwd,
       exitCodes: 'any',
       ...(env && {
@@ -63,11 +65,14 @@ export function createTestSpawnApi(
   const spawnController = async (
     executable: string,
     args: string[],
-    spawnOpts?: SpawnOptionsWithExtra<SpawnResultOpts>
+    spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>> & {
+      searchAndReplace?: Parameters<typeof searchAndReplaceTextTransform>[0];
+    }
   ) => {
     const { cwd, env } = await opts();
 
     const activeOpts = {
+      shell: process.platform === 'win32',
       cwd,
       ...(env && {
         env: {
@@ -85,10 +90,16 @@ export function createTestSpawnApi(
     const resultPromise = spawnResultCore(child, {
       exitCodes: 'any',
       ...activeOpts,
-      buffers: {
-        combined,
-      },
+      output: [],
     });
+
+    const collectOutput = (data: Buffer | string) => {
+      combined.push(data instanceof Buffer ? data.toString('utf8') : data);
+    };
+
+    const userReplace = spawnOpts?.searchAndReplace
+      ? searchAndReplaceTextTransform(spawnOpts.searchAndReplace)
+      : undefined;
 
     const waitForOutput = async (
       output: string | RegExp,
@@ -108,15 +119,27 @@ export function createTestSpawnApi(
       });
 
       return new Promise<void>((res, rej) => {
+        let timer: NodeJS.Timeout | undefined;
         const stop = () => {
           out.unpipe(stripAnsiTransform);
           err.unpipe(stripAnsiTransform);
-          stripAnsiTransform.unpipe(search);
+          if (userReplace) {
+            stripAnsiTransform.unpipe(userReplace);
+            userReplace.unpipe(search);
+            userReplace.off('data', collectOutput);
+          } else {
+            stripAnsiTransform.unpipe(search);
+            stripAnsiTransform.off('data', collectOutput);
+          }
           if (out.isPaused() && out.listenerCount('data') > 0) {
             out.resume();
           }
           if (err.isPaused() && err.listenerCount('data') > 0) {
             err.resume();
+          }
+          if (timer) {
+            clearTimeout(timer);
+            timer = undefined;
           }
         };
 
@@ -137,7 +160,7 @@ export function createTestSpawnApi(
                 new Error(
                   `Expected output "${String(
                     output
-                  )}" was not generated, got:\n${stripAnsi(combined.join(''))}`
+                  )}" was not generated, got:\n${combined.join('')}`
                 )
               );
             } else {
@@ -148,7 +171,7 @@ export function createTestSpawnApi(
 
         if (timeoutMs !== 'no-timeout') {
           const timeout = timeoutMs;
-          setTimeout(() => {
+          timer = setTimeout(() => {
             stop();
             rej(
               new Error(
@@ -164,7 +187,14 @@ export function createTestSpawnApi(
 
         out.pipe(stripAnsiTransform, { end: false });
         err.pipe(stripAnsiTransform, { end: false });
-        stripAnsiTransform.pipe(search, { end: false });
+        if (userReplace) {
+          stripAnsiTransform.pipe(userReplace, { end: false });
+          userReplace.pipe(search, { end: false });
+          userReplace.on('data', collectOutput);
+        } else {
+          stripAnsiTransform.pipe(search, { end: false });
+          stripAnsiTransform.on('data', collectOutput);
+        }
       });
     };
 
@@ -200,11 +230,14 @@ export function createTestSpawnApi(
 
     const waitForResult = async () => {
       const result = await resultPromise;
-      return spawnResultConvert(result);
+      return {
+        ...spawnResultConvert(result),
+        output: combined.join(''),
+      };
     };
 
     const nextSnapshot = () => {
-      const result = stripAnsi(combined.join(''));
+      const result = combined.join('');
       combined.splice(0, combined.length);
       return result;
     };
@@ -222,6 +255,8 @@ export function createTestSpawnApi(
       const stdout = child.stdout;
       const stderr = child.stderr;
       return await new Promise<string>((res, rej) => {
+        let timer: NodeJS.Timeout | undefined;
+
         const cleanup = () => {
           stdout.removeListener('data', onData);
           stdout.removeListener('error', onError);
@@ -230,6 +265,11 @@ export function createTestSpawnApi(
           stderr.removeListener('data', onData);
           stderr.removeListener('error', onError);
           stderr.removeListener('end', onData);
+
+          if (timer) {
+            clearTimeout(timer);
+            timer = undefined;
+          }
         };
 
         const onData = () => {
@@ -251,7 +291,7 @@ export function createTestSpawnApi(
         stderr.addListener('end', onData);
 
         if (typeof timeoutMs === 'number') {
-          setTimeout(() => {
+          timer = setTimeout(() => {
             cleanup();
             rej(
               new Error(
@@ -272,7 +312,7 @@ export function createTestSpawnApi(
 
     return {
       outputSnapshot: () => {
-        return stripAnsi(combined.join(''));
+        return combined.join('');
       },
       readOutput,
       nextSnapshot,
@@ -289,7 +329,7 @@ export function createTestSpawnApi(
     spawnBin: async (
       bin: string,
       args: string[],
-      spawnOpts?: SpawnOptionsWithExtra<SpawnResultOpts>
+      spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>>
     ) => {
       const path = join('./node_modules/.bin/', bin);
       return await spawnResult(path, args, spawnOpts);
@@ -297,10 +337,26 @@ export function createTestSpawnApi(
     spawnBinController: async (
       bin: string,
       args: string[],
-      spawnOpts?: SpawnOptionsWithExtra<SpawnResultOpts>
+      spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>> & {
+        searchAndReplace?: Parameters<typeof searchAndReplaceTextTransform>[0];
+      }
     ) => {
       const path = join('./node_modules/.bin/', bin);
       return await spawnController(path, args, spawnOpts);
+    },
+    spawnBinControllerFromPackageInstallSource: async (
+      bin: string,
+      args: string[],
+      spawnOpts?: SpawnOptionsWithExtra<Partial<SpawnResultOpts>> & {
+        searchAndReplace?: Parameters<typeof searchAndReplaceTextTransform>[0];
+      }
+    ) => {
+      const { packageInstallSource } = await opts();
+      return await spawnController(
+        'npx',
+        ['--package', packageInstallSource, '-y', '--', bin].concat(args),
+        spawnOpts
+      );
     },
   };
 }

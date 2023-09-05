@@ -17,7 +17,7 @@ const onError = (err) => {
 };
 
 binPath('${binName}', '${binScriptPath}').then((result) => {
-  const cp = spawn(result, process.argv.slice(2), { stdio: 'inherit' });
+  const cp = spawn(process.execPath, [result, ...process.argv.slice(2)], { stdio: 'inherit' });
   cp.on('error', onError);
   cp.on('close', (code, signal) => {
     if (typeof code === 'number') {

@@ -8,7 +8,11 @@ export const prettierPath = () =>
   });
 
 export async function prettierWrite(paths: string[]) {
-  return spawnToPromise(await prettierPath(), ['--write', ...paths], {
-    exitCodes: [0],
-  });
+  return spawnToPromise(
+    process.execPath,
+    [await prettierPath(), '--write', ...paths],
+    {
+      exitCodes: [0],
+    }
+  );
 }

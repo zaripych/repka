@@ -1,14 +1,22 @@
 import { describe, expect, it } from '@jest/globals';
+import { normalize } from 'path';
 import { fileURLToPath } from 'url';
 
 import { getModuleRootDirectoryForImportMetaUrl } from './moduleRootDirectory';
 
 describe('getModuleRootDirectoryForImportMetaUrl', () => {
-  const monoRoot = '/home/rz/projects/startup-repo';
+  const monoRoot =
+    process.platform === 'win32'
+      ? normalize('C://home/rz/projects/startup-repo')
+      : normalize('/home/rz/projects/startup-repo');
 
   it('works after bundling', () => {
-    const importMetaUrl = `file://${monoRoot}/packages/xxx/yyy/node_modules/@repka-kit/ts/dist/chunk.94a64047.js`;
-    const modulesBinPathResult = `${monoRoot}/packages/xxx/yyy/node_modules/@repka-kit/ts/`;
+    const importMetaUrl = normalize(
+      `file://${monoRoot}/packages/xxx/yyy/node_modules/@repka-kit/ts/dist/chunk.94a64047.js`
+    );
+    const modulesBinPathResult = normalize(
+      `${monoRoot}/packages/xxx/yyy/node_modules/@repka-kit/ts/`
+    );
     expect(
       getModuleRootDirectoryForImportMetaUrl({
         importMetaUrl,

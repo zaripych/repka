@@ -2,7 +2,7 @@
 // NOTE: This file is bundled up from './src/bin/*' and needs to be committed
 import { spawn } from 'node:child_process';
 import { stat } from 'node:fs/promises';
-import { join, dirname } from 'node:path';
+import { sep, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const isFile = async (file) => {
@@ -11,30 +11,35 @@ const isFile = async (file) => {
     .catch(() => false);
 };
 
-async function findBin(startWith, binScriptPath) {
+async function* iterateNodeModules(startWith, path) {
   let current = startWith;
-  while (current !== '/' && current !== '~/') {
-    const candidate = join(current, 'node_modules', binScriptPath);
+  while (current !== sep && current !== '~/') {
+    const candidate = join(current, 'node_modules', path);
     if (await isFile(candidate)) {
-      return candidate;
+      yield candidate;
+    }
+    if (current === dirname(current)) {
+      break;
     }
     current = dirname(current);
   }
 }
 
-const binPath = async (binName, binScriptPath) => {
-  const root = fileURLToPath(new URL('../', import.meta.url));
-  const bestGuess = join(root, 'node_modules', '.bin', binName);
-  if (await isFile(bestGuess)) {
-    return bestGuess;
+async function findBinScript(startWith, binScriptPath) {
+  for await (const path of iterateNodeModules(startWith, binScriptPath)) {
+    return path;
   }
-  const result = await findBin(root, binScriptPath);
+  return undefined;
+}
+
+async function binPath(binName, binScriptPath) {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const result = await findBinScript(root, binScriptPath);
   if (result) {
     return result;
   }
   throw new Error(`Cannot find bin ${binName}`);
-};
-
+}
 
 const onError = (err) => {
   console.error(err);
@@ -43,8 +48,9 @@ const onError = (err) => {
 
 binPath('tsx', 'tsx/dist/cli.js').then((result) => {
   const cp = spawn(
-    result,
+    process.execPath,
     [
+      result,
       fileURLToPath(new URL('../src/bin/lint-staged.ts', import.meta.url)),
       ...process.argv.slice(2),
     ],
@@ -59,4 +65,4 @@ binPath('tsx', 'tsx/dist/cli.js').then((result) => {
     }
   });
 }, onError);
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGludC1zdGFnZWQuZ2VuLm1qcyIsInNvdXJjZXMiOltdLCJzb3VyY2VzQ29udGVudCI6W10sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OzsifQ==
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibGludC1zdGFnZWQuZ2VuLm1qcyIsInNvdXJjZXMiOltdLCJzb3VyY2VzQ29udGVudCI6W10sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OzsifQ==

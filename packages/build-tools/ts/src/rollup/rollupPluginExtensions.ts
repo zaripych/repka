@@ -1,9 +1,6 @@
 import { readdir, stat } from 'fs/promises';
-import { posix } from 'path';
+import { basename, dirname, isAbsolute, resolve } from 'path';
 import type { Plugin } from 'rollup';
-
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const { basename, dirname, isAbsolute, resolve } = posix;
 
 type Extensions = Array<string>;
 
@@ -77,6 +74,7 @@ async function resolveFilePath(
     }
   } catch (err) {
     // noop
+    console.error(err);
   }
 
   return null;
@@ -105,17 +103,19 @@ export function extensions({
     name: 'extensions',
     resolveId(id, parent) {
       // Resolve absolute paths
-      if (isAbsolute(id))
+      if (isAbsolute(id)) {
         return resolveFilePath(resolve(id), extensions, resolveIndex);
+      }
 
       // Parent will be undefined if this is an entry point.
       // Resolve against current working directory.
-      if (parent === undefined)
+      if (parent === undefined) {
         return resolveFilePath(
           resolve(process.cwd(), id),
           extensions,
           resolveIndex
         );
+      }
 
       // Skip external modules at this stage
       if (id[0] !== '.') return null;

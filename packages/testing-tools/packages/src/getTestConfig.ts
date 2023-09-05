@@ -49,12 +49,9 @@ const readConfigAt = async (opts: {
 const createConfig = (opts: { packageRootDirectory: string }) => {
   return {
     packageRootDirectory: opts.packageRootDirectory,
-    testRootDirectory: join(
-      tmpdir(),
-      '@repka-kit',
-      'integration-tests',
-      'root-' + randomText(8)
-    ),
+    testRootDirectory: process.env['TEST_ROOT_DIR']
+      ? join(process.env['TEST_ROOT_DIR'], 'root-' + randomText(8))
+      : join(tmpdir(), 'root-' + randomText(8)),
   };
 };
 

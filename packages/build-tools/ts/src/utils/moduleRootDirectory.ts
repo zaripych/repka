@@ -1,4 +1,4 @@
-import { dirname } from 'node:path';
+import { dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { once } from '@utils/ts';
@@ -12,9 +12,9 @@ export const getModuleRootDirectoryForImportMetaUrl = (opts: {
   const parent = dirname(__fileName);
   const superParent = dirname(parent);
 
-  const isBundledInDist = () => parent.endsWith('/dist');
+  const isBundledInDist = () => parent.endsWith(sep + 'dist');
   const isBundledInBin = () =>
-    parent.endsWith('/bin') && !superParent.endsWith('/src');
+    parent.endsWith(sep + 'bin') && !superParent.endsWith(sep + 'src');
 
   if (isBundledInDist() || isBundledInBin()) {
     return fileURLToPath(new URL(`../`, opts.importMetaUrl));

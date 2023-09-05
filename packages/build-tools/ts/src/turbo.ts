@@ -6,6 +6,7 @@ import { spawnOutputConditional } from './child-process';
 import type { SpawnResultOpts } from './child-process/spawnResult';
 import { binPath } from './utils/binPath';
 import type { CliArgs } from './utils/cliArgsPipe';
+import { setScript } from './utils/cliArgsPipe';
 import { cliArgsPipe } from './utils/cliArgsPipe';
 import { insertAfterAnyOf } from './utils/cliArgsPipe';
 import { includesAnyOf } from './utils/cliArgsPipe';
@@ -66,9 +67,9 @@ export async function runTurboTasksForSinglePackage(opts: {
   const rootDir = opts.packageDir ?? process.cwd();
   const cwd = await repositoryRootPath();
   return await spawnOutputConditional(
-    await turboBinPath(),
+    process.execPath,
     cliArgsPipe(
-      [inheritTurboForceArgFromEnv()],
+      [setScript(await turboBinPath()), inheritTurboForceArgFromEnv()],
       [
         'run',
         ...opts.tasks,
