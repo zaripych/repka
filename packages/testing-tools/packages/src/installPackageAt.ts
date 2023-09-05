@@ -1,9 +1,5 @@
 import { spawnOutputConditional } from '@build-tools/ts';
 import { UnreachableError } from '@utils/ts';
-import { copyFile } from 'fs/promises';
-import { join } from 'path';
-
-import { repositoryRootPath } from './helpers/repositoryRootPath';
 
 export type SupportedPackageManagers =
   (typeof supportedPackageManagers)[number];
@@ -23,23 +19,6 @@ export async function installPackageAt(opts: {
   switch (opts.packageManager) {
     case 'pnpm':
       {
-        /**
-         * @todo decide whether we need this flag after some testing
-         */
-        if (process.env['USE_PNPM_FETCH']) {
-          const rootDir = await repositoryRootPath();
-          await copyFile(
-            join(rootDir, 'pnpm-lock.yaml'),
-            join(opts.directory, 'pnpm-lock.yaml')
-          );
-          await spawnOutputConditional('pnpm', ['fetch'], {
-            cwd: opts.directory,
-            exitCodes: [0],
-            // NOTE: No way not to use the shell as pnpm is not
-            // our direct dependency
-            shell: process.platform === 'win32',
-          });
-        }
         await spawnOutputConditional(
           'pnpm',
           ['install', '--prefer-offline', '--no-frozen-lockfile'],

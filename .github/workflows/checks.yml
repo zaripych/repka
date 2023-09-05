@@ -6,19 +6,10 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   quick-checks:
-    name: Ubuntu
-    uses: ./.github/workflows/run-checks.yml
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    with:
-      os: ${{ matrix.os }}
-
-  extra-checks:
     name: ${{ matrix.os }}
     uses: ./.github/workflows/run-checks.yml
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     with:
       os: ${{ matrix.os }}
