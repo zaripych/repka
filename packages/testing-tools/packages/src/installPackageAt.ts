@@ -37,7 +37,7 @@ export async function installPackageAt(opts: {
         });
         await spawnOutputConditional(
           'pnpm',
-          ['install', '--offline', '--no-frozen-lockfile'],
+          ['install', '--prefer-offline', '--no-frozen-lockfile'],
           {
             cwd: opts.directory,
             exitCodes: [0],
