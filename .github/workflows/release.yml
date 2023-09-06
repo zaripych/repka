@@ -20,3 +20,4 @@ jobs:
   release:
     name: Release
     uses: ./.github/workflows/run-release.yml
+    needs: [release-checks]
