@@ -47,6 +47,7 @@ runs:
           ${{ runner.os }}-pnpm-store-
 
     - name: Install Dependencies
+      shell: bash
       run: pnpm install
 
     - name: Access To Node Bins
