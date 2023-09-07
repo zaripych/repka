@@ -66,7 +66,8 @@ export async function validatePackageJsonBins({
     if (!fileExists) {
       throw new Error(
         'package.json "bin" prop is invalid: the key ' +
-          `"${bin}" points to a file that does not exist: "${value}"`
+          `"${bin}" points to a file "${value}" that does not ` +
+          `exist.`
       );
     }
 
@@ -76,9 +77,10 @@ export async function validatePackageJsonBins({
     if (!firstLine || !firstLine.startsWith('#!/usr/bin/env ')) {
       throw new Error(
         'package.json "bin" prop is invalid: the key ' +
-          `"${bin}" points to a file that does not have a shebang, ie ` +
-          `"#!/usr/bin/env tsx". The shebang is required to be able to run ` +
-          `the TypeScript file when the bin command is executed.`
+          `"${bin}" points to a file "${value}" that does not have a ` +
+          `shebang, ie "#!/usr/bin/env tsx". The shebang is required ` +
+          `to be able to run the TypeScript file when the bin command ` +
+          `is executed.`
       );
     }
   }

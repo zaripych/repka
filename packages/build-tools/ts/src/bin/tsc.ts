@@ -1,3 +1,4 @@
+#!/usr/bin/env tsx
 import { spawnToPromise } from '../child-process';
 import { tscPath } from '../tsc/tsc';
 import {
