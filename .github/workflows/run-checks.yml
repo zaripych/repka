@@ -3,7 +3,11 @@ name: Checks
 on:
   workflow_call:
     inputs:
-      os:
+      runs-on:
+        required: true
+        type: string
+
+      node-version:
         required: true
         type: string
 
@@ -11,7 +15,7 @@ jobs:
   checks:
     name: Checks
     timeout-minutes: 30
-    runs-on: ${{ inputs.os }}
+    runs-on: ${{ inputs.runs-on }}
 
     steps:
       - name: Checkout Repo
@@ -20,14 +24,15 @@ jobs:
           fetch-depth: 0
 
       - name: Get Node Version
+        id: node-version
         run: |
-          echo "NODE_VERSION=$(jq -r .engines.node package.json)" >> $GITHUB_ENV
-          echo "NODE_VERSION=$(jq -r .engines.node package.json)" >> "$Env:GITHUB_ENV"
+          echo "version=$(jq -r .engines.node package.json)" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version:
+            ${{ inputs.node-version || steps.node-version.outputs.version }}
 
       - uses: pnpm/action-setup@v2
         name: Install pnpm
@@ -35,13 +40,12 @@ jobs:
       - name: Get pnpm store directory
         id: pnpm-store
         run: |
-          echo "PNPM_STORE_DIR=$(pnpm store path)" >> $GITHUB_ENV
-          echo "PNPM_STORE_DIR=$(pnpm store path)" >> "$Env:GITHUB_ENV"
+          echo "dir=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache@v3
         name: Setup pnpm cache
         with:
-          path: ${{ env.PNPM_STORE_DIR }}
+          path: ${{ steps.pnpm-store.outputs.dir }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
