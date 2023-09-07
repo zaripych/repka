@@ -1,17 +1,27 @@
-name: Release
+name: Checks
 
 on:
   workflow_call:
+    inputs:
+      runs-on:
+        required: false
+        type: string
+
+      node-version:
+        required: false
+        type: string
 
 jobs:
   release:
     name: Release
-    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+
     steps:
-      - name: Access To Node Bins
-        run: |
-          echo "${GITHUB_WORKSPACE}/node_modules/.bin" >> $GITHUB_PATH
-          echo "${GITHUB_WORKSPACE}/node_modules/.bin" >> $Env:GITHUB_PATH
+      - name: Checkout And Install
+        uses: zaripych/repka/.github/actions/checkout-and-install@rinat/ci-maintainance
+        with:
+          node-version: ${{ inputs.node-version }}
 
       - name: Create and Publish Versions
         uses: changesets/action@v1

@@ -9,13 +9,13 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release-checks:
-    name: ${{ matrix.os }}
+    name: ${{ matrix.runs-on }}
     uses: ./.github/workflows/run-checks.yml
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        runs-on: [ubuntu-latest, windows-latest, macos-latest]
     with:
-      os: ${{ matrix.os }}
+      runs-on: ${{ matrix.runs-on }}
 
   release:
     name: Release

@@ -1,0 +1,61 @@
+name: 'Checkout and Install'
+description: 'Checkout the code and run pnpm install'
+author: 'zaripych'
+
+inputs:
+  node-version:
+    description:
+      Version of Node.js to use, default to the version specified in the
+      package.json engines section.
+    default: null
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get Node Version
+      id: node-version
+      shell: bash
+      run: |
+        echo "version=$(jq -r .engines.node package.json)" >> "$GITHUB_OUTPUT"
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version:
+          ${{ inputs.node-version || steps.node-version.outputs.version }}
+
+    - uses: pnpm/action-setup@v2
+      name: Install pnpm
+
+    - name: Get pnpm store directory
+      id: pnpm-store
+      shell: bash
+      run: |
+        echo "dir=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/cache@v3
+      name: Setup pnpm cache
+      with:
+        path: ${{ steps.pnpm-store.outputs.dir }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install Dependencies
+      shell: bash
+      run: pnpm install
+
+    - name: Access To Node Bins
+      shell: bash
+      run: |
+        echo "${GITHUB_WORKSPACE}/node_modules/.bin" >> $GITHUB_PATH
+
+# Ref: https://haya14busa.github.io/github-action-brandings/
+branding:
+  icon: 'chevrons-down'
+  color: 'green'
