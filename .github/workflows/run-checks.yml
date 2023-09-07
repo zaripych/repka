@@ -25,6 +25,7 @@ jobs:
 
       - name: Get Node Version
         id: node-version
+        shell: bash
         run: |
           echo "version=$(jq -r .engines.node package.json)" >> "$GITHUB_OUTPUT"
 
@@ -39,6 +40,7 @@ jobs:
 
       - name: Get pnpm store directory
         id: pnpm-store
+        shell: bash
         run: |
           echo "dir=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
