@@ -87,10 +87,12 @@ const resolveEntryPointsNoConditions = (
 
 export function validateEntryPoints(exports: PackageJsonExports) {
   const results: Record<string, PackageExportsEntryPoint> = {};
-  const ignored: Record<string, PackageJsonExports> = {};
-  resolveEntryPointsNoConditions(results, ignored, exports);
+  const ignoredEntryPoints: Record<string, PackageJsonExports> = {};
+
+  resolveEntryPointsNoConditions(results, ignoredEntryPoints, exports);
+
   return {
     entryPoints: Object.values(results),
-    ignored,
+    ignoredEntryPoints,
   };
 }

@@ -1,3 +1,4 @@
+#!/usr/bin/env tsx
 import { jest } from '../jest/jest';
 import {
   cliArgsPipe,

@@ -6,13 +6,15 @@ await pipeline(
   buildForNode({
     packageConfig: (deps) => ({
       ...deps,
-      buildEntryPoints: () => [
-        {
-          entryPoint: '.',
-          sourcePath: './src/index.ts',
-          chunkName: 'main',
-        },
-      ],
+      buildEntryPoints: () => ({
+        entryPoints: [
+          {
+            entryPoint: '.',
+            sourcePath: './src/index.ts',
+            chunkName: 'main',
+          },
+        ],
+      }),
     }),
     plugins: [...dtsBundleGeneratorBuildPlugins()],
     outputPackageJson(packageJson) {
@@ -30,13 +32,15 @@ await pipeline(
       await declarations({
         packageConfig: (deps) => ({
           ...deps,
-          buildEntryPoints: () => [
-            {
-              entryPoint: '.',
-              sourcePath: './src/index.ts',
-              chunkName: 'main',
-            },
-          ],
+          buildEntryPoints: () => ({
+            entryPoints: [
+              {
+                entryPoint: '.',
+                sourcePath: './src/index.ts',
+                chunkName: 'main',
+              },
+            ],
+          }),
         }),
         unstable_skipDependencies: ['@repka-kit/ts'],
       }).execute?.();

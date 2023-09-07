@@ -6,7 +6,10 @@ import type { Plugin, ResolveIdHook, RollupWatchOptions } from 'rollup';
 import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from './config/loadNodePackageConfigs';
 import type { JsonType } from './package-json/packageJson';
-import { buildBinsBundleConfig } from './rollup/buildBinsBundleConfig';
+import {
+  buildBinsBundleConfig,
+  buildTypeScriptShebangBinsBundleConfig,
+} from './rollup/buildBinsBundleConfig';
 import { rollupBuild } from './rollup/rollupBuild';
 import { rollupPackageJsonPlugin } from './rollup/rollupPackageJsonPlugin';
 import { rollupWatch } from './rollup/rollupWatch';
@@ -41,8 +44,10 @@ export type BuildOpts = {
   buildExportsConfig?: RollupOptionsBuilder;
 
   /**
-   * Entries in package.json "bin" need to be pre-bundled and included
-   * as source code for normal operation during development.
+   * Entries in package.json "bin" represent extra inputs for Rollup.
+   * Unlike "exports" - these entries require special handling, because
+   * they can be used as CLI commands during dev-time as well by
+   * consumers.
    *
    * If you have a need to fine-tune configuration entries defined
    * in package.json "bin" prop - you can do that in this callback.
@@ -50,7 +55,7 @@ export type BuildOpts = {
   buildBinsConfig?: RollupOptionsBuilder;
 
   /**
-   * If you have a need to bundle different entries with different
+   * If you have a need to create extra bundles with different
    * non-standard parameters, have a function here return those
    * configs
    */
@@ -68,8 +73,8 @@ export type BuildOpts = {
 
   /**
    * Override output package.json - the output package.json is built from your
-   * regular package.json, but written to the `./dist` directory. This package.json
-   * should be used to publish your package.
+   * regular package.json, but written to the `./dist` directory. This
+   * package.json should be used to publish your package.
    *
    * This eliminates dependencies that were already bundled up to the output
    * by rollup, but you might want to override some extra details.
@@ -94,9 +99,10 @@ export function buildForNode(opts?: BuildOpts) {
     execute: async () => {
       const config = await loadNodePackageConfigs(opts);
 
-      const { entryPoints, ignoredEntryPoints } = config;
+      const { entryPoints, ignoredEntryPoints, ignoredBinEntryPoints } = config;
 
       const allExternals = externalsFromDependencies(config.dependencies, opts);
+
       const baseOpts: DefaultRollupConfigBuildOpts = {
         external: allExternals,
         resolveId: opts?.resolveId,
@@ -109,6 +115,15 @@ export function buildForNode(opts?: BuildOpts) {
         );
 
       const { binConfigs, bundledEsmBinsInputs } = await buildBinsBundleConfig({
+        config,
+        defaultRollupConfig: defaultConfig,
+      });
+
+      const {
+        binConfigs: binConfigsTs,
+        bundledEsmBinsInputs: bundledEsmBinsInputsTs,
+        binEntryPoints: binEntryPointsTs,
+      } = buildTypeScriptShebangBinsBundleConfig({
         config,
         defaultRollupConfig: defaultConfig,
       });
@@ -136,6 +151,7 @@ export function buildForNode(opts?: BuildOpts) {
               )
             ),
             ...bundledEsmBinsInputs,
+            ...bundledEsmBinsInputsTs,
           },
           output: {
             ...config.output,
@@ -146,6 +162,8 @@ export function buildForNode(opts?: BuildOpts) {
               outDir: './dist',
               entryPoints,
               ignoredEntryPoints,
+              binEntryPoints: binEntryPointsTs || [],
+              ignoredBinEntryPoints,
               externals: allExternals,
               packageJson: opts?.outputPackageJson,
             }),
@@ -162,7 +180,12 @@ export function buildForNode(opts?: BuildOpts) {
           )
         : [buildExportsConfig()];
 
-      const configs = [...exportsConfig, ...binConfigs, ...extraConfigs];
+      const configs = [
+        ...exportsConfig,
+        ...binConfigs,
+        ...binConfigsTs,
+        ...extraConfigs,
+      ];
       await allFulfilled(configs.map((config) => rollupBuild(config)));
 
       return configs;

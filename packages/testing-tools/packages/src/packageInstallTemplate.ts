@@ -256,6 +256,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
       );
 
       const shouldFullInstall =
+        process.env['FULL_INSTALL'] ||
         !previousInstallResult ||
         JSON.stringify(expectedInstallResult.propsTriggeringReinstall) !==
           JSON.stringify(previousInstallResult.propsTriggeringReinstall);

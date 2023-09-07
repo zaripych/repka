@@ -29,9 +29,9 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "bin": {
-    "dts-bundle-generator": "./bin/dts-bundle-generator.gen.cjs",
-    "eslint": "./bin/eslint.gen.mjs",
-    "jest": "./bin/jest.gen.mjs",
+    "dts-bundle-generator": "./src/bin/dts-bundle-generator.cts",
+    "eslint": "./src/bin/eslint.ts",
+    "jest": "./src/bin/jest.ts",
     "lint-staged": "./bin/lint-staged.gen.mjs",
     "prettier": "./bin/prettier.gen.mjs",
     "repka": "./bin/repka.gen.mjs",

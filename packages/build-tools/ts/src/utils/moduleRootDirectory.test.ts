@@ -14,14 +14,19 @@ describe('getModuleRootDirectoryForImportMetaUrl', () => {
     const importMetaUrl = normalize(
       `file://${monoRoot}/packages/xxx/yyy/node_modules/@repka-kit/ts/dist/chunk.94a64047.js`
     );
+
     const modulesBinPathResult = normalize(
       `${monoRoot}/packages/xxx/yyy/node_modules/@repka-kit/ts/`
     );
+
     expect(
       getModuleRootDirectoryForImportMetaUrl({
         importMetaUrl,
       })
-    ).toBe(modulesBinPathResult);
+    ).toEqual({
+      type: 'bundled',
+      path: modulesBinPathResult,
+    });
   });
 
   it('works when run via tsx', () => {
@@ -29,10 +34,14 @@ describe('getModuleRootDirectoryForImportMetaUrl', () => {
     const modulesBinPathResult = fileURLToPath(
       new URL(`../../`, importMetaUrl)
     );
+
     expect(
       getModuleRootDirectoryForImportMetaUrl({
         importMetaUrl,
       })
-    ).toBe(modulesBinPathResult);
+    ).toEqual({
+      type: 'source',
+      path: modulesBinPathResult,
+    });
   });
 });

@@ -7,12 +7,10 @@ import type { PackageConfigBuilder } from '../config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from '../config/loadNodePackageConfigs';
 import { loadTsConfigJson } from '../config/loadTsConfigJson';
 import { logger } from '../logger/logger';
+import { binPath } from '../utils/binPath';
 import { loadMonorepoDependencies } from '../utils/loadMonorepoDependencies';
-import { moduleRootDirectory } from '../utils/moduleRootDirectory';
+import { getModuleRootDirectoryForImportMetaUrl } from '../utils/moduleRootDirectory';
 import { tscCompositeTypeCheckAt } from './tsc';
-
-const generatorPath = () =>
-  join(moduleRootDirectory(), './bin/dts-bundle-generator.gen.cjs');
 
 export type DeclarationsOpts = {
   /**
@@ -106,14 +104,29 @@ export async function declarationsViaDtsBundleGenerator(
 }
 
 async function runDtsBundleGeneratorViaStdIn(config: BundlerConfig) {
-  const child = spawn(process.execPath, [generatorPath()], {
-    cwd: process.cwd(),
-    stdio: ['pipe', 'inherit', 'inherit'],
-    env: {
-      ...process.env,
-      LOG_LEVEL: logger.logLevel,
-    },
+  const { type, path } = getModuleRootDirectoryForImportMetaUrl({
+    importMetaUrl: import.meta.url,
   });
+  const child = spawn(
+    process.execPath,
+    type === 'bundled'
+      ? [join(path, './bin/dts-bundle-generator.cjs')]
+      : [
+          await binPath({
+            binName: 'tsx',
+            binScriptPath: 'tsx/dist/cli.js',
+          }),
+          join(path, './src/bin/dts-bundle-generator.cts'),
+        ],
+    {
+      cwd: process.cwd(),
+      stdio: ['pipe', 'inherit', 'inherit'],
+      env: {
+        ...process.env,
+        LOG_LEVEL: logger.logLevel,
+      },
+    }
+  );
   child.stdin.setDefaultEncoding('utf-8');
   const writeToStdin = () =>
     new Promise<void>((res, rej) => {
