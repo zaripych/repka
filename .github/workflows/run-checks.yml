@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout And Install
-        uses: zaripych/repka-kit/.github/actions/checkout-and-install
+        uses: zaripych/repka/.github/actions/checkout-and-install@rinat/ci-maintainance
         with:
           node-version: ${{ inputs.node-version }}
 
