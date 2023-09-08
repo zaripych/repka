@@ -128,7 +128,7 @@ const plugins = (opts?: DefaultRollupConfigBuildOpts): InputPluginOption => {
     }),
     json(),
     extensions({
-      extensions: ['.ts', '.tsx'],
+      extensions: ['.ts', '.tsx', '.cts', '.mts'],
     }),
     esbuild({
       target: 'node16',
@@ -144,7 +144,7 @@ const plugins = (opts?: DefaultRollupConfigBuildOpts): InputPluginOption => {
       minify: opts?.minify ?? false,
       format: 'esm',
       loader: 'ts',
-      include: ['**/*.ts'],
+      include: ['**/*.ts', '**/*.cts', '**/*.mts'],
     }),
     // swc({
     //   module: {

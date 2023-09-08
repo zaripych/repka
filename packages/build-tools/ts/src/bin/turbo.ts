@@ -1,3 +1,4 @@
+#!/usr/bin/env tsx
 import { relative } from 'node:path';
 
 import { spawnToPromise } from '../child-process';

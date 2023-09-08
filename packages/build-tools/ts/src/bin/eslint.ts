@@ -1,3 +1,4 @@
+#!/usr/bin/env tsx
 import { spawnToPromise } from '../child-process';
 import { ensureEslintConfigFilesExist } from '../eslint/ensureEslintConfigFilesExist';
 import { eslintBinPath } from '../eslint/eslint';

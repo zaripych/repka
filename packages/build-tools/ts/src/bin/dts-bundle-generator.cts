@@ -1,3 +1,4 @@
+#!/usr/bin/env tsx
 import type { BundlerConfig } from '@build-tools/dts-bundle-generator';
 import {
   enableNormalLog,

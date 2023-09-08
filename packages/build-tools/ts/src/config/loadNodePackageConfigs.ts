@@ -12,12 +12,15 @@ import { validateEntryPoints } from './validateEntryPoints';
 import { validatePackageJson } from './validatePackageJson';
 import { validatePackageJsonBins } from './validatePackageJsonBins';
 
-type BuildEntryPointsResult =
-  | PackageExportsEntryPoint[]
-  | {
-      entryPoints: PackageExportsEntryPoint[];
-      ignored: Record<string, PackageJsonExports>;
-    };
+type BuildEntryPointsResult = {
+  entryPoints: PackageExportsEntryPoint[];
+  ignoredEntryPoints?: Record<string, PackageJsonExports>;
+};
+
+type BuildBinEntryPointsResult = {
+  binEntryPoints: PackageBinEntryPoint[];
+  ignoredBinEntryPoints?: Record<string, string>;
+};
 
 export type BuilderDeps = {
   buildConfig: () => NodePackageConfig | Promise<NodePackageConfig>;
@@ -26,8 +29,8 @@ export type BuilderDeps = {
     | BuildEntryPointsResult
     | Promise<BuildEntryPointsResult>;
   buildBinEntryPoints: () =>
-    | PackageBinEntryPoint[]
-    | Promise<PackageBinEntryPoint[]>;
+    | BuildBinEntryPointsResult
+    | Promise<BuildBinEntryPointsResult>;
 };
 
 export type PackageConfigBuilder = (opts: BuilderDeps) => BuilderDeps;
@@ -43,42 +46,38 @@ async function tryBuildingPackageConfig(
   customized: boolean
 ): Promise<NodePackageConfig> {
   const packageJson = await deps.readPackageJson();
+
   if (!customized) {
     // provide more robust error messages when reading from package.json
     validatePackageJson(packageJson);
   }
+
   const name = packageJson.name;
   if (!name) {
     throw new Error('"name" of the package is not specified');
   }
+
   const version = packageJson.version;
   if (!version) {
     throw new Error('"version" of the package is not specified');
   }
-  const entryPointsBuildResultPromise = deps.buildEntryPoints();
-  const binEntryPoints = deps.buildBinEntryPoints();
-  const entryPointsBuildResult = await Promise.resolve(
-    entryPointsBuildResultPromise
-  );
-  const entryPointsBuildResultParsed = Array.isArray(entryPointsBuildResult)
-    ? {
-        entryPoints: entryPointsBuildResult,
-        ignored: {},
-      }
-    : entryPointsBuildResult;
-  if (entryPointsBuildResultParsed.entryPoints.length === 0) {
+
+  const entryPointsBuildResult = await deps.buildEntryPoints();
+  const binEntryPointsBuildResult = await deps.buildBinEntryPoints();
+
+  if (entryPointsBuildResult.entryPoints.length === 0) {
     throw new Error(
       "The package doesn't have any entry points, nothing to bundle!"
     );
   }
+
   return {
     name,
     version,
     dependencies: packageJson.dependencies || {},
     devDependencies: packageJson.devDependencies || {},
-    entryPoints: entryPointsBuildResultParsed.entryPoints,
-    ignoredEntryPoints: entryPointsBuildResultParsed.ignored,
-    binEntryPoints: await binEntryPoints,
+    ...entryPointsBuildResult,
+    ...binEntryPointsBuildResult,
   };
 }
 
@@ -87,15 +86,19 @@ export async function loadNodePackageConfigs(opts?: {
 }) {
   const deps: BuilderDeps = {
     readPackageJson: () => readCwdPackageJson(),
+
     buildConfig: () => tryBuildingPackageConfig(deps, false),
+
     buildEntryPoints: () =>
       Promise.resolve(deps.readPackageJson()).then((packageJson) =>
         validateEntryPoints(packageJson.exports || {})
       ),
+
     buildBinEntryPoints: () =>
       Promise.resolve(deps.readPackageJson()).then((packageJson) =>
         validatePackageJsonBins({
           packageName: packageJson.name,
+          packageDirectory: process.cwd(),
           bin: packageJson.bin,
         })
       ),

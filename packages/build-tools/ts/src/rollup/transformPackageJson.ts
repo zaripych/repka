@@ -1,15 +1,27 @@
 import assert from 'assert';
 
-import type { PackageExportsEntryPoint } from '../config/nodePackageConfig';
+import type {
+  PackageBinEntryPoint,
+  PackageExportsEntryPoint,
+} from '../config/nodePackageConfig';
 import type { JsonType, PackageJsonExports } from '../package-json/packageJson';
 
 export function transformPackageJson(opts: {
   entryPoints: Array<PackageExportsEntryPoint>;
-  ignoredEntryPoints: Record<string, PackageJsonExports>;
+  ignoredEntryPoints?: Record<string, PackageJsonExports>;
+  binEntryPoints: Array<PackageBinEntryPoint>;
+  ignoredBinEntryPoints?: Record<string, string>;
 }) {
-  const entries = opts.entryPoints;
-  const main = opts.entryPoints.find((entry) => entry.chunkName === 'main');
+  const {
+    entryPoints,
+    ignoredEntryPoints,
+    binEntryPoints,
+    ignoredBinEntryPoints,
+  } = opts;
+
+  const main = entryPoints.find((entry) => entry.chunkName === 'main');
   assert(!!main);
+
   return (packageJson: Record<string, JsonType>): Record<string, JsonType> => {
     const keys = [
       'name',
@@ -38,6 +50,17 @@ export function transformPackageJson(opts: {
     assert(!!version && typeof version === 'string');
     assert(!!type && typeof type === 'string');
 
+    const bin = Object.fromEntries([
+      ...binEntryPoints.map(
+        (bin) =>
+          [
+            bin.binName,
+            `./bin/${bin.binName}.${bin.format === 'cjs' ? 'cjs' : 'mjs'}`,
+          ] as const
+      ),
+      ...Object.entries(ignoredBinEntryPoints || {}),
+    ]);
+
     const next = {
       name,
       version,
@@ -46,18 +69,19 @@ export function transformPackageJson(opts: {
       ...('main' in packageJson && {
         main: `./dist/${main.chunkName}.js`,
       }),
-      ...(entries.length === 1
+      ...(Object.keys(bin).length > 0 && { bin }),
+      ...(entryPoints.length === 1
         ? {
             exports:
-              Object.entries(opts.ignoredEntryPoints).length === 0
+              Object.entries(ignoredEntryPoints || {}).length === 0
                 ? `./dist/${main.chunkName}.js`
                 : {
-                    ...opts.ignoredEntryPoints,
+                    ...ignoredEntryPoints,
                     '.': `./dist/${main.chunkName}.js`,
                   },
           }
         : {
-            exports: entries.reduce(
+            exports: entryPoints.reduce(
               (acc, entry) => ({
                 ...acc,
                 [entry.entryPoint]: `./dist/${entry.chunkName}.js`,

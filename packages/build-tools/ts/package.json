@@ -29,15 +29,15 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "bin": {
-    "dts-bundle-generator": "./bin/dts-bundle-generator.gen.cjs",
-    "eslint": "./bin/eslint.gen.mjs",
-    "jest": "./bin/jest.gen.mjs",
-    "lint-staged": "./bin/lint-staged.gen.mjs",
-    "prettier": "./bin/prettier.gen.mjs",
-    "repka": "./bin/repka.gen.mjs",
-    "tsc": "./bin/tsc.gen.mjs",
-    "tsx": "./bin/tsx.gen.mjs",
-    "turbo": "./bin/turbo.gen.mjs"
+    "dts-bundle-generator": "./src/bin/dts-bundle-generator.cts",
+    "eslint": "./src/bin/eslint.ts",
+    "jest": "./src/bin/jest.ts",
+    "lint-staged": "./src/bin/lint-staged.ts",
+    "prettier": "./src/bin/prettier.ts",
+    "repka": "./src/bin/repka.ts",
+    "tsc": "./src/bin/tsc.ts",
+    "tsx": "./src/bin/tsx.mjs",
+    "turbo": "./src/bin/turbo.ts"
   },
   "files": [
     "src",

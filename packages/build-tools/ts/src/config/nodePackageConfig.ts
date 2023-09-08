@@ -45,7 +45,13 @@ export type NodePackageConfig = {
    * Entry points of the package that couldn't be parsed and were
    * ignored - they should be rendered out as is.
    */
-  ignoredEntryPoints: Record<string, PackageJsonExports>;
+  ignoredEntryPoints?: Record<string, PackageJsonExports>;
+
+  /**
+   * Bin entry points of the package that couldn't be parsed and were
+   * ignored - they should be rendered out as is.
+   */
+  ignoredBinEntryPoints?: Record<string, string>;
 
   /**
    * Package dependencies of the package where the key
@@ -91,8 +97,8 @@ export type PackageExportsEntryPoint = {
  * Represents single entry from package.json bin object
  *
  * ```json
- *   "jest": "./bin/jest.gen.cjs",
- *   "prettier": "./bin/prettier.gen.mjs",
+ *   "jest": "./src/bin/jest.ts",
+ *   "prettier": "./src/bin/prettier.ts",
  * ```
  */
 export type PackageBinEntryPoint = {
@@ -100,12 +106,24 @@ export type PackageBinEntryPoint = {
    * Name of the bin file
    */
   binName: string;
+
   /**
-   * When specified, the bin entry is a mirror of package's dependency,
-   * this will automatically generate source code to run
-   * `./node_modules/.bin/[binName]` relative to the package
+   * Path to the source file of the bin
    */
-  binEntryType?: 'dependency-bin';
+  sourceFilePath: string;
+
+  /**
+   * - `typescript-shebang-bin` - this is an entry which points to a TypeScript
+   * file with a shebang command that allows that file to be transpiled
+   * on the fly at dev-time
+   *
+   * - `dependency-bin` - when specified, the bin entry is a mirror
+   * of package's dependency, this will automatically generate
+   * source code to run `./node_modules/.bin/[binName]` relative
+   * to the package
+   */
+  binEntryType?: 'typescript-shebang-bin' | 'dependency-bin';
+
   /**
    * Output format
    */

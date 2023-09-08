@@ -7,7 +7,7 @@ describe('validateEntryPoints', () => {
     const result = validateEntryPoints({});
     expect(result).toEqual({
       entryPoints: [],
-      ignored: {},
+      ignoredEntryPoints: {},
     });
   });
 
@@ -28,7 +28,7 @@ describe('validateEntryPoints', () => {
           chunkName: 'main',
         },
       ],
-      ignored: {},
+      ignoredEntryPoints: {},
     });
   });
 
@@ -41,7 +41,7 @@ describe('validateEntryPoints', () => {
           chunkName: 'main',
         },
       ],
-      ignored: {},
+      ignoredEntryPoints: {},
     });
   });
 
@@ -61,7 +61,7 @@ describe('validateEntryPoints', () => {
           chunkName: 'cli',
         },
       ],
-      ignored: {},
+      ignoredEntryPoints: {},
     });
   });
 
@@ -85,7 +85,7 @@ describe('validateEntryPoints', () => {
           chunkName: 'cli',
         },
       ],
-      ignored: {
+      ignoredEntryPoints: {
         './configs/*': './configs/*',
       },
     });
@@ -101,7 +101,7 @@ describe('validateEntryPoints', () => {
       })
     ).toEqual({
       entryPoints: [],
-      ignored: {
+      ignoredEntryPoints: {
         node: {
           ['.']: './src/index.ts',
           './cli': './src/cli.ts',
@@ -118,7 +118,7 @@ describe('validateEntryPoints', () => {
     });
     expect(result).toEqual({
       entryPoints: [],
-      ignored: {
+      ignoredEntryPoints: {
         ['.']: {
           node: './src/index.ts',
         },

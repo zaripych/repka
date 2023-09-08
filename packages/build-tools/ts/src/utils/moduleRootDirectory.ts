@@ -17,13 +17,21 @@ export const getModuleRootDirectoryForImportMetaUrl = (opts: {
     parent.endsWith(sep + 'bin') && !superParent.endsWith(sep + 'src');
 
   if (isBundledInDist() || isBundledInBin()) {
-    return fileURLToPath(new URL(`../`, opts.importMetaUrl));
+    return {
+      type: 'bundled' as const,
+      path: fileURLToPath(new URL(`../`, opts.importMetaUrl)),
+    };
   }
 
   // run via tsx to build the @repka-kit/ts itself
-  return fileURLToPath(new URL(`../../`, opts.importMetaUrl));
+  return {
+    type: 'source' as const,
+    path: fileURLToPath(new URL(`../../`, opts.importMetaUrl)),
+  };
 };
 
-export const moduleRootDirectory = once(() =>
-  getModuleRootDirectoryForImportMetaUrl({ importMetaUrl: import.meta.url })
+export const moduleRootDirectory = once(
+  () =>
+    getModuleRootDirectoryForImportMetaUrl({ importMetaUrl: import.meta.url })
+      .path
 );
