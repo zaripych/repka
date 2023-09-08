@@ -330,6 +330,24 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
       }
 
       await writeFile(
+        join(templateDirectory, 'before.json'),
+        JSON.stringify(
+          previousInstallResult?.propsTriggeringReinstall || null,
+          undefined,
+          '  '
+        ),
+        'utf-8'
+      );
+      await writeFile(
+        join(templateDirectory, 'after.json'),
+        JSON.stringify(
+          expectedInstallResult.propsTriggeringReinstall,
+          undefined,
+          '  '
+        ),
+        'utf-8'
+      );
+      await writeFile(
         installResultFilePath,
         JSON.stringify(expectedInstallResult, undefined, '  '),
         'utf-8'
