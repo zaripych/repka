@@ -36,7 +36,7 @@
     "prettier": "./src/bin/prettier.ts",
     "repka": "./src/bin/repka.ts",
     "tsc": "./src/bin/tsc.ts",
-    "tsx": "./src/bin/tsx.ts",
+    "tsx": "./src/bin/tsx.mjs",
     "turbo": "./src/bin/turbo.ts"
   },
   "files": [

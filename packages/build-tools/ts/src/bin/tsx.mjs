@@ -1,8 +1,12 @@
 #!/usr/bin/env node
-// NOTE: This file is bundled up from './src/bin/*' and needs to be committed
+/**
+ * @note This file cannot use `tsx` to execute "itself", because
+ * that would lead to an infinite loop. So we have to use `node`
+ * and pure JS here.
+ */
 import { spawn } from 'node:child_process';
 import { stat } from 'node:fs/promises';
-import { sep, join, dirname } from 'node:path';
+import { dirname, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const isFile = async (file) => {
@@ -47,7 +51,9 @@ const onError = (err) => {
 };
 
 binPath('tsx', 'tsx/dist/cli.js').then((result) => {
-  const cp = spawn(process.execPath, [result, ...process.argv.slice(2)], { stdio: 'inherit' });
+  const cp = spawn(process.execPath, [result, ...process.argv.slice(2)], {
+    stdio: 'inherit',
+  });
   cp.on('error', onError);
   cp.on('close', (code, signal) => {
     if (typeof code === 'number') {
@@ -57,4 +63,3 @@ binPath('tsx', 'tsx/dist/cli.js').then((result) => {
     }
   });
 }, onError);
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHN4Lmdlbi5tanMiLCJzb3VyY2VzIjpbXSwic291cmNlc0NvbnRlbnQiOltdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OyJ9

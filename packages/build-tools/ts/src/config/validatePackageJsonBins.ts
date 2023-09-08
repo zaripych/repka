@@ -30,7 +30,7 @@ export async function validatePackageJsonBins({
   const binObj = Object.fromEntries(binEntries);
 
   for (const [key, value] of binEntries) {
-    if (value.endsWith('ts')) {
+    if (value.endsWith('ts') || value.endsWith('js')) {
       continue;
     }
     const allowed = [`./bin/${key}.gen.cjs`, `./bin/${key}.gen.mjs`];
@@ -95,6 +95,13 @@ export async function validatePackageJsonBins({
           binName: bin,
           sourceFilePath: value,
           format: value.endsWith('.cts') ? 'cjs' : 'esm',
+          binEntryType: 'typescript-shebang-bin',
+        });
+      } else if (value.endsWith('js')) {
+        acc.validBins.push({
+          binName: bin,
+          sourceFilePath: value,
+          format: value.endsWith('.cjs') ? 'cjs' : 'esm',
           binEntryType: 'typescript-shebang-bin',
         });
       } else if (srcBinContents.includes(`${bin}.ts`)) {
