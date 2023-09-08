@@ -11,17 +11,16 @@ import type { RollupOptionsBuilderOpts } from './standardRollupConfig';
 
 function buildBinInputs(
   entryPoints: PackageBinEntryPoint[],
-  suffix?: (entry: PackageBinEntryPoint) => string
+  sourceFilePath?: (entry: PackageBinEntryPoint) => string
 ): {
   [entryAlias: string]: string;
 } {
   return entryPoints.reduce(
     (acc, entry) => ({
       ...acc,
-      [entry.binName]:
-        entry.binEntryType !== 'typescript-shebang-bin'
-          ? `./src/bin/${entry.binName}${suffix?.(entry) ?? ''}.ts`
-          : entry.sourceFilePath,
+      [entry.binName]: sourceFilePath
+        ? sourceFilePath(entry)
+        : entry.sourceFilePath,
     }),
     {}
   );
@@ -288,7 +287,7 @@ function buildTypescriptShebangBinsPlugins(
 
   // for bins which are declared in package.json and exist in
   // the ./src/bin directory we create a virtual module that
-  // uses "export * from '../dist/bin.js';"
+  // renders "export * from '../dist/bin.js';"
   const bundledEsmBinsPlugins: Plugin[] =
     bundledEsmBins.length > 0
       ? [
@@ -350,9 +349,7 @@ export function buildTypeScriptShebangBinsBundleConfig({
 
   const cjsBins = binEntryPoints.filter((entry) => entry.format === 'cjs');
 
-  const bundledEsmBins = binEntryPoints.filter(
-    (entry) => entry.format === 'esm'
-  );
+  const esmBins = binEntryPoints.filter((entry) => entry.format === 'esm');
 
   const banner = `#!/usr/bin/env node`;
 
@@ -370,9 +367,12 @@ export function buildTypeScriptShebangBinsBundleConfig({
     ],
   };
 
-  const esmConfig: false | RollupWatchOptions = bundledEsmBins.length > 0 && {
+  const esmConfig: false | RollupWatchOptions = esmBins.length > 0 && {
     ...shared,
-    input: buildBinInputs(bundledEsmBins, () => '.bundled'),
+    input: buildBinInputs(
+      esmBins,
+      ({ binName }) => `./src/bin/${binName}.bundled.ts`
+    ),
     output: [
       {
         ...bundledBinOutput,
@@ -384,7 +384,13 @@ export function buildTypeScriptShebangBinsBundleConfig({
     ],
   };
 
-  const bundledEsmBinsInputs = buildBinInputs(bundledEsmBins);
+  const bundledEsmBinsInputs = buildBinInputs(esmBins);
+
+  console.log({
+    cjsBins,
+    esmBins,
+    bundledEsmBinsInputs,
+  });
 
   return {
     binEntryPoints,
