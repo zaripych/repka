@@ -6,10 +6,7 @@ import type { Plugin, ResolveIdHook, RollupWatchOptions } from 'rollup';
 import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from './config/loadNodePackageConfigs';
 import type { JsonType } from './package-json/packageJson';
-import {
-  buildBinsBundleConfig,
-  buildTypeScriptShebangBinsBundleConfig,
-} from './rollup/buildBinsBundleConfig';
+import { buildShebangBinsBundleConfig } from './rollup/buildBinsBundleConfig';
 import { rollupBuild } from './rollup/rollupBuild';
 import { rollupPackageJsonPlugin } from './rollup/rollupPackageJsonPlugin';
 import { rollupWatch } from './rollup/rollupWatch';
@@ -114,19 +111,11 @@ export function buildForNode(opts?: BuildOpts) {
           combineDefaultRollupConfigBuildOpts(baseOpts, opts)
         );
 
-      const { binConfigs, bundledEsmBinsInputs } = await buildBinsBundleConfig({
-        config,
-        defaultRollupConfig: defaultConfig,
-      });
-
-      const {
-        binConfigs: binConfigsTs,
-        bundledEsmBinsInputs: bundledEsmBinsInputsTs,
-        binEntryPoints: binEntryPointsTs,
-      } = buildTypeScriptShebangBinsBundleConfig({
-        config,
-        defaultRollupConfig: defaultConfig,
-      });
+      const { binConfigs, bundledEsmBinsInputs, binEntryPoints } =
+        buildShebangBinsBundleConfig({
+          config,
+          defaultRollupConfig: defaultConfig,
+        });
 
       const extraConfigs = opts?.extraRollupConfigs
         ? await Promise.resolve(
@@ -151,7 +140,6 @@ export function buildForNode(opts?: BuildOpts) {
               )
             ),
             ...bundledEsmBinsInputs,
-            ...bundledEsmBinsInputsTs,
           },
           output: {
             ...config.output,
@@ -162,7 +150,7 @@ export function buildForNode(opts?: BuildOpts) {
               outDir: './dist',
               entryPoints,
               ignoredEntryPoints,
-              binEntryPoints: binEntryPointsTs || [],
+              binEntryPoints: binEntryPoints || [],
               ignoredBinEntryPoints,
               externals: allExternals,
               packageJson: opts?.outputPackageJson,
@@ -180,12 +168,7 @@ export function buildForNode(opts?: BuildOpts) {
           )
         : [buildExportsConfig()];
 
-      const configs = [
-        ...exportsConfig,
-        ...binConfigs,
-        ...binConfigsTs,
-        ...extraConfigs,
-      ];
+      const configs = [...exportsConfig, ...binConfigs, ...extraConfigs];
       await allFulfilled(configs.map((config) => rollupBuild(config)));
 
       return configs;
