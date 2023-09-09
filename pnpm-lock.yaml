@@ -186,32 +186,17 @@ importers:
         version: 3.10.0
     publishDirectory: dist
 
-  packages/templates/ts-package: {}
-
-  packages/testing-tools/packages:
-    dependencies:
-      fast-glob:
-        specifier: 3.2.11
-        version: 3.2.11
+  packages/playground/todo-list-cli:
     devDependencies:
-      '@jest/globals':
-        specifier: 29.5.0
-        version: 29.5.0
-      '@utils/ts':
+      '@playground/todo-list-store':
         specifier: workspace:*
-        version: link:../../utils/ts
-
-  packages/tooling-tests/todo-list-cli:
-    devDependencies:
+        version: link:../todo-list-store
       '@repka-kit/ts':
         specifier: workspace:*
         version: link:../../build-tools/ts
       '@testing-tools/packages':
         specifier: workspace:*
         version: link:../../testing-tools/packages
-      '@tooling-tests/todo-list-store':
-        specifier: workspace:*
-        version: link:../todo-list-store
       '@utils/ts':
         specifier: workspace:*
         version: link:../../utils/ts
@@ -225,11 +210,24 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
 
-  packages/tooling-tests/todo-list-store:
+  packages/playground/todo-list-store:
     devDependencies:
       '@repka-kit/ts':
         specifier: workspace:*
         version: link:../../build-tools/ts
+
+  packages/testing-tools/packages:
+    dependencies:
+      fast-glob:
+        specifier: 3.2.11
+        version: 3.2.11
+    devDependencies:
+      '@jest/globals':
+        specifier: 29.5.0
+        version: 29.5.0
+      '@utils/ts':
+        specifier: workspace:*
+        version: link:../../utils/ts
 
   packages/utils/ts: {}
 

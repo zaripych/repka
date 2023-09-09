@@ -1,4 +1,4 @@
-import type { TodoEntry } from '@tooling-tests/todo-list-store';
+import type { TodoEntry } from '@playground/todo-list-store';
 
 import { printEntry } from './printEntry';
 
