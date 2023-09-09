@@ -195,9 +195,10 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
     const buildStart = performance.now();
 
     if (packageManager === 'pnpm') {
+      const tasks = `/(${buildTasks.join('|')})/`;
       await spawnOutputConditional(
         packageManager,
-        ['-r', `/${buildTasks.join('|')}/`],
+        ['-r', process.platform === 'win32' ? `"${tasks}"` : tasks],
         {
           cwd: packageRootDirectory,
           shell: process.platform === 'win32',
