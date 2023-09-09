@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { logger } from '../logger/logger';
 import type { PackageBinEntryPoint } from './nodePackageConfig';
 
-export async function validatePackageJsonBins({
+export async function validateBinEntryPoints({
   packageName,
   packageDirectory,
   bin,
