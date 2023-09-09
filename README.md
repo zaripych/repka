@@ -8,7 +8,8 @@ This is a work in progress at the moment.
 
 ## Features
 
-- single dependency linting, bundling, testing and packaging for TypeScript projects
+- single dependency linting, bundling, testing and packaging for TypeScript
+  projects
 - supports both monorepo with multiple packages and single package repos
 - minimum configuration required, driven by `package.json`
 - configuration via TypeScript scripts with auto-completion
@@ -23,17 +24,18 @@ This is a work in progress at the moment.
 - eslint
 - prettier
 - jest
-- turbo - (as dependency at the moment with planned auto-generation of turbo.json)
-- lint-staged - (customized version that stashes all changes including untracked files)
-- vite - (planned as bundler for FE apps if `vite-federation` lives up to expectations, otherwise webpack with esbuild/swc)
+- lint-staged - (customized version that stashes all changes including untracked
+  files)
 - dts-bundle-generator - forked version which turned into bundler
 
 ## Roadmap
 
 - [x] `init` command for first time initialization
-- [ ] `init` command supporting migration of an existing project
-- [ ] test on `Windows OS`, test with `npm` and `yarn` package managers
-- [ ] `@repka-kit/node` to be split out of `@repka-kit/ts` in preparation of `@repka-kit/web`
+- [x] test on `Windows OS`, test with `npm` and `yarn` package managers
+- [ ] get rid of `turbo` dependency as it was found to be clunky and not super
+      beneficial
+- [ ] `@repka-kit/node` to be split out of `@repka-kit/ts` in preparation of
+      `@repka-kit/web`
 
 ## Documentation
 
@@ -41,6 +43,8 @@ TODO
 
 ### Attributions
 
-<a href="https://github.com/timocov/dts-bundle-generator" title="dts-bundle-generator">Forked version of the DTS Bundle Generator is used to generate .d.ts files</a>
+<a href="https://github.com/timocov/dts-bundle-generator" title="dts-bundle-generator">Forked
+version of the DTS Bundle Generator is used to generate .d.ts files</a>
 
-<a href="https://www.flaticon.com/free-icons/turnip" title="turnip icons">Turnip icons created by Ridho Imam Prayogi - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/turnip" title="turnip icons">Turnip
+icons created by Ridho Imam Prayogi - Flaticon</a>

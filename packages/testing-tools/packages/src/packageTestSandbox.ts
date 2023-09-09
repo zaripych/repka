@@ -123,7 +123,12 @@ export function packageTestSandbox(opts: PackageTestSandboxOpts) {
         await copyFiles({
           source: templateDirectory,
           include: ['**/*'],
-          exclude: ['node_modules', 'install-result.json'],
+          exclude: [
+            'node_modules',
+            'install-result.json',
+            'before.json',
+            'after.json',
+          ],
           destination: sandboxDirectory,
           options: {
             dot: true,
@@ -151,7 +156,7 @@ export function packageTestSandbox(opts: PackageTestSandboxOpts) {
         await copyFiles({
           source: templateDirectory,
           include: ['**/*'],
-          exclude: ['install-result.json'],
+          exclude: ['install-result.json', 'before.json', 'after.json'],
           destination: sandboxDirectory,
           options: {
             dot: true,
