@@ -197,7 +197,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
     if (packageManager === 'pnpm') {
       await spawnOutputConditional(
         packageManager,
-        [`/${buildTasks.join('|')}/`],
+        ['-r', `/${buildTasks.join('|')}/`],
         {
           cwd: packageRootDirectory,
           exitCodes: [0],
