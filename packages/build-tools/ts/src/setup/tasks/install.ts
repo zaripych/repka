@@ -2,8 +2,8 @@ import { join } from 'node:path';
 
 import { spawnToPromise } from '../../child-process/index';
 import type { PackageJson } from '../../package-json/packageJson';
+import { determinePackageManager } from '../../utils/determinePackageManager';
 import { taskFactory } from './core/definition';
-import { determinePackageManager } from './helpers/determinePackageManager';
 import { readPackageJsonWithDefault } from './helpers/readPackageJson';
 
 function packageJsonFieldsCausingReinstall(packageJson: PackageJson) {
@@ -43,10 +43,18 @@ export const install = taskFactory(
         }
 
         addPostOp(async () => {
-          const command = await determinePackageManager({
-            directory: opts.directory,
-            packageJson,
-          });
+          const command = await determinePackageManager(
+            {
+              directory: opts.directory,
+              packageJson,
+            },
+            {
+              readPackageJson: (path) =>
+                readPackageJsonWithDefault(path, {
+                  readFile,
+                }),
+            }
+          );
           const args: string[] = ['install'];
           if (command === 'pnpm') {
             args.push('--prefer-offline');

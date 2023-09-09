@@ -1,17 +1,22 @@
 import assert from 'node:assert';
-import { mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import {
+  mkdir,
+  readFile,
+  rm,
+  stat,
+  symlink,
+  writeFile,
+} from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 
-import type { TaskTypes } from '@build-tools/ts';
-import { runTurboTasksForSinglePackage } from '@build-tools/ts';
+import { spawnOutputConditional } from '@build-tools/ts';
 import { logger } from '@build-tools/ts';
 import { hasOne, onceAsync } from '@utils/ts';
 
 import { getTestConfig } from './getTestConfig';
 import { copyFiles } from './helpers/copyFiles';
-import { deleteTurboCache } from './helpers/deleteTurboCache';
 import { emptyDir } from './helpers/emptyDir';
 import { findPackageUnderTest } from './helpers/findPackageUnderTest';
 import { ignoreErrors } from './helpers/ignoreErrors';
@@ -71,9 +76,7 @@ type PackageInstallResult = {
     packageUnderTest: string;
     packageInstallSource: string;
     packageJsonContents: Record<string, unknown>;
-    linked: boolean;
   };
-  turboHash: string | undefined;
   cacheBustedInstallSource: string;
 };
 
@@ -107,7 +110,7 @@ export type PackageInstallTemplateOpts = {
   /**
    * Tasks to run before the integration test
    */
-  buildTasks?: TaskTypes[];
+  buildTasks?: string[];
 
   /**
    * Install via this package manager
@@ -131,6 +134,7 @@ export const TEST_PACKAGE_MANAGER = 'TEST_PACKAGE_MANAGER';
 export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
   const props = onceAsync(async () => {
     const config = await getTestConfig(fileURLToPath(opts.importMetaUrl));
+
     const packageUnderTest = await findPackageUnderTest(
       config.packageRootDirectory
     );
@@ -138,6 +142,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
       packageUnderTest,
       'Name of the package under test should be in the environment variables or provided'
     );
+
     const envPackageManager = process.env[TEST_PACKAGE_MANAGER];
     const packageManager =
       opts.packageManager ||
@@ -179,20 +184,38 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
   });
 
   const runBuild = onceAsync(async () => {
-    const { packageRootDirectory } = await props();
+    const { packageRootDirectory, packageManager } = await props();
+
     const buildTasks = opts.buildTasks ?? ['build', 'declarations'];
+
     if (!hasOne(buildTasks)) {
       return { buildTime: 0 };
     }
+
     const buildStart = performance.now();
-    await runTurboTasksForSinglePackage({
-      tasks: buildTasks,
-      packageDir: packageRootDirectory,
-      spawnOpts: {
-        exitCodes: [0],
-      },
-    });
+
+    if (packageManager === 'pnpm') {
+      await spawnOutputConditional(
+        packageManager,
+        [`/${buildTasks.join('|')}/`],
+        {
+          cwd: packageRootDirectory,
+          exitCodes: [0],
+        }
+      );
+    } else {
+      await Promise.all(
+        buildTasks.map((task) =>
+          spawnOutputConditional(packageManager, [task], {
+            cwd: packageRootDirectory,
+            exitCodes: [0],
+          })
+        )
+      );
+    }
+
     const buildStop = performance.now();
+
     return {
       buildTime: buildStop - buildStart,
     };
@@ -242,10 +265,8 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
           packageManager: allProps.packageManager,
           packageUnderTest: allProps.packageUnderTest,
           packageInstallSource: allProps.packageInstallSource,
-          linked: Boolean(opts.linkPackageUnderTest),
           packageJsonContents: await readPackageJson(packageInstallSource),
         },
-        turboHash: process.env['TURBO_HASH'],
         cacheBustedInstallSource,
       };
 
@@ -274,11 +295,6 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
               recursive: true,
             })
           );
-        }
-
-        // delete cache entry for previous run when we have to reinstall
-        if (previousInstallResult?.turboHash) {
-          await deleteTurboCache(previousInstallResult.turboHash);
         }
 
         await mkdir(templateDirectory, { recursive: true });
@@ -327,26 +343,40 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
           directory: templateDirectory,
           packageManager,
         });
+      } else {
+        const installLocation = join(
+          templateDirectory,
+          'node_modules',
+          packageUnderTest
+        );
+
+        logger.info(
+          `Will refresh "${templateName}" by copying over files from "${packageInstallSource}" to "${installLocation}"`
+        );
+
+        assert(
+          await stat(installLocation).then(
+            (res) => res.isDirectory() || res.isSymbolicLink()
+          ),
+          `Install location "${installLocation}" should be a directory or a symlink`
+        );
+
+        await emptyDir(
+          join(templateDirectory, 'node_modules', packageUnderTest),
+          ['node_modules']
+        );
+
+        await copyFiles({
+          source: packageInstallSource,
+          destination: installLocation,
+          include: ['**'],
+          exclude: ['node_modules'],
+          options: {
+            dot: true,
+          },
+        });
       }
 
-      await writeFile(
-        join(templateDirectory, 'before.json'),
-        JSON.stringify(
-          previousInstallResult?.propsTriggeringReinstall || null,
-          undefined,
-          '  '
-        ),
-        'utf-8'
-      );
-      await writeFile(
-        join(templateDirectory, 'after.json'),
-        JSON.stringify(
-          expectedInstallResult.propsTriggeringReinstall,
-          undefined,
-          '  '
-        ),
-        'utf-8'
-      );
       await writeFile(
         installResultFilePath,
         JSON.stringify(expectedInstallResult, undefined, '  '),

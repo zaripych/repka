@@ -1,7 +1,7 @@
 import { lstat, mkdir, readdir, rm, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export async function emptyDir(dir: string) {
+export async function emptyDir(dir: string, ignore?: string[]) {
   let items;
   try {
     items = await readdir(dir);
@@ -11,6 +11,9 @@ export async function emptyDir(dir: string) {
 
   return Promise.all(
     items.map(async (item) => {
+      if (ignore?.includes(item)) {
+        return;
+      }
       const path = join(dir, item);
       const result = await lstat(path);
       if (result.isSymbolicLink()) {

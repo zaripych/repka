@@ -32,7 +32,7 @@ This is a work in progress at the moment.
 
 - [x] `init` command for first time initialization
 - [x] test on `Windows OS`, test with `npm` and `yarn` package managers
-- [ ] get rid of `turbo` dependency as it was found to be clunky and not super
+- [x] get rid of `turbo` dependency as it was found to be clunky and not super
       beneficial
 - [ ] `@repka-kit/node` to be split out of `@repka-kit/ts` in preparation of
       `@repka-kit/web`

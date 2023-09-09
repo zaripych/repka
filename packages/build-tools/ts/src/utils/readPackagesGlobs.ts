@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { onceAsync } from '@utils/ts';
 import { load } from 'js-yaml';
 
+import { readPackageJson } from './findDevDependency';
 import { repositoryRootPath } from './repositoryRootPath';
 
 async function tryReadingPnpmWorkspaceYaml(monorepoRoot: string) {
@@ -20,13 +21,10 @@ async function tryReadingPnpmWorkspaceYaml(monorepoRoot: string) {
 }
 
 async function tryReadingPackageJsonWorkspaces(monorepoRoot: string) {
-  const text = await readFile(join(monorepoRoot, 'package.json'), 'utf-8');
-  const packageJson = JSON.parse(text) as {
-    workspaces?: string[];
-  };
-  return Array.isArray(packageJson.workspaces) &&
-    packageJson.workspaces.length > 0
-    ? packageJson.workspaces
+  const packageJson = await readPackageJson(join(monorepoRoot, 'package.json'));
+  const workspaces = packageJson['workspaces'];
+  return Array.isArray(workspaces) && workspaces.length > 0
+    ? workspaces.flatMap((entry) => (typeof entry === 'string' ? [entry] : []))
     : undefined;
 }
 
