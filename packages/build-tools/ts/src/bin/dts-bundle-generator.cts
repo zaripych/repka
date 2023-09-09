@@ -38,10 +38,10 @@ async function run() {
   if (!config) {
     throw new Error('Expected config to be passed via stdin');
   }
-  if (process.env['LOG_LEVEL'] === 'debug') {
+  if (process.env['DTS_LOG_LEVEL'] === 'debug') {
     enableVerbose();
   }
-  if (process.env['LOG_LEVEL'] === 'info') {
+  if (process.env['DTS_LOG_LEVEL'] === 'info') {
     enableNormalLog();
   }
   generateAndSaveDtsBundle(config);

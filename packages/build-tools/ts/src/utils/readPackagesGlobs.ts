@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { onceAsync } from '@utils/ts';
 import { load } from 'js-yaml';
 
-import { readPackageJson } from './findDevDependency';
+import { readPackageJson } from '../package-json/readPackageJson';
 import { repositoryRootPath } from './repositoryRootPath';
 
 async function tryReadingPnpmWorkspaceYaml(monorepoRoot: string) {

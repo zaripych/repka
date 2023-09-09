@@ -8,9 +8,9 @@ import type {
   PackageBinEntryPoint,
   PackageExportsEntryPoint,
 } from './nodePackageConfig';
+import { validateBinEntryPoints } from './validateBinEntryPoints';
 import { validateEntryPoints } from './validateEntryPoints';
 import { validatePackageJson } from './validatePackageJson';
-import { validatePackageJsonBins } from './validatePackageJsonBins';
 
 type BuildEntryPointsResult = {
   entryPoints: PackageExportsEntryPoint[];
@@ -96,7 +96,7 @@ export async function loadNodePackageConfigs(opts?: {
 
     buildBinEntryPoints: () =>
       Promise.resolve(deps.readPackageJson()).then((packageJson) =>
-        validatePackageJsonBins({
+        validateBinEntryPoints({
           packageName: packageJson.name,
           packageDirectory: process.cwd(),
           bin: packageJson.bin,
