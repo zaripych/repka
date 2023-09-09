@@ -1,5 +1,37 @@
 # @repka-kit/ts
 
+## 1.0.0-beta.8
+
+### Patch Changes
+
+- [#15](https://github.com/zaripych/repka/pull/15)
+  [`3200535`](https://github.com/zaripych/repka/commit/3200535bc80faffbc84e56b8c152b0b40404050d)
+  Thanks [@zaripych](https://github.com/zaripych)! - fix(turbo): remove turbo as
+  dependency
+
+- [#11](https://github.com/zaripych/repka/pull/11)
+  [`8996c10`](https://github.com/zaripych/repka/commit/8996c10d075b9b1621d25e262e20315250a0c698)
+  Thanks [@zaripych](https://github.com/zaripych)! - feat(bins): improve bins
+  experience - we can now simply use TypeScript for bin entries, as long as they
+  have a shebang (ie '#!/usr/bin/env tsx') as first line in the source file the
+  bin entry points to. This is much better experience than having to deal with
+  generated .gen.cjs/mjs files that we then have to commit along with the source
+  code.
+
+  Here is an
+  [example](https://github.com/zaripych/repka/blob/e804d34feba9e4205ffd4e9f791bee7e4dc96ac2/packages/build-tools/ts/src/bin/eslint.ts#L1)
+  of a source file that this
+  [bin](https://github.com/zaripych/repka/blob/e804d34feba9e4205ffd4e9f791bee7e4dc96ac2/packages/build-tools/ts/package.json#L33)
+  entry points to from "package.json".
+
+  Now `eslint` bin becomes available to us in the terminal at dev-time as well
+  as in the production bundle.
+
+- [#10](https://github.com/zaripych/repka/pull/10)
+  [`908ba28`](https://github.com/zaripych/repka/commit/908ba28e2881dfcd35284751576a8e25d26fe3fc)
+  Thanks [@zaripych](https://github.com/zaripych)! - fix(windows): make it work
+  on windows, make tests run on windows as well
+
 ## 1.0.0-beta.7
 
 ### Patch Changes
