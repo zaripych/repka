@@ -200,6 +200,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
         ['-r', `/${buildTasks.join('|')}/`],
         {
           cwd: packageRootDirectory,
+          shell: process.platform === 'win32',
           exitCodes: [0],
         }
       );
@@ -208,6 +209,7 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
         buildTasks.map((task) =>
           spawnOutputConditional(packageManager, [task], {
             cwd: packageRootDirectory,
+            shell: process.platform === 'win32',
             exitCodes: [0],
           })
         )
