@@ -2,9 +2,7 @@
   <img width="240" alt="Turnip or Repka" src="https://user-images.githubusercontent.com/396623/176195581-8ffe54c2-4096-4076-853d-645553af1903.png">
 </p>
 
-Have a look at example packages in [tooling-tests](./packages/tooling-tests/).
-
-This is a work in progress at the moment.
+Have a look at example packages in the [playground](./packages/playground/).
 
 ## Features
 
