@@ -68,11 +68,6 @@ export async function validatePackageJsonBins({
     });
   }
 
-  console.log({
-    validBins,
-    invalidBins,
-  });
-
   return {
     binEntryPoints: validBins,
     ignoredBinEntryPoints: Object.fromEntries(
