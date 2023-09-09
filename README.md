@@ -2,9 +2,7 @@
   <img width="240" alt="Turnip or Repka" src="https://user-images.githubusercontent.com/396623/176195581-8ffe54c2-4096-4076-853d-645553af1903.png">
 </p>
 
-Have a look at example packages in [tooling-tests](./packages/tooling-tests/).
-
-This is a work in progress at the moment.
+Have a look at example packages in the [playground](./packages/playground/).
 
 ## Features
 
@@ -32,7 +30,7 @@ This is a work in progress at the moment.
 
 - [x] `init` command for first time initialization
 - [x] test on `Windows OS`, test with `npm` and `yarn` package managers
-- [ ] get rid of `turbo` dependency as it was found to be clunky and not super
+- [x] get rid of `turbo` dependency as it was found to be clunky and not super
       beneficial
 - [ ] `@repka-kit/node` to be split out of `@repka-kit/ts` in preparation of
       `@repka-kit/web`

@@ -36,8 +36,7 @@
     "prettier": "./src/bin/prettier.ts",
     "repka": "./src/bin/repka.ts",
     "tsc": "./src/bin/tsc.ts",
-    "tsx": "./src/bin/tsx.mjs",
-    "turbo": "./src/bin/turbo.ts"
+    "tsx": "./src/bin/tsx.mjs"
   },
   "files": [
     "src",
@@ -84,7 +83,6 @@
     "rollup-plugin-analyzer": "4.0.0",
     "rollup-plugin-generate-package-json": "3.2.0",
     "tsx": "3.12.7",
-    "turbo": "1.10.13",
     "typescript": "5.0.4"
   },
   "devDependencies": {

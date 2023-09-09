@@ -1,5 +1,5 @@
 {
-  "name": "@tooling-tests/todo-list-cli",
+  "name": "@playground/todo-list-cli",
   "version": "0.0.0-development",
   "private": true,
   "type": "module",
@@ -19,9 +19,9 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@playground/todo-list-store": "workspace:*",
     "@repka-kit/ts": "workspace:*",
     "@testing-tools/packages": "workspace:*",
-    "@tooling-tests/todo-list-store": "workspace:*",
     "@utils/ts": "workspace:*",
     "commander": "9.2.0",
     "kleur": "4.1.5",

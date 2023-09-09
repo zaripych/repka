@@ -1,4 +1,4 @@
-import { listEntries } from '@tooling-tests/todo-list-store';
+import { listEntries } from '@playground/todo-list-store';
 import { createCommand } from 'commander';
 
 import { printEntries } from '../print/printEntries';

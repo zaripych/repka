@@ -4,8 +4,8 @@ import {
   listEntries,
   removeEntryById,
   removeEntryByText,
-} from '@tooling-tests/todo-list-store';
-import { isEntryId } from '@tooling-tests/todo-list-store';
+} from '@playground/todo-list-store';
+import { isEntryId } from '@playground/todo-list-store';
 import { createCommand } from 'commander';
 
 import { printEntries } from '../print/printEntries';

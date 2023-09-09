@@ -1,4 +1,4 @@
-import { addEntry, listEntries } from '@tooling-tests/todo-list-store';
+import { addEntry, listEntries } from '@playground/todo-list-store';
 import type { Command } from 'commander';
 import { createCommand } from 'commander';
 

@@ -6,8 +6,8 @@
     "@repka-kit/ts": "0.0.0",
     "@templates/ts-package": "0.0.0-development",
     "@testing-tools/packages": "0.0.0-development",
-    "@tooling-tests/todo-list-cli": "0.0.0-development",
-    "@tooling-tests/todo-list-store": "0.0.0-development",
+    "@playground/todo-list-cli": "0.0.0-development",
+    "@playground/todo-list-store": "0.0.0-development",
     "@utils/ts": "0.0.0-development"
   },
   "changesets": [

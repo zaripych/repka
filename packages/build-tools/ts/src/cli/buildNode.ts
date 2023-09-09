@@ -17,7 +17,7 @@ export const buildNodeCommand = () =>
     .action(async (_opts: unknown, command: Command) => {
       await commandTemplate({
         cliCommand: 'build:node',
-        turboTask: 'build',
+        npmScriptsTask: 'build',
         needsSourceCode: true,
         command,
         run: async () => {

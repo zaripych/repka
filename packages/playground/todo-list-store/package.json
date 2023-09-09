@@ -1,5 +1,5 @@
 {
-  "name": "@tooling-tests/todo-list-store",
+  "name": "@playground/todo-list-store",
   "version": "0.0.0-development",
   "private": true,
   "type": "module",

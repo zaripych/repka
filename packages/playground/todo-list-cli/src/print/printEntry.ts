@@ -1,4 +1,4 @@
-import type { TodoEntry } from '@tooling-tests/todo-list-store';
+import type { TodoEntry } from '@playground/todo-list-store';
 import { green, red, white } from 'kleur/colors';
 
 export function printEntry(entry: TodoEntry, variant?: 'removed' | 'added') {

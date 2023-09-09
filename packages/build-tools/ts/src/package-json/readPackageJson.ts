@@ -26,7 +26,7 @@ export async function readPackageJson(
   deps = { readFile: (path: string) => readFile(path, 'utf-8') }
 ): Promise<PackageJson> {
   // assuming current directory doesn't change while app is running
-  return process.cwd() === cwdPackageJsonPath()
+  return path === cwdPackageJsonPath()
     ? await readCwdPackageJson()
     : await readPackageJsonAt(path, deps);
 }

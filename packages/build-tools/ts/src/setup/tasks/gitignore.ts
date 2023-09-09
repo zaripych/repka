@@ -21,7 +21,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .npm/
-.turbo
 .tsc-out
 .temporary
 dist

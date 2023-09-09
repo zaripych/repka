@@ -1,4 +1,4 @@
-import { load, save } from '@tooling-tests/todo-list-store';
+import { load, save } from '@playground/todo-list-store';
 import { program } from 'commander';
 
 import { addCommand } from './add/command';
