@@ -7,6 +7,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "build:changed": "pnpm --filter='...[origin/main]' -r build",
+    "ci:version": "changeset version && pnpm install",
     "integration": "pnpm jest --integration",
     "integration:changed": "pnpm jest --integration --changedSince=origin/main",
     "lint": "pnpm -r lint",
