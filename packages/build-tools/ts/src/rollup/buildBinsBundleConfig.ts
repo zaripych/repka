@@ -23,13 +23,7 @@ function buildBinInputs(
   );
 }
 
-function buildShebangBinsPlugins(
-  entryPointsUnfiltered: PackageBinEntryPoint[]
-) {
-  const entryPoints = entryPointsUnfiltered.filter(
-    (entry) => entry.binEntryType === 'typescript-shebang-bin'
-  );
-
+function buildShebangBinsPlugins(entryPoints: PackageBinEntryPoint[]) {
   const bundledEsmBins = entryPoints.filter((entry) => entry.format === 'esm');
 
   const bundledEsmBinsInfo = new Map(
@@ -86,9 +80,7 @@ export function buildShebangBinsBundleConfig({
     };
   }
 
-  const binEntryPoints = config.binEntryPoints.filter(
-    (entry) => entry.binEntryType === 'typescript-shebang-bin'
-  );
+  const binEntryPoints = config.binEntryPoints;
 
   const { plugins } = buildShebangBinsPlugins(binEntryPoints);
 
@@ -143,12 +135,6 @@ export function buildShebangBinsBundleConfig({
   };
 
   const bundledEsmBinsInputs = buildBinInputs(esmBins);
-
-  console.log({
-    cjsBins,
-    esmBins,
-    bundledEsmBinsInputs,
-  });
 
   return {
     binEntryPoints,

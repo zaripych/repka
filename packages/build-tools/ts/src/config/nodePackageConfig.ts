@@ -83,10 +83,12 @@ export type PackageExportsEntryPoint = {
    * Package entry point
    */
   entryPoint: string;
+
   /**
    * Path to the module this entry point represents
    */
   sourcePath: string;
+
   /**
    * Chunk name generated from the entry point
    */
@@ -111,18 +113,6 @@ export type PackageBinEntryPoint = {
    * Path to the source file of the bin
    */
   sourceFilePath: string;
-
-  /**
-   * - `typescript-shebang-bin` - this is an entry which points to a TypeScript
-   * file with a shebang command that allows that file to be transpiled
-   * on the fly at dev-time
-   *
-   * - `dependency-bin` - when specified, the bin entry is a mirror
-   * of package's dependency, this will automatically generate
-   * source code to run `./node_modules/.bin/[binName]` relative
-   * to the package
-   */
-  binEntryType?: 'typescript-shebang-bin' | 'dependency-bin';
 
   /**
    * Output format
