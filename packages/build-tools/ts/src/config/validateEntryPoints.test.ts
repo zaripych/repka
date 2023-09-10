@@ -45,6 +45,26 @@ describe('validateEntryPoints', () => {
     });
   });
 
+  it('ignores null entries', () => {
+    expect(
+      validateEntryPoints({
+        ['.']: './src/index.ts',
+        ['./internal']: null,
+      })
+    ).toEqual({
+      entryPoints: [
+        {
+          entryPoint: '.',
+          sourcePath: './src/index.ts',
+          chunkName: 'main',
+        },
+      ],
+      ignoredEntryPoints: {
+        ['./internal']: null,
+      },
+    });
+  });
+
   it('works for extra object entries', () => {
     expect(
       validateEntryPoints({ ['.']: './src/index.ts', './cli': './src/cli.ts' })
@@ -65,7 +85,7 @@ describe('validateEntryPoints', () => {
     });
   });
 
-  it(`doesn't support globs`, () => {
+  it(`allows glob entries`, () => {
     expect(
       validateEntryPoints({
         ['.']: './src/index.ts',
@@ -84,45 +104,76 @@ describe('validateEntryPoints', () => {
           sourcePath: './src/cli.ts',
           chunkName: 'cli',
         },
+        {
+          entryPoint: './configs/*',
+          sourcePath: './configs/*',
+          chunkName: 'configs',
+        },
       ],
-      ignoredEntryPoints: {
-        './configs/*': './configs/*',
-      },
+      ignoredEntryPoints: {},
     });
   });
 
-  it(`doesn't support conditions`, () => {
+  it(`supports globs with conditions`, () => {
     expect(
       validateEntryPoints({
-        node: {
-          ['.']: './src/index.ts',
-          './cli': './src/cli.ts',
+        ['.']: './src/index.ts',
+        './cli': './src/cli.ts',
+        './configs/*': {
+          browser: './configs/*1',
+          types: './configs/*2',
         },
       })
     ).toEqual({
-      entryPoints: [],
-      ignoredEntryPoints: {
-        node: {
-          ['.']: './src/index.ts',
-          './cli': './src/cli.ts',
+      entryPoints: [
+        {
+          entryPoint: '.',
+          sourcePath: './src/index.ts',
+          chunkName: 'main',
         },
-      },
+        {
+          entryPoint: './cli',
+          sourcePath: './src/cli.ts',
+          chunkName: 'cli',
+        },
+        {
+          entryPoint: './configs/*',
+          sourcePath: './configs/*2',
+          chunkName: 'configs',
+        },
+      ],
+      ignoredEntryPoints: {},
     });
   });
 
-  it(`doesn't support nested conditions`, () => {
+  it(`supports nested conditions`, () => {
     const result = validateEntryPoints({
       ['.']: {
         node: './src/index.ts',
       },
     });
     expect(result).toEqual({
-      entryPoints: [],
-      ignoredEntryPoints: {
-        ['.']: {
-          node: './src/index.ts',
+      entryPoints: [
+        {
+          entryPoint: '.',
+          sourcePath: './src/index.ts',
+          chunkName: 'main',
         },
-      },
+      ],
+      ignoredEntryPoints: {},
     });
   });
+});
+
+it(`throws on invalid export entries`, () => {
+  expect(() =>
+    validateEntryPoints({
+      node: {
+        ['.']: './src/index.ts',
+        './cli': './src/cli.ts',
+      },
+    })
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Unexpected "exports" entry - found ".", "./cli" but expected only conditions, ie "types", "node", "browser", "default", ... etc. See https://nodejs.org/api/packages.html#conditional-exports for more information"`
+  );
 });

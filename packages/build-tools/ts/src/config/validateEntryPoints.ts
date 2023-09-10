@@ -1,6 +1,10 @@
 import { logger } from '../logger/logger';
 import type { PackageJsonExports } from '../package-json/packageJson';
 import type { PackageExportsEntryPoint } from './nodePackageConfig';
+import {
+  isConditionsOnlyEntry,
+  resolvePackageJsonExportEntry,
+} from './resolvePackageJsonExportEntry';
 
 const determineName = (key = 'main') => {
   return key === '.'
@@ -12,11 +16,10 @@ const determineName = (key = 'main') => {
         .replace('/', '_');
 };
 
-// TODO: This doesn't support globs yet
-const resolveEntryPointsNoConditions = (
+const resolveEntryPoints = (
   results: Record<string, PackageExportsEntryPoint>,
   ignored: Record<string, PackageJsonExports>,
-  exports: PackageJsonExports,
+  exportEntry: PackageJsonExports,
   entryPoint?: string
 ): void => {
   const chunkName = determineName(entryPoint);
@@ -24,72 +27,59 @@ const resolveEntryPointsNoConditions = (
     return;
   }
 
-  if (typeof exports === 'string') {
+  if (typeof exportEntry === 'string') {
     results[chunkName] = {
       entryPoint: entryPoint || '.',
-      sourcePath: exports,
+      sourcePath: exportEntry,
       chunkName,
     };
     return;
   }
 
-  if (exports === null || typeof exports !== 'object') {
+  console.log(entryPoint);
+
+  if (exportEntry === null || typeof exportEntry !== 'object') {
     throw new Error(
       `Expected "string" or "object" as exports entry - got "${String(
-        exports
+        exportEntry
       )}"`
     );
   }
 
-  for (const [key, entry] of Object.entries(exports)) {
-    if (!entry) {
-      continue;
-    }
-    if (!key.startsWith('.')) {
-      const expected = key
-        .replaceAll('*', '')
-        .replaceAll(/^\.?\//g, '')
-        .replaceAll(/\/$/g, '');
-
-      logger.warn(
-        `"exports" in package.json doesn't support conditions/flavors - found "${key}", expected something like "./${
-          expected === '' ? 'something' : expected
-        }" or "."`
-      );
-
+  if (isConditionsOnlyEntry(exportEntry)) {
+    const result = resolvePackageJsonExportEntry(exportEntry);
+    if (!result) {
       if (entryPoint) {
-        ignored[entryPoint] = exports;
+        logger.warn(
+          `cannot resolve "exports" entry with key "${entryPoint}" - ignoring`
+        );
       } else {
-        ignored[key] = entry;
-      }
-    } else if (key.includes('*')) {
-      const expected = key
-        .replaceAll('*', '')
-        .replaceAll(/^\.?\//g, '')
-        .replaceAll(/\/$/g, '');
-
-      logger.warn(
-        `"exports" in package.json doesn't support globs yet - found "${key}", expected something like "./${
-          expected === '' ? 'something' : expected
-        }"`
-      );
-
-      if (entryPoint) {
-        ignored[entryPoint] = exports;
-      } else {
-        ignored[key] = entry;
+        logger.warn(`cannot resolve "exports" entries`);
       }
     } else {
-      resolveEntryPointsNoConditions(results, ignored, entry, key);
+      results[chunkName] = {
+        entryPoint: entryPoint || '.',
+        sourcePath: result,
+        chunkName,
+      };
+    }
+  } else {
+    for (const [key, entry] of Object.entries(exportEntry)) {
+      if (!entry) {
+        ignored[key] = entry;
+        continue;
+      }
+
+      resolveEntryPoints(results, ignored, entry as PackageJsonExports, key);
     }
   }
 };
 
-export function validateEntryPoints(exports: PackageJsonExports) {
+export function validateEntryPoints(exportEntry: PackageJsonExports) {
   const results: Record<string, PackageExportsEntryPoint> = {};
   const ignoredEntryPoints: Record<string, PackageJsonExports> = {};
 
-  resolveEntryPointsNoConditions(results, ignoredEntryPoints, exports);
+  resolveEntryPoints(results, ignoredEntryPoints, exportEntry);
 
   return {
     entryPoints: Object.values(results),
