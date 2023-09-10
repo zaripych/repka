@@ -21,3 +21,5 @@ jobs:
     name: Release
     uses: ./.github/workflows/run-release.yml
     needs: [release-checks]
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
