@@ -11,6 +11,10 @@ on:
         required: false
         type: string
 
+    secrets:
+      NPM_TOKEN:
+        required: true
+
 jobs:
   release:
     name: Release
