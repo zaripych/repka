@@ -12,7 +12,8 @@ export const getModuleRootDirectoryForImportMetaUrl = (opts: {
   const parent = dirname(__fileName);
   const superParent = dirname(parent);
 
-  const isBundledInRoot = () => parent.endsWith(sep + '@repka-kit/ts');
+  const isBundledInRoot = () =>
+    parent.endsWith(sep + '@repka-kit/ts'.replace('/', sep));
   const isBundledInDist = () => parent.endsWith(sep + 'dist');
   const isBundledInBin = () =>
     parent.endsWith(sep + 'bin') && !superParent.endsWith(sep + 'src');
