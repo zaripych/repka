@@ -12,12 +12,15 @@ export const ignoredByNodeExportConditions = [
   'production',
 ] as const;
 
+export const repkaCustomConditions = ['bundle'] as const;
+
 export const dependencyKeys = Object.freeze([
   'dependencies',
   'devDependencies',
   'peerDependencies',
 ] as const);
-export type DependencyKeys = typeof dependencyKeys[number];
+
+export type DependencyKeys = (typeof dependencyKeys)[number];
 
 export function getDependenciesRecord(
   packageJson: Record<string, JsonType>,
@@ -30,19 +33,18 @@ export function getDependenciesRecord(
   return packageDependencies as Record<string, string>;
 }
 
-export type NodeExportsConditions = typeof nodeExportsConditions[number];
+export type NodeExportsConditions = (typeof nodeExportsConditions)[number];
 
 export type ExportsConditions =
   | NodeExportsConditions
-  | typeof ignoredByNodeExportConditions[number];
+  | (typeof ignoredByNodeExportConditions)[number]
+  | (typeof repkaCustomConditions)[number];
 
 export type PackageJsonExports =
   | JsonPrimitive
-  | ({
-      [condition in ExportsConditions]?: PackageJsonExports;
-    } & {
-      [exportPath: `.${string}`]: PackageJsonExports;
-    });
+  | {
+      [keyOrCondition: string]: PackageJsonExports;
+    };
 
 export type JsonPrimitive = boolean | number | string | null;
 

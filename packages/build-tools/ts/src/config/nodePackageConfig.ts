@@ -90,7 +90,14 @@ export type PackageExportsEntryPoint = {
   sourcePath: string;
 
   /**
-   * Chunk name generated from the entry point
+   * Path to the output module where the entry point chunk will be written
+   */
+  outputPath: string;
+
+  /**
+   * Chunk name generated from the entry point and source path
+   * that can be used to identify the chunk in the bundle when
+   * it's being built by rollup.
    */
   chunkName: string;
 };

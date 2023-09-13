@@ -28,11 +28,10 @@ function buildShebangBinsPlugins(entryPoints: PackageBinEntryPoint[]) {
 
   const bundledEsmBinsInfo = new Map(
     bundledEsmBins.map(({ binName }) => [
-      `../dist/${binName}.js`,
+      `../${binName}.js`,
       {
         virtualModuleLocation: `./src/bin/${binName}.bundled.ts`,
-        bundledEsmBinFileName: `../dist/${binName}.js`,
-        proxySourceCode: `export * from "${`../dist/${binName}.js`}";`,
+        proxySourceCode: `export * from "${`../${binName}.js`}";`,
       },
     ])
   );

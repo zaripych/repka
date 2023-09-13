@@ -40,6 +40,7 @@ export function resolvePackageJsonExportEntry(
 
   for (const condition of exportConditions) {
     const result = conditionEntries.find(([key]) => key === condition);
+
     if (result) {
       const value = result[1];
 

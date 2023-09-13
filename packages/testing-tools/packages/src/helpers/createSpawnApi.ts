@@ -85,13 +85,14 @@ export function createTestSpawnApi(
 
     const child = spawn(executable, args, activeOpts);
 
-    const combined: string[] = [];
-
-    const resultPromise = spawnResultCore(child, {
-      exitCodes: 'any',
-      ...activeOpts,
-      output: [],
+    const stripAnsiTransform = new Transform({
+      transform(this, chunk: Buffer, _, callback) {
+        this.push(stripAnsi(chunk.toString('utf8')));
+        callback();
+      },
     });
+
+    const combined: string[] = [];
 
     const collectOutput = (data: Buffer | string) => {
       combined.push(data instanceof Buffer ? data.toString('utf8') : data);
@@ -101,42 +102,108 @@ export function createTestSpawnApi(
       ? searchAndReplaceTextTransform(spawnOpts.searchAndReplace)
       : undefined;
 
+    const subscribe = () => {
+      const out = child.stdout;
+      const err = child.stderr;
+
+      if (!out && !err) {
+        return {
+          combinedOutput: undefined,
+          unsubscribe: () => {},
+        };
+      }
+
+      if (out) {
+        out.pipe(stripAnsiTransform, { end: false });
+      }
+      if (err) {
+        err.pipe(stripAnsiTransform, { end: false });
+      }
+      if (userReplace) {
+        stripAnsiTransform.pipe(userReplace, { end: false });
+      }
+
+      const combinedOutput = userReplace ? userReplace : stripAnsiTransform;
+
+      combinedOutput.on('data', collectOutput);
+      combinedOutput.on('error', (err) => {
+        console.log(err);
+      });
+
+      const unpause = () => {
+        if (out) {
+          if (out.isPaused()) {
+            out.resume();
+          }
+        }
+
+        if (err) {
+          if (err.isPaused()) {
+            err.resume();
+          }
+        }
+
+        if (combinedOutput.isPaused()) {
+          combinedOutput.resume();
+        }
+      };
+
+      return {
+        combinedOutput,
+        unpause,
+        unsubscribe: () => {
+          combinedOutput.off('data', collectOutput);
+
+          if (userReplace) {
+            stripAnsiTransform.unpipe(userReplace);
+          }
+
+          if (out) {
+            out.unpipe(stripAnsiTransform);
+          }
+
+          if (err) {
+            err.unpipe(stripAnsiTransform);
+          }
+
+          unpause();
+        },
+      };
+    };
+
+    const { unsubscribe, unpause, combinedOutput } = subscribe();
+
+    const resultPromise = spawnResultCore(child, {
+      exitCodes: 'any',
+      ...activeOpts,
+      output: [],
+    });
+
+    const waitForResult = async () => {
+      try {
+        const result = await resultPromise;
+        return {
+          ...spawnResultConvert(result),
+          output: combined.join(''),
+        };
+      } finally {
+        unsubscribe();
+      }
+    };
+
     const waitForOutput = async (
       output: string | RegExp,
       timeoutMs: number | 'no-timeout' = 500
     ) => {
-      if (!child.stdout || !child.stderr) {
-        throw new Error('There is no .stdout');
+      if (!combinedOutput) {
+        throw new Error('There is no .stdout or .stderr');
       }
-      const out = child.stdout;
-      const err = child.stderr;
-
-      const stripAnsiTransform = new Transform({
-        transform(this, chunk: Buffer, _, callback) {
-          this.push(stripAnsi(chunk.toString('utf8')));
-          callback();
-        },
-      });
 
       return new Promise<void>((res, rej) => {
         let timer: NodeJS.Timeout | undefined;
         const stop = () => {
-          out.unpipe(stripAnsiTransform);
-          err.unpipe(stripAnsiTransform);
-          if (userReplace) {
-            stripAnsiTransform.unpipe(userReplace);
-            userReplace.unpipe(search);
-            userReplace.off('data', collectOutput);
-          } else {
-            stripAnsiTransform.unpipe(search);
-            stripAnsiTransform.off('data', collectOutput);
-          }
-          if (out.isPaused() && out.listenerCount('data') > 0) {
-            out.resume();
-          }
-          if (err.isPaused() && err.listenerCount('data') > 0) {
-            err.resume();
-          }
+          combinedOutput.unpipe(search);
+          unpause();
           if (timer) {
             clearTimeout(timer);
             timer = undefined;
@@ -185,16 +252,8 @@ export function createTestSpawnApi(
           }, timeout);
         }
 
-        out.pipe(stripAnsiTransform, { end: false });
-        err.pipe(stripAnsiTransform, { end: false });
-        if (userReplace) {
-          stripAnsiTransform.pipe(userReplace, { end: false });
-          userReplace.pipe(search, { end: false });
-          userReplace.on('data', collectOutput);
-        } else {
-          stripAnsiTransform.pipe(search, { end: false });
-          stripAnsiTransform.on('data', collectOutput);
-        }
+        combinedOutput.pipe(search, { end: false });
+        unpause();
       });
     };
 
@@ -202,9 +261,12 @@ export function createTestSpawnApi(
       if (!child.stdin) {
         throw new Error('There is no .stdin');
       }
+
       const { rethrow } = captureStackTrace();
+
       const stdin = child.stdin;
       stdin.setDefaultEncoding('utf-8');
+
       await new Promise<void>((res, rej) => {
         const flushed = stdin.write(text, (err) => {
           if (err) {
@@ -226,14 +288,6 @@ export function createTestSpawnApi(
           return;
         })
         .catch(rethrow);
-    };
-
-    const waitForResult = async () => {
-      const result = await resultPromise;
-      return {
-        ...spawnResultConvert(result),
-        output: combined.join(''),
-      };
     };
 
     const nextSnapshot = () => {

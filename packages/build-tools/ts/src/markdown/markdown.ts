@@ -1,3 +1,4 @@
+import dedent from 'dedent';
 import { $ } from 'kleur/colors';
 
 import { glowFormat } from './glowFormat';
@@ -14,7 +15,7 @@ export function markdown(
       return template.naughty;
     }
   }
-  return String.raw({ raw: template }, ...values);
+  return dedent(String.raw({ raw: template }, ...values));
 }
 
 export async function format(markdown: string, deps = { glowFormat }) {

@@ -1,6 +1,7 @@
 /// <reference types="./@types/rollup-plugin-generate-package-json" />
 
 import { allFulfilled } from '@utils/ts';
+import { posix } from 'path';
 import type { Plugin, ResolveIdHook, RollupWatchOptions } from 'rollup';
 
 import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
@@ -135,15 +136,25 @@ export function buildForNode(opts?: BuildOpts) {
           input: {
             ...Object.fromEntries(
               Object.values(entryPoints).map(
-                ({ chunkName: name, sourcePath: value }) =>
-                  [name, value] as const
+                ({ chunkName, sourcePath }) => [chunkName, sourcePath] as const
               )
             ),
             ...bundledEsmBinsInputs,
           },
           output: {
             ...config.output,
-            dir: './dist/dist',
+            dir: './dist',
+            entryFileNames: (chunk) => {
+              const entryPoint = entryPoints.find(
+                (entry) => entry.chunkName === chunk.name
+              );
+
+              const outputPath = entryPoint?.outputPath;
+
+              return outputPath
+                ? posix.relative('./dist', outputPath)
+                : '[name].js';
+            },
           },
           ...combinePluginsProp(config.plugins, [
             rollupPackageJsonPlugin({
