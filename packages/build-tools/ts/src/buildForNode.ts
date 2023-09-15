@@ -6,10 +6,12 @@ import type { Plugin, ResolveIdHook, RollupWatchOptions } from 'rollup';
 
 import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from './config/loadNodePackageConfigs';
+import type { CopyOpts } from './file-system/copyFiles';
 import type { JsonType } from './package-json/packageJson';
 import { buildShebangBinsBundleConfig } from './rollup/buildBinsBundleConfig';
 import { rollupBuild } from './rollup/rollupBuild';
 import { rollupPackageJsonPlugin } from './rollup/rollupPackageJsonPlugin';
+import { rollupPluginCopy } from './rollup/rollupPluginCopy';
 import { rollupWatch } from './rollup/rollupWatch';
 import type {
   DefaultRollupConfigBuildOpts,
@@ -80,6 +82,15 @@ export type BuildOpts = {
   outputPackageJson?: (
     packageJson: Record<string, JsonType>
   ) => Record<string, JsonType>;
+
+  /**
+   * One or more copy operations to perform after the build is complete
+   * and the output package.json is written. This will also watch files
+   * for changes and copy them over as they change.
+   */
+  copy?: Array<
+    Pick<CopyOpts, 'source' | 'include' | 'exclude' | 'destination'>
+  >;
 };
 
 const externalsFromDependencies = (
@@ -166,6 +177,7 @@ export function buildForNode(opts?: BuildOpts) {
               externals: allExternals,
               packageJson: opts?.outputPackageJson,
             }),
+            ...(opts?.copy || []).map((opts) => rollupPluginCopy(opts)),
           ]),
         };
       };

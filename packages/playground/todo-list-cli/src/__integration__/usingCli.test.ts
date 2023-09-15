@@ -33,21 +33,21 @@ it('should add, list and remove entries', async () => {
   `);
   expect(await spawnMain(['add', 'my first todo entry']))
     .toMatchInlineSnapshot(`
-    {
-      "exitCode": 0,
-      "output": "+ 1 my first todo entry
-    ",
-    }
-  `);
+      {
+        "exitCode": 0,
+        "output": "+ 1 my first todo entry
+      ",
+      }
+    `);
   expect(await spawnMain(['add', 'my second todo entry']))
     .toMatchInlineSnapshot(`
-    {
-      "exitCode": 0,
-      "output": "• 1 my first todo entry
-    + 2 my second todo entry
-    ",
-    }
-  `);
+      {
+        "exitCode": 0,
+        "output": "• 1 my first todo entry
+      + 2 my second todo entry
+      ",
+      }
+    `);
   expect(await spawnMain(['list'])).toMatchInlineSnapshot(`
     {
       "exitCode": 0,
