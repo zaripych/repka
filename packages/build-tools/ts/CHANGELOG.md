@@ -1,5 +1,14 @@
 # @repka-kit/ts
 
+## 1.0.0-beta.9
+
+### Patch Changes
+
+- [#18](https://github.com/zaripych/repka/pull/18)
+  [`eb17c89`](https://github.com/zaripych/repka/commit/eb17c89aea7d356711d3dce594d85a7fce15dbdf)
+  Thanks [@zaripych](https://github.com/zaripych)! - feat(package.json): globs
+  are now supported in "exports" field
+
 ## 1.0.0-beta.8
 
 ### Patch Changes
