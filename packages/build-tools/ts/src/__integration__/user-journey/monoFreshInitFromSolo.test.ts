@@ -61,11 +61,10 @@ describe('user installs @repka-kit/ts package as devDependency, then runs repka 
 
     await controller.writeInput(keys.enter, true);
 
-    controller.nextSnapshot();
-
-    const errorRegex = /\serror(:|\s)?/gi;
+    const errorRegex = /(\s|\W|^)error(:|\s)?/gi;
 
     const result = await controller.waitForResult();
+
     expect(result).toMatchObject({
       exitCode: 0,
       output: expect.not.stringMatching(errorRegex),
@@ -75,6 +74,7 @@ describe('user installs @repka-kit/ts package as devDependency, then runs repka 
       exitCode: 0,
       output: expect.not.stringMatching(errorRegex),
     });
+
     expect(await sandbox().spawnBin('jest', [])).toMatchObject({
       exitCode: 0,
       output: expect.not.stringMatching(errorRegex),

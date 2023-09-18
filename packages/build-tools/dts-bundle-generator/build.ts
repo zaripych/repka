@@ -11,6 +11,7 @@ await pipeline(
           {
             entryPoint: '.',
             sourcePath: './src/index.ts',
+            outputPath: './dist/index.js',
             chunkName: 'main',
           },
         ],
@@ -20,7 +21,7 @@ await pipeline(
     outputPackageJson(packageJson) {
       return {
         ...packageJson,
-        types: './dist/main.d.ts',
+        types: './index.d.ts',
       };
     },
   }),
@@ -37,6 +38,7 @@ await pipeline(
               {
                 entryPoint: '.',
                 sourcePath: './src/index.ts',
+                outputPath: './dist/index.js',
                 chunkName: 'main',
               },
             ],
@@ -49,7 +51,7 @@ await pipeline(
       // to the dist folder
       await copyFiles({
         source: './src/',
-        destination: './dist/dist/',
+        destination: './dist/',
         include: ['*.d.ts'],
       });
     }

@@ -5,6 +5,9 @@ const { syncEslintConfigHelpers } = require('./eslintConfigHelpers.gen.cjs');
 const tsEnabled = () => true;
 
 module.exports = {
+  env: {
+    es2024: true,
+  },
   parser: '@typescript-eslint/parser',
   parserOptions: tsEnabled()
     ? {
@@ -13,20 +16,30 @@ module.exports = {
           ...syncEslintConfigHelpers().tsConfigGlobs,
           './tsconfig.eslint.json',
         ],
+        ecmaVersion: 'latest',
+        sourceType: 'module',
         EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
       }
     : {
         project: null,
+        ecmaVersion: 'latest',
+        sourceType: 'module',
       },
   settings: {
     'import/parsers': {
-      '@typescript-eslint/parser': ['.ts', '.tsx', '.d.ts'],
+      '@typescript-eslint/parser': ['.ts', '.tsx', '.d.ts', '.cts', '.mts'],
     },
     'import/resolver': {
       typescript: {},
     },
   },
-  plugins: ['@typescript-eslint', 'jest', 'import', 'simple-import-sort'],
+  plugins: [
+    '@typescript-eslint',
+    'jest',
+    'import',
+    'simple-import-sort',
+    'unicorn',
+  ],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -67,5 +80,14 @@ module.exports = {
         },
       ],
     }),
+    'unicorn/template-indent': [
+      'error',
+      {
+        tags: ['line', 'dedent', 'markdown'],
+        functions: ['dedent', 'line'],
+        selectors: [],
+        comments: [],
+      },
+    ],
   },
 };

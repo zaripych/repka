@@ -8,6 +8,7 @@ import { loadNodePackageConfigs } from '../config/loadNodePackageConfigs';
 import { loadTsConfigJson } from '../config/loadTsConfigJson';
 import { logger } from '../logger/logger';
 import { binPath } from '../utils/binPath';
+import { changeExtension } from '../utils/changeExtension';
 import { loadMonorepoDependencies } from '../utils/loadMonorepoDependencies';
 import { getModuleRootDirectoryForImportMetaUrl } from '../utils/moduleRootDirectory';
 import { tscCompositeTypeCheckAt } from './tsc';
@@ -87,7 +88,7 @@ export async function declarationsViaDtsBundleGenerator(
     },
     entries: entryPoints.map((entry) => {
       const input = join(outDir, entry.sourcePath);
-      const output = join('./dist/dist', entry.chunkName + '.d.ts');
+      const output = join(changeExtension(entry.outputPath, '.d.ts'));
       return {
         filePath: input,
         outFile: output,

@@ -55,6 +55,7 @@ describe('user installs @repka-kit/ts package as devDependency, then runs repka 
      */
     await controller.waitForOutput('select the type of repository', 30_000);
     await controller.writeInput(keys.downKey);
+
     await controller.waitForOutput('>   solo - ');
     await controller.writeInput(keys.enter);
 
@@ -68,11 +69,10 @@ describe('user installs @repka-kit/ts package as devDependency, then runs repka 
 
     await controller.writeInput(keys.enter, true);
 
-    controller.nextSnapshot();
-
-    const errorRegex = /\serror(:|\s)?/gi;
+    const errorRegex = /(\s|\W|^)error(:|\s)?/gi;
 
     const result = await controller.waitForResult();
+
     expect(result).toMatchObject({
       exitCode: 0,
       output: expect.not.stringMatching(errorRegex),

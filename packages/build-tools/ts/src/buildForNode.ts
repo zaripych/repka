@@ -1,14 +1,17 @@
 /// <reference types="./@types/rollup-plugin-generate-package-json" />
 
 import { allFulfilled } from '@utils/ts';
+import { posix } from 'path';
 import type { Plugin, ResolveIdHook, RollupWatchOptions } from 'rollup';
 
 import type { PackageConfigBuilder } from './config/loadNodePackageConfigs';
 import { loadNodePackageConfigs } from './config/loadNodePackageConfigs';
+import type { CopyOpts } from './file-system/copyFiles';
 import type { JsonType } from './package-json/packageJson';
 import { buildShebangBinsBundleConfig } from './rollup/buildBinsBundleConfig';
 import { rollupBuild } from './rollup/rollupBuild';
 import { rollupPackageJsonPlugin } from './rollup/rollupPackageJsonPlugin';
+import { rollupPluginCopy } from './rollup/rollupPluginCopy';
 import { rollupWatch } from './rollup/rollupWatch';
 import type {
   DefaultRollupConfigBuildOpts,
@@ -79,6 +82,15 @@ export type BuildOpts = {
   outputPackageJson?: (
     packageJson: Record<string, JsonType>
   ) => Record<string, JsonType>;
+
+  /**
+   * One or more copy operations to perform after the build is complete
+   * and the output package.json is written. This will also watch files
+   * for changes and copy them over as they change.
+   */
+  copy?: Array<
+    Pick<CopyOpts, 'source' | 'include' | 'exclude' | 'destination'>
+  >;
 };
 
 const externalsFromDependencies = (
@@ -135,15 +147,25 @@ export function buildForNode(opts?: BuildOpts) {
           input: {
             ...Object.fromEntries(
               Object.values(entryPoints).map(
-                ({ chunkName: name, sourcePath: value }) =>
-                  [name, value] as const
+                ({ chunkName, sourcePath }) => [chunkName, sourcePath] as const
               )
             ),
             ...bundledEsmBinsInputs,
           },
           output: {
             ...config.output,
-            dir: './dist/dist',
+            dir: './dist',
+            entryFileNames: (chunk) => {
+              const entryPoint = entryPoints.find(
+                (entry) => entry.chunkName === chunk.name
+              );
+
+              const outputPath = entryPoint?.outputPath;
+
+              return outputPath
+                ? posix.relative('./dist', outputPath)
+                : '[name].js';
+            },
           },
           ...combinePluginsProp(config.plugins, [
             rollupPackageJsonPlugin({
@@ -155,6 +177,7 @@ export function buildForNode(opts?: BuildOpts) {
               externals: allExternals,
               packageJson: opts?.outputPackageJson,
             }),
+            ...(opts?.copy || []).map((opts) => rollupPluginCopy(opts)),
           ]),
         };
       };

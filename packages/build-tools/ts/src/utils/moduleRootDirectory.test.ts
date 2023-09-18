@@ -12,7 +12,7 @@ describe('getModuleRootDirectoryForImportMetaUrl', () => {
 
   it('works after bundling', () => {
     const importMetaUrl = normalize(
-      `file://${monoRoot}/packages/xxx/yyy/node_modules/@repka-kit/ts/dist/chunk.94a64047.js`
+      `file://${monoRoot}/packages/xxx/yyy/node_modules/@repka-kit/ts/chunk.94a64047.js`
     );
 
     const modulesBinPathResult = normalize(

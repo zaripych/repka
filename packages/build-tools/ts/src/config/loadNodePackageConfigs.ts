@@ -1,8 +1,10 @@
+import { join } from 'node:path';
+
 import type {
   PackageJson,
   PackageJsonExports,
 } from '../package-json/packageJson';
-import { readCwdPackageJson } from '../package-json/readPackageJson';
+import { readPackageJson } from '../package-json/readPackageJson';
 import type {
   NodePackageConfig,
   PackageBinEntryPoint,
@@ -83,22 +85,28 @@ async function tryBuildingPackageConfig(
 
 export async function loadNodePackageConfigs(opts?: {
   packageConfig?: PackageConfigBuilder;
+  directory?: string;
 }) {
+  const directory = opts?.directory || process.cwd();
+
   const deps: BuilderDeps = {
-    readPackageJson: () => readCwdPackageJson(),
+    readPackageJson: () => readPackageJson(join(directory, 'package.json')),
 
     buildConfig: () => tryBuildingPackageConfig(deps, false),
 
     buildEntryPoints: () =>
       Promise.resolve(deps.readPackageJson()).then((packageJson) =>
-        validateEntryPoints(packageJson.exports || {})
+        validateEntryPoints({
+          exportEntry: packageJson.exports || {},
+          packageDirectory: directory,
+        })
       ),
 
     buildBinEntryPoints: () =>
       Promise.resolve(deps.readPackageJson()).then((packageJson) =>
         validateBinEntryPoints({
           packageName: packageJson.name,
-          packageDirectory: process.cwd(),
+          packageDirectory: directory,
           bin: packageJson.bin,
         })
       ),

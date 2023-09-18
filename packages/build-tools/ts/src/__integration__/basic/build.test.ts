@@ -58,8 +58,7 @@ it('should build via tsx', async () => {
     [
       "build.ts",
       "dist/",
-      "dist/dist/",
-      "dist/dist/main.js",
+      "dist/index.js",
       "dist/package.json",
       "package.json",
       "src/",
@@ -84,8 +83,7 @@ it('should build via repka', async () => {
     [
       "build.ts",
       "dist/",
-      "dist/dist/",
-      "dist/dist/main.js",
+      "dist/index.js",
       "dist/package.json",
       "package.json",
       "src/",

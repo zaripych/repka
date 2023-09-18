@@ -25,14 +25,9 @@ it('should print when glow is not in the system', async () => {
       }
     )
   );
-  await print(
-    markdown`
-> Hello world
-    `,
-    {
-      glowPrint: glowPrintFn,
-    }
-  );
+  await print(markdown`> Hello world`, {
+    glowPrint: glowPrintFn,
+  });
   expect(write).toBeCalledWith(
     expect.stringContaining(`
   > Hello world
@@ -57,14 +52,9 @@ it('should format when glow is not in the system', async () => {
     )
   );
   expect(
-    await format(
-      markdown`
-Hello _world_
-      `,
-      {
-        glowFormat: glowFormatFn,
-      }
-    )
+    await format(markdown`Hello _world_`, {
+      glowFormat: glowFormatFn,
+    })
   ).toMatchInlineSnapshot(`"Hello _world_"`);
   expect(disableGlow).toBeCalledTimes(1);
 });

@@ -1,4 +1,4 @@
-import { buildForNode, copy, pipeline } from './src';
+import { buildForNode, pipeline } from './src';
 import { buildEslintConfigHelpers } from './src/eslint/eslintConfigHelpers.build.js';
 import { buildJestConfigHelpers } from './src/jest/jestConfigHelpers.build.js';
 
@@ -8,9 +8,11 @@ await pipeline(
       buildJestConfigHelpers(opts),
       buildEslintConfigHelpers(opts),
     ],
-  }),
-  copy({
-    include: ['configs/**/*'],
-    destination: './dist/',
+    copy: [
+      {
+        include: ['configs/**/*'],
+        destination: './dist/',
+      },
+    ],
   })
 );

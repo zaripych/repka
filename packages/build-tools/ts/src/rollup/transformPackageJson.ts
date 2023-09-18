@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { posix } from 'path';
 
 import type {
   PackageBinEntryPoint,
@@ -61,30 +62,33 @@ export function transformPackageJson(opts: {
       ...Object.entries(ignoredBinEntryPoints || {}),
     ]);
 
+    const mainOutput = './' + posix.relative('./dist', main.outputPath);
+
     const next = {
       name,
       version,
       type,
       ...rest,
       ...('main' in packageJson && {
-        main: `./dist/${main.chunkName}.js`,
+        main: mainOutput,
       }),
       ...(Object.keys(bin).length > 0 && { bin }),
       ...(entryPoints.length === 1
         ? {
             exports:
               Object.entries(ignoredEntryPoints || {}).length === 0
-                ? `./dist/${main.chunkName}.js`
+                ? mainOutput
                 : {
                     ...ignoredEntryPoints,
-                    '.': `./dist/${main.chunkName}.js`,
+                    '.': mainOutput,
                   },
           }
         : {
             exports: entryPoints.reduce(
               (acc, entry) => ({
                 ...acc,
-                [entry.entryPoint]: `./dist/${entry.chunkName}.js`,
+                [entry.entryPoint]:
+                  './' + posix.relative('./dist', entry.outputPath),
               }),
               {
                 ...opts.ignoredEntryPoints,

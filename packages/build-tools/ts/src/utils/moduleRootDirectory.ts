@@ -12,14 +12,16 @@ export const getModuleRootDirectoryForImportMetaUrl = (opts: {
   const parent = dirname(__fileName);
   const superParent = dirname(parent);
 
+  const isBundledInRoot = () =>
+    parent.endsWith(sep + '@repka-kit/ts'.replace('/', sep));
   const isBundledInDist = () => parent.endsWith(sep + 'dist');
   const isBundledInBin = () =>
     parent.endsWith(sep + 'bin') && !superParent.endsWith(sep + 'src');
 
-  if (isBundledInDist() || isBundledInBin()) {
+  if (isBundledInRoot() || isBundledInBin() || isBundledInDist()) {
     return {
       type: 'bundled' as const,
-      path: fileURLToPath(new URL(`../`, opts.importMetaUrl)),
+      path: fileURLToPath(new URL(`./`, opts.importMetaUrl)),
     };
   }
 
