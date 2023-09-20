@@ -20,6 +20,7 @@ export async function lookupPackageVersions(
   }
 ) {
   const lookupPackageJson = await deps.ourPackageJson();
+
   return Object.fromEntries(
     await Promise.all(
       Object.entries(dependencies).map(([name, version]) =>
@@ -53,6 +54,18 @@ async function lookupPackageVersion(
   }
 
   if (version === 'lookup:from-our-package-json') {
+    if (name === lookupPackageJson['name']) {
+      const ourVersion = lookupPackageJson['version'];
+
+      if (typeof ourVersion !== 'string') {
+        throw new Error(
+          `Cannot determine version of a dependency "${name}" which we meant to lookup in our own package.json`
+        );
+      }
+
+      return [name, ourVersion];
+    }
+
     const version = dependencyVersionFromPackageJson(name, lookupPackageJson);
     if (!version) {
       throw new Error(

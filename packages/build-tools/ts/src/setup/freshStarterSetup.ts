@@ -42,6 +42,7 @@ export async function freshStarterSetup() {
               createPackageJson({
                 packageName,
                 devDependencies: {
+                  '@repka-kit/ts': 'lookup:from-our-package-json',
                   '@jest/globals': 'lookup:from-our-package-json',
                 },
               }),
@@ -64,6 +65,7 @@ export async function freshStarterSetup() {
                 directory: '.',
                 packagesGlobs,
                 devDependencies: {
+                  '@repka-kit/ts': 'lookup:from-our-package-json',
                   '@jest/globals': 'lookup:from-our-package-json',
                 },
               }),

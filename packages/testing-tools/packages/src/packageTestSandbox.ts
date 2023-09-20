@@ -30,6 +30,7 @@ export type PackageTestSandboxOpts = {
   tag: string;
   importMetaUrl: string;
   templateName?: string;
+
   /**
    * Type of the sandbox. Defaults to `symlink`.
    *
@@ -98,7 +99,7 @@ export function packageTestSandbox(opts: PackageTestSandboxOpts) {
 
   return {
     props,
-    create: async () => {
+    create: async (params?: { copyFromTemplate?: boolean }) => {
       const start = performance.now();
 
       const allProps = await props();
@@ -119,49 +120,55 @@ export function packageTestSandbox(opts: PackageTestSandboxOpts) {
 
       const sandboxType = opts.sandboxType || 'symlink';
 
-      if (sandboxType === 'symlink') {
-        await copyFiles({
-          source: templateDirectory,
-          include: ['**/*'],
-          exclude: [
-            'node_modules',
-            'install-result.json',
-            'before.json',
-            'after.json',
-          ],
-          destination: sandboxDirectory,
-          options: {
-            dot: true,
-          },
-        });
+      if (params?.copyFromTemplate ?? true) {
+        if (sandboxType === 'symlink') {
+          await copyFiles({
+            source: templateDirectory,
+            include: ['**/*'],
+            exclude: [
+              'node_modules',
+              'install-result.json',
+              'before.json',
+              'after.json',
+            ],
+            destination: sandboxDirectory,
+            options: {
+              dot: true,
+            },
+          });
 
-        const dirs = fg.stream(
-          [`node_modules`, `*/node_modules`, `!(node_modules)/*/node_modules`],
-          {
-            cwd: templateDirectory,
-            onlyDirectories: false,
-            markDirectories: false,
-            onlyFiles: false,
+          const dirs = fg.stream(
+            [
+              `node_modules`,
+              `*/node_modules`,
+              `!(node_modules)/*/node_modules`,
+            ],
+            {
+              cwd: templateDirectory,
+              onlyDirectories: false,
+              markDirectories: false,
+              onlyFiles: false,
+            }
+          ) as AsyncIterable<string>;
+
+          for await (const nodeModulesDir of dirs) {
+            await symlink(
+              join(templateDirectory, nodeModulesDir),
+              join(sandboxDirectory, nodeModulesDir),
+              'dir'
+            );
           }
-        ) as AsyncIterable<string>;
-
-        for await (const nodeModulesDir of dirs) {
-          await symlink(
-            join(templateDirectory, nodeModulesDir),
-            join(sandboxDirectory, nodeModulesDir),
-            'dir'
-          );
+        } else {
+          await copyFiles({
+            source: templateDirectory,
+            include: ['**/*'],
+            exclude: ['install-result.json', 'before.json', 'after.json'],
+            destination: sandboxDirectory,
+            options: {
+              dot: true,
+            },
+          });
         }
-      } else {
-        await copyFiles({
-          source: templateDirectory,
-          include: ['**/*'],
-          exclude: ['install-result.json', 'before.json', 'after.json'],
-          destination: sandboxDirectory,
-          options: {
-            dot: true,
-          },
-        });
       }
 
       await runPostActions(allProps, {
