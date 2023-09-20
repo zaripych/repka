@@ -1,7 +1,11 @@
 import { UnreachableError } from '@utils/ts';
 
+import { moduleRootDirectory } from '../utils/moduleRootDirectory';
 import { dependencyVersionFromPackageJson } from './dependencyVersion';
-import { latestPackageVersion } from './latestPackageVersion';
+import {
+  isPackageVersionValid,
+  latestPackageVersion,
+} from './latestPackageVersion';
 import type { JsonType } from './packageJson';
 import { ourPackageJson } from './readPackageJson';
 
@@ -61,6 +65,22 @@ async function lookupPackageVersion(
         throw new Error(
           `Cannot determine version of a dependency "${name}" which we meant to lookup in our own package.json`
         );
+      }
+
+      /**
+       * @note This is a special case when we are testing installation of
+       * "@repka-kit/ts" package before it is published to npm registry.
+       *
+       * This condition might be affected by the user being offline
+       * and us not being able to determine if this version of the package
+       * is valid or not.
+       */
+      const isValid = await isPackageVersionValid(name, ourVersion).catch(
+        () => true
+      );
+      if (!isValid) {
+        const filePath = moduleRootDirectory();
+        return [name, `file:${filePath}`];
       }
 
       return [name, ourVersion];

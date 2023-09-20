@@ -1,7 +1,7 @@
 import { spawnResult } from '../child-process/index';
 import type { JsonType } from './packageJson';
 
-export async function latestPackageVersion(name: string) {
+async function npmInfo(name: string) {
   const { status, stdout, stderr } = await spawnResult(
     'npm',
     ['info', name, '--json'],
@@ -15,6 +15,11 @@ export async function latestPackageVersion(name: string) {
     );
   }
   const result = JSON.parse(stdout) as JsonType;
+  return result;
+}
+
+export async function latestPackageVersion(name: string) {
+  const result = await npmInfo(name);
   if (typeof result !== 'object' || !result) {
     throw new Error(
       'Expected an object response from "npm" process, got something else'
@@ -33,4 +38,22 @@ export async function latestPackageVersion(name: string) {
     );
   }
   return latest;
+}
+
+export async function isPackageVersionValid(name: string, version: string) {
+  const result = await npmInfo(name);
+  if (typeof result !== 'object' || !result) {
+    throw new Error(
+      'Expected an object response from "npm" process, got something else'
+    );
+  }
+
+  const versions = result['versions'];
+  if (!Array.isArray(versions)) {
+    throw new Error(
+      `Expected .["versions"] in the "npm" process response to be an array, got ${typeof versions}`
+    );
+  }
+
+  return versions.includes(version);
 }
