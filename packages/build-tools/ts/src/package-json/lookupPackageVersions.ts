@@ -1,5 +1,7 @@
 import { UnreachableError } from '@utils/ts';
 
+import { logger } from '../logger/logger';
+import { line } from '../markdown/line';
 import { moduleRootDirectory } from '../utils/moduleRootDirectory';
 import { dependencyVersionFromPackageJson } from './dependencyVersion';
 import {
@@ -63,7 +65,10 @@ async function lookupPackageVersion(
 
       if (typeof ourVersion !== 'string') {
         throw new Error(
-          `Cannot determine version of a dependency "${name}" which we meant to lookup in our own package.json`
+          line`
+            Cannot determine version of a dependency "${name}" which we 
+            meant to lookup in our own package.json
+          `
         );
       }
 
@@ -76,8 +81,12 @@ async function lookupPackageVersion(
        * is valid or not.
        */
       const isValid = await isPackageVersionValid(name, ourVersion).catch(
-        () => true
+        (err) => {
+          logger.error(err);
+          return true;
+        }
       );
+
       if (!isValid) {
         const filePath = moduleRootDirectory();
         return [name, `file:${filePath}`];
@@ -89,7 +98,10 @@ async function lookupPackageVersion(
     const version = dependencyVersionFromPackageJson(name, lookupPackageJson);
     if (!version) {
       throw new Error(
-        `Cannot determine version of a dependency "${name}" which we meant to lookup in our own package.json`
+        line`
+          Cannot determine version of a dependency "${name}" which we meant 
+          to lookup in our own package.json
+        `
       );
     }
     return [name, version];

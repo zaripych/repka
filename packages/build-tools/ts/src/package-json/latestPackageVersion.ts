@@ -1,17 +1,27 @@
 import { spawnResult } from '../child-process/index';
+import { line } from '../markdown/line';
 import type { JsonType } from './packageJson';
 
 async function npmInfo(name: string) {
-  const { status, stdout, stderr } = await spawnResult(
+  const { status, stdout, output } = await spawnResult(
     'npm',
     ['info', name, '--json'],
     {
       exitCodes: 'any',
+      shell: process.platform === 'win32',
     }
   );
   if (status !== 0) {
     throw new Error(
-      `Could not determine version of the package "${name}": ${stderr}`
+      [
+        line`
+          Could not determine version of the package "${name}" - it exited with
+          status ${status}
+        `,
+        output.join(''),
+      ]
+        .filter(Boolean)
+        .join('\n')
     );
   }
   const result = JSON.parse(stdout) as JsonType;
@@ -54,6 +64,11 @@ export async function isPackageVersionValid(name: string, version: string) {
       `Expected .["versions"] in the "npm" process response to be an array, got ${typeof versions}`
     );
   }
+
+  console.log({
+    versions,
+    version,
+  });
 
   return versions.includes(version);
 }
