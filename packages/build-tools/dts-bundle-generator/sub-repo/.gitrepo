@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:zaripych/dts-bundle-generator.git
 	branch = config-and-api-changes
-	commit = d40b5af3d3b182c1bf77a6ddbca2702463a110d8
-	parent = e0cd8182a32880a659b2cfe1eefc535a616525e1
+	commit = 9d6964ba110a9b70ea4c3241e98cdd7f8bd5b412
+	parent = 068deb6684f4f007ce6aa23c9297a7408804ffc1
 	method = merge
 	cmdver = 0.4.3
