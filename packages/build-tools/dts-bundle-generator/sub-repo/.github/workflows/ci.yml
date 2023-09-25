@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+  schedule:
+    # https://crontab.guru/#0_10_*_*_0
+    - cron:  '0 10 * * 0'
   pull_request:
 
 jobs:
@@ -12,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
       with:
-        node-version: 12
+        node-version: 16
     - run: npm install
     - run: npm run lint
 
@@ -24,12 +27,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
       with:
-        node-version: 12
+        node-version: 14
     - run: npm install
-    - run: npm install typescript@3.0.1
+    - run: npm install typescript@5.0.2
     - run: npm run tsc
 
   ts-current:
@@ -37,10 +40,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
       with:
-        node-version: 12
+        node-version: 14
     - run: npm install
     - run: npm run tsc
     - run: npm run test
@@ -51,10 +54,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
       with:
-        node-version: 12
+        node-version: 14
     - run: npm install
     - run: npm install typescript@next
     - run: npm run tsc

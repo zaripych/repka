@@ -1,4 +1,3 @@
-import * as path from 'path';
 import * as ts from 'typescript';
 
 import { verboseLog, warnLog } from './logger';
@@ -11,6 +10,25 @@ export interface CompileDtsResult {
 	program: ts.Program;
 	rootFilesRemapping: Map<string, string>;
 }
+
+const declarationExtsRemapping: Record<string, ts.Extension> = {
+	[ts.Extension.Js]: ts.Extension.Js,
+	[ts.Extension.Jsx]: ts.Extension.Jsx,
+	[ts.Extension.Json]: ts.Extension.Json,
+	[ts.Extension.TsBuildInfo]: ts.Extension.TsBuildInfo,
+	[ts.Extension.Mjs]: ts.Extension.Mjs,
+	[ts.Extension.Cjs]: ts.Extension.Cjs,
+
+	[ts.Extension.Ts]: ts.Extension.Dts,
+	[ts.Extension.Tsx]: ts.Extension.Dts,
+	[ts.Extension.Dts]: ts.Extension.Dts,
+
+	[ts.Extension.Mts]: ts.Extension.Dmts,
+	[ts.Extension.Dmts]: ts.Extension.Dmts,
+
+	[ts.Extension.Cts]: ts.Extension.Dcts,
+	[ts.Extension.Dcts]: ts.Extension.Dcts,
+} satisfies Record<ts.Extension, ts.Extension>;
 
 export interface CompileDtsOpts extends GetCompilerOptionsOpts {
 	followSymlinks?: boolean;
@@ -44,18 +62,22 @@ export function compileDts(opts: CompileDtsOpts): CompileDtsResult {
 		host.realpath = (p: string) => p;
 	}
 
-	host.resolveModuleNames = (moduleNames: string[], containingFile: string) => {
-		return moduleNames.map((moduleName: string) => {
-			const resolvedModule = ts.resolveModuleName(moduleName, containingFile, compilerOptions, host).resolvedModule;
-			if (resolvedModule && !resolvedModule.isExternalLibraryImport && resolvedModule.extension !== ts.Extension.Dts) {
-				resolvedModule.extension = ts.Extension.Dts;
+	host.resolveModuleNameLiterals = (moduleLiterals: readonly ts.StringLiteralLike[], containingFile: string): ts.ResolvedModuleWithFailedLookupLocations[] => {
+		return moduleLiterals.map((moduleLiteral: ts.StringLiteralLike): ts.ResolvedModuleWithFailedLookupLocations => {
+			const resolvedModule = ts.resolveModuleName(moduleLiteral.text, containingFile, compilerOptions, host).resolvedModule;
+			if (resolvedModule && !resolvedModule.isExternalLibraryImport) {
+				const newExt = declarationExtsRemapping[resolvedModule.extension];
 
-				verboseLog(`Change module from .ts to .d.ts: ${resolvedModule.resolvedFileName}`);
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+				if (newExt !== resolvedModule.extension) {
+					verboseLog(`Changing module from ${resolvedModule.extension} to ${newExt} for ${resolvedModule.resolvedFileName}`);
 
-				resolvedModule.resolvedFileName = changeExtensionToDts(resolvedModule.resolvedFileName);
+					resolvedModule.extension = newExt;
+					resolvedModule.resolvedFileName = changeExtensionToDts(resolvedModule.resolvedFileName);
+				}
 			}
 
-			return resolvedModule as ts.ResolvedModule;
+			return { resolvedModule };
 		});
 	};
 
@@ -87,13 +109,28 @@ export function compileDts(opts: CompileDtsOpts): CompileDtsResult {
 }
 
 function changeExtensionToDts(fileName: string): string {
-	if (fileName.slice(-5) === '.d.ts') {
+	let ext: ts.Extension | undefined;
+
+	// `path.extname` doesn't handle `.d.ts` cases (it returns `.ts` instead of `.d.ts`)
+	if (fileName.endsWith(ts.Extension.Dts)) {
 		return fileName;
 	}
 
-	// .ts, .tsx
-	const ext = path.extname(fileName);
-	return fileName.slice(0, -ext.length) + '.d.ts';
+	if (fileName.endsWith(ts.Extension.Cts)) {
+		ext = ts.Extension.Cts;
+	} else if (fileName.endsWith(ts.Extension.Mts)) {
+		ext = ts.Extension.Mts;
+	} else if (fileName.endsWith(ts.Extension.Ts)) {
+		ext = ts.Extension.Ts;
+	} else if (fileName.endsWith(ts.Extension.Tsx)) {
+		ext = ts.Extension.Tsx;
+	}
+
+	if (ext === undefined) {
+		return fileName;
+	}
+
+	return fileName.slice(0, -ext.length) + declarationExtsRemapping[ext];
 }
 
 /**
@@ -102,10 +139,14 @@ function changeExtensionToDts(fileName: string): string {
 function getDeclarationFiles(rootFiles: readonly string[], compilerOptions: ts.CompilerOptions): Map<string, string> {
 	// we must pass `declaration: true` and `noEmit: false` if we want to generate declaration files
 	// see https://github.com/microsoft/TypeScript/issues/24002#issuecomment-550549393
+	// also, we don't want to generate anything apart from declarations so that's why `emitDeclarationOnly: true` is here
+	// it allows to run the tool for projects with allowJs flag enabled to avoid errors like:
+	// error TS5055: Cannot write file '<filename>' because it would overwrite input file.
 	compilerOptions = {
 		...compilerOptions,
 		noEmit: false,
 		declaration: true,
+		emitDeclarationOnly: true,
 	};
 
 	const program = ts.createProgram(rootFiles, compilerOptions);

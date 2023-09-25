@@ -1,6 +1,9 @@
 export interface Interface {
 }
 export type Type = number | string;
+declare module ModuleWithoutQuotes {
+	export type A = string;
+}
 export interface Base {
 	id: string;
 }
@@ -11,9 +14,10 @@ declare class SomeClass {
 	private x;
 	public constructor();
 }
-export declare type TestType = Interface | Type;
+export type TestType = Interface | Type;
 export declare class MyClass extends SomeClass {
 }
-export declare type ReExportedTypes = Derived;
+export type ReExportedTypes = Derived;
+export type T = ModuleWithoutQuotes.A;
 
 export {};

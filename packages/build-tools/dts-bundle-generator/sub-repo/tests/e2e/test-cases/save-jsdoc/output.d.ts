@@ -9,6 +9,7 @@ export declare const enum NonExportedConstEnum {
 }
 declare class NonExportedClass {
 	method(): NonExportedEnum;
+	/** Method description */
 	method2(): NonExportedConstEnum;
 }
 /**
@@ -19,11 +20,12 @@ export interface ExportedInterface {
 /**
  * ExportedType JSDoc
  */
-export declare type ExportedType = string | number;
+export type ExportedType = string | number;
 /**
  * ExportedConstEnum JSDoc
  */
 export declare const enum ExportedConstEnum {
+	/** Item description */
 	Item = 0
 }
 /**

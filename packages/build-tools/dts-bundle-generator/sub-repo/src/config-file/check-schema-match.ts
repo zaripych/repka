@@ -1,5 +1,3 @@
-// tslint:disable:strict-type-predicates
-
 export interface PrimitiveValues {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions
 	anyObject: any;
