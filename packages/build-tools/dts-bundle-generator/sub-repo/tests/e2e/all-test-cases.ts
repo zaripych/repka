@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as assert from 'assert';
 
+import * as ts from 'typescript';
+
 import { generateDtsBundle } from '../../src/bundle-generator';
 
 import { TestCaseConfig } from './test-cases/test-case-config';
@@ -15,12 +17,39 @@ interface TestCase {
 
 const testCasesDir = path.resolve(__dirname, 'test-cases');
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+const currentPackageVersion = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), { encoding: 'utf-8' })).version as string;
+
 function isDirectory(filePath: string): boolean {
 	return fs.lstatSync(path.resolve(testCasesDir, filePath)).isDirectory();
 }
 
 function prepareString(str: string): string {
 	return str.trim().replace(/\r\n/g, '\n');
+}
+
+function findInputFile(testCaseDir: string): string {
+	const tsFilePath = path.join(testCaseDir, 'input.ts');
+	if (fs.existsSync(tsFilePath)) {
+		return tsFilePath;
+	}
+
+	const dtsFilePath = path.join(testCaseDir, 'input.d.ts');
+	if (fs.existsSync(dtsFilePath)) {
+		return dtsFilePath;
+	}
+
+	const mtsFilePath = path.join(testCaseDir, 'input.mts');
+	if (fs.existsSync(mtsFilePath)) {
+		return mtsFilePath;
+	}
+
+	const ctsFilePath = path.join(testCaseDir, 'input.cts');
+	if (fs.existsSync(ctsFilePath)) {
+		return ctsFilePath;
+	}
+
+	throw new Error(`Cannot find input file in ${testCaseDir}`);
 }
 
 function getTestCases(): TestCase[] {
@@ -30,14 +59,10 @@ function getTestCases(): TestCase[] {
 		})
 		.map((directoryName: string) => {
 			const testCaseDir = path.resolve(testCasesDir, directoryName);
+
+			const inputFileName = findInputFile(testCaseDir);
+
 			const outputFileName = path.resolve(testCaseDir, 'output.d.ts');
-
-			const tsFilePath = path.relative(process.cwd(), path.resolve(testCaseDir, 'input.ts'));
-			const dtsFilePath = path.relative(process.cwd(), path.resolve(testCaseDir, 'input.d.ts'));
-
-			const inputFileName = fs.existsSync(tsFilePath) ? tsFilePath : dtsFilePath;
-
-			assert(fs.existsSync(inputFileName), `Input file doesn't exist for ${directoryName}`);
 			assert(fs.existsSync(outputFileName), `Output file doesn't exist for ${directoryName}`);
 
 			const result: TestCase = {
@@ -45,14 +70,14 @@ function getTestCases(): TestCase[] {
 				inputFileName,
 				// eslint-disable-next-line @typescript-eslint/no-var-requires
 				config: require(path.resolve(testCaseDir, 'config.ts')) as TestCaseConfig,
-				outputFileContent: prepareString(fs.readFileSync(outputFileName, 'utf-8')),
+				outputFileContent: prepareString(fs.readFileSync(outputFileName, 'utf-8')).replace(/\$PACKAGE_CURRENT_VERSION/g, currentPackageVersion),
 			};
 
 			return result;
 		});
 }
 
-describe('Functional tests', () => {
+describe(`Functional tests, typescript-v${ts.versionMajorMinor}`, () => {
 	for (const testCase of getTestCases()) {
 		it(testCase.name, () => {
 			const outputOptions = testCase.config.output || {};

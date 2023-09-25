@@ -11,29 +11,22 @@ const namedDeclarationKinds = [
 	ts.SyntaxKind.PropertySignature,
 ];
 
-// actually we should use ts.DefaultKeyword instead of ts.Modifier
-// but there is no such type in previous versions of the compiler so we cannot use it here
-// TODO: replace with ts.DefaultKeyword once the min typescript will be upgraded
-export type NodeName = ts.DeclarationName | ts.Modifier;
+export type NodeName = ts.DeclarationName | ts.DefaultKeyword;
 
 export function isNodeNamedDeclaration(node: ts.Node): node is ts.NamedDeclaration {
 	return namedDeclarationKinds.indexOf(node.kind) !== -1;
 }
 
 export function hasNodeModifier(node: ts.Node, modifier: ts.SyntaxKind): boolean {
-	const nodeWithModifiers = node as ts.Node & {
-		modifiers?: ts.NodeArray<ts.ModifierLike>
-	}
-	return Boolean(nodeWithModifiers.modifiers && nodeWithModifiers.modifiers.some((nodeModifier: ts.ModifierLike) => nodeModifier.kind === modifier));
+	const modifiers = getModifiers(node);
+	return Boolean(modifiers && modifiers.some((nodeModifier: ts.Modifier) => nodeModifier.kind === modifier));
 }
 
 export function getNodeName(node: ts.Node): NodeName | undefined {
 	const nodeName = (node as unknown as ts.NamedDeclaration).name;
 	if (nodeName === undefined) {
-		const nodeWithModifiers = node as ts.Node & {
-			modifiers?: ts.NodeArray<ts.ModifierLike>
-		}
-		const defaultModifier = nodeWithModifiers.modifiers?.find((mod: ts.ModifierLike) => mod.kind === ts.SyntaxKind.DefaultKeyword);
+		const modifiers = getModifiers(node);
+		const defaultModifier = modifiers?.find((mod: ts.Modifier) => mod.kind === ts.SyntaxKind.DefaultKeyword);
 		if (defaultModifier !== undefined) {
 			return defaultModifier as NodeName;
 		}
@@ -130,14 +123,10 @@ export function isNamespaceStatement(node: ts.Node): node is ts.ModuleDeclaratio
 export function getDeclarationsForSymbol(symbol: ts.Symbol): ts.Declaration[] {
 	const result: ts.Declaration[] = [];
 
-	// Disabling tslint is for backward compat with TypeScript < 3
-	// tslint:disable-next-line:strict-type-predicates
 	if (symbol.declarations !== undefined) {
 		result.push(...symbol.declarations);
 	}
 
-	// Disabling tslint is for backward compat with TypeScript < 3
-	// tslint:disable-next-line:strict-type-predicates
 	if (symbol.valueDeclaration !== undefined) {
 		// push valueDeclaration might be already in declarations array
 		// so let's check first to avoid duplication nodes
@@ -205,13 +194,13 @@ export function getExportsForSourceFile(typeChecker: ts.TypeChecker, sourceFileS
 		exp.symbol = getActualSymbol(exp.symbol, typeChecker);
 
 		const resolvedIdentifier = resolveIdentifierBySymbol(exp.symbol);
-		exp.originalName = resolvedIdentifier !== undefined ? resolvedIdentifier.getText() : exp.symbol.escapedName as string;
+		exp.originalName = resolvedIdentifier?.name !== undefined ? resolvedIdentifier.name.getText() : exp.symbol.escapedName as string;
 	});
 
 	return result;
 }
 
-export function resolveIdentifier(typeChecker: ts.TypeChecker, identifier: ts.Identifier): ts.NamedDeclaration['name'] {
+export function resolveIdentifier(typeChecker: ts.TypeChecker, identifier: ts.Identifier): ts.NamedDeclaration | undefined {
 	const symbol = getDeclarationNameSymbol(identifier, typeChecker);
 	if (symbol === null) {
 		return undefined;
@@ -220,7 +209,7 @@ export function resolveIdentifier(typeChecker: ts.TypeChecker, identifier: ts.Id
 	return resolveIdentifierBySymbol(symbol);
 }
 
-function resolveIdentifierBySymbol(identifierSymbol: ts.Symbol): ts.NamedDeclaration['name'] {
+function resolveIdentifierBySymbol(identifierSymbol: ts.Symbol): ts.NamedDeclaration | undefined {
 	const declarations = getDeclarationsForSymbol(identifierSymbol);
 	if (declarations.length === 0) {
 		return undefined;
@@ -231,13 +220,13 @@ function resolveIdentifierBySymbol(identifierSymbol: ts.Symbol): ts.NamedDeclara
 		return undefined;
 	}
 
-	return decl.name;
+	return decl;
 }
 
 export function getExportsForStatement(
 	exportedSymbols: readonly SourceFileExport[],
 	typeChecker: ts.TypeChecker,
-	statement: ts.Statement
+	statement: ts.Statement | ts.NamedDeclaration
 ): SourceFileExport[] {
 	if (ts.isVariableStatement(statement)) {
 		if (statement.declarationList.declarations.length === 0) {
@@ -287,40 +276,202 @@ function getExportsForName(
 	return exportedSymbols.filter((rootExport: SourceFileExport) => rootExport.symbol === declarationSymbol);
 }
 
-// labelled tuples were introduced in TypeScript 4.0, prior 4.0 version type `ts.NamedTupleMember` didn't exist
-// so the main question is how to make the compiler happy to compile the code without errors
-// and at the same time don't use `any` type and provide proper autocomplete and properties checking _with previous versions of the compiler_?
-// the following trick allows us to handle this!
-// if ts.NamedTupleMember doesn't exist (< 4.0) - NamedTupleMember will be `any` type
-// otherwise it will be a proper type from the compiler's typings
-// (this is how @ts-ignore works)
-// thus this type must NOT be inlined
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-type NamedTupleMember = ts.NamedTupleMember;
+export type ModifiersMap = Record<ts.ModifierSyntaxKind, boolean>;
 
-// if NamedTupleMember is `any` type then let's use a fallback (we don't need to provide full type spec here, just what we're using in the code)
-// otherwise we'll use its type so we don't need to use a fallback
-type NamedTupleMemberCompat = unknown extends NamedTupleMember ? ts.Node & { name: ts.Identifier } : NamedTupleMember;
+const modifiersPriority: Partial<Record<ts.ModifierSyntaxKind, number>> = {
+	[ts.SyntaxKind.ExportKeyword]: 4,
+	[ts.SyntaxKind.DefaultKeyword]: 3,
+	[ts.SyntaxKind.DeclareKeyword]: 2,
 
-export function isNamedTupleMember(node: ts.Node): node is NamedTupleMemberCompat {
-	interface CompatibilityTypeScriptPart {
-		// labelled tuples and this method were introduced in TypeScript 4.0
-		// so, to be compiled with TypeScript < 4.0 we need to have this trick
-		isNamedTupleMember?(node: ts.Node): node is NamedTupleMemberCompat;
+	[ts.SyntaxKind.AsyncKeyword]: 1,
+	[ts.SyntaxKind.ConstKeyword]: 1,
+};
+
+export function modifiersToMap(modifiers: (readonly ts.Modifier[]) | undefined | null): ModifiersMap {
+	modifiers = modifiers || [];
+
+	return modifiers.reduce(
+		(result: ModifiersMap, modifier: ts.Modifier) => {
+			result[modifier.kind] = true;
+			return result;
+		},
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+		{} as Record<ts.ModifierSyntaxKind, boolean>
+	);
+}
+
+export function modifiersMapToArray(modifiersMap: ModifiersMap): ts.Modifier[] {
+	return Object.entries(modifiersMap)
+		.filter(([kind, include]) => include)
+		.map(([kind]) => {
+			// we don't care about decorators here as it is not possible to have them in declaration files
+			return ts.factory.createModifier(Number(kind));
+		})
+		.sort((a: ts.Modifier, b: ts.Modifier) => {
+			// note `|| 0` is here as a fallback in the case if the compiler adds a new modifier
+			// but the tool isn't updated yet
+			const aValue = modifiersPriority[a.kind as ts.ModifierSyntaxKind] || 0;
+			const bValue = modifiersPriority[b.kind as ts.ModifierSyntaxKind] || 0;
+			return bValue - aValue;
+		});
+}
+
+export function recreateRootLevelNodeWithModifiers(node: ts.Node, modifiersMap: ModifiersMap, newName?: string, keepComments: boolean = true): ts.Node {
+	const newNode = recreateRootLevelNodeWithModifiersImpl(node, modifiersMap, newName);
+
+	if (keepComments) {
+		ts.setCommentRange(newNode, ts.getCommentRange(node));
 	}
 
-	type CommonKeys = keyof (CompatibilityTypeScriptPart | typeof ts);
+	return newNode;
+}
 
-	// if current ts.Program has isNamedTupleMember method - then use it
-	// if it does not have it yet - use fallback
-	type CompatibleTypeScript = CommonKeys extends never ? typeof ts & CompatibilityTypeScriptPart : typeof ts;
+// eslint-disable-next-line complexity
+function recreateRootLevelNodeWithModifiersImpl(node: ts.Node, modifiersMap: ModifiersMap, newName?: string): ts.Node {
+	const modifiers = modifiersMapToArray(modifiersMap);
 
-	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-	const compatTs = ts as CompatibleTypeScript;
-	if (!compatTs.isNamedTupleMember) {
-		return false;
+	if (ts.isArrowFunction(node)) {
+		return ts.factory.createArrowFunction(
+			modifiers,
+			node.typeParameters,
+			node.parameters,
+			node.type,
+			node.equalsGreaterThanToken,
+			node.body
+		);
 	}
 
-	return compatTs.isNamedTupleMember(node);
+	if (ts.isClassDeclaration(node)) {
+		return ts.factory.createClassDeclaration(
+			modifiers,
+			newName || node.name,
+			node.typeParameters,
+			node.heritageClauses,
+			node.members
+		);
+	}
+
+	if (ts.isClassExpression(node)) {
+		return ts.factory.createClassExpression(
+			modifiers,
+			newName || node.name,
+			node.typeParameters,
+			node.heritageClauses,
+			node.members
+		);
+	}
+
+	if (ts.isEnumDeclaration(node)) {
+		return ts.factory.createEnumDeclaration(
+			modifiers,
+			newName || node.name,
+			node.members
+		);
+	}
+
+	if (ts.isExportAssignment(node)) {
+		return ts.factory.createExportAssignment(
+			modifiers,
+			node.isExportEquals,
+			node.expression
+		);
+	}
+
+	if (ts.isExportDeclaration(node)) {
+		return ts.factory.createExportDeclaration(
+			modifiers,
+			node.isTypeOnly,
+			node.exportClause,
+			node.moduleSpecifier,
+			node.assertClause
+		);
+	}
+
+	if (ts.isFunctionDeclaration(node)) {
+		return ts.factory.createFunctionDeclaration(
+			modifiers,
+			node.asteriskToken,
+			newName || node.name,
+			node.typeParameters,
+			node.parameters,
+			node.type,
+			node.body
+		);
+	}
+
+	if (ts.isFunctionExpression(node)) {
+		return ts.factory.createFunctionExpression(
+			modifiers,
+			node.asteriskToken,
+			newName || node.name,
+			node.typeParameters,
+			node.parameters,
+			node.type,
+			node.body
+		);
+	}
+
+	if (ts.isImportDeclaration(node)) {
+		return ts.factory.createImportDeclaration(
+			modifiers,
+			node.importClause,
+			node.moduleSpecifier,
+			node.assertClause
+		);
+	}
+
+	if (ts.isImportEqualsDeclaration(node)) {
+		return ts.factory.createImportEqualsDeclaration(
+			modifiers,
+			node.isTypeOnly,
+			newName || node.name,
+			node.moduleReference
+		);
+	}
+
+	if (ts.isInterfaceDeclaration(node)) {
+		return ts.factory.createInterfaceDeclaration(
+			modifiers,
+			newName || node.name,
+			node.typeParameters,
+			node.heritageClauses,
+			node.members
+		);
+	}
+
+	if (ts.isModuleDeclaration(node)) {
+		return ts.factory.createModuleDeclaration(
+			modifiers,
+			node.name,
+			node.body,
+			node.flags
+		);
+	}
+
+	if (ts.isTypeAliasDeclaration(node)) {
+		return ts.factory.createTypeAliasDeclaration(
+			modifiers,
+			newName || node.name,
+			node.typeParameters,
+			node.type
+		);
+	}
+
+	if (ts.isVariableStatement(node)) {
+		return ts.factory.createVariableStatement(
+			modifiers,
+			node.declarationList
+		);
+	}
+
+	throw new Error(`Unknown top-level node kind (with modifiers): ${ts.SyntaxKind[node.kind]}.
+If you're seeing this error, please report a bug on https://github.com/timocov/dts-bundle-generator/issues`);
+}
+
+export function getModifiers(node: ts.Node): readonly ts.Modifier[] | undefined {
+	if (!ts.canHaveModifiers(node)) {
+		return undefined;
+	}
+
+	return ts.getModifiers(node);
 }

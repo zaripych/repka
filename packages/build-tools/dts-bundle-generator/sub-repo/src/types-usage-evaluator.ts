@@ -2,7 +2,6 @@ import * as ts from 'typescript';
 import {
 	getActualSymbol,
 	isDeclareModule,
-	isNamedTupleMember,
 	isNodeNamedDeclaration,
 	splitTransientSymbol,
 } from './helpers/typescript';
@@ -63,10 +62,14 @@ export class TypesUsageEvaluator {
 			for (const statement of node.body.statements) {
 				this.computeUsageForNode(statement);
 			}
-		} else if (isNodeNamedDeclaration(node) && node.name) {
+		}
+
+		if (isNodeNamedDeclaration(node) && node.name) {
 			const childSymbol = this.getSymbol(node.name);
 			this.computeUsagesRecursively(node, childSymbol);
-		} else if (ts.isVariableStatement(node)) {
+		}
+
+		if (ts.isVariableStatement(node)) {
 			for (const varDeclaration of node.declarationList.declarations) {
 				this.computeUsageForNode(varDeclaration);
 			}
@@ -76,7 +79,7 @@ export class TypesUsageEvaluator {
 	private computeUsagesRecursively(parent: ts.Node, parentSymbol: ts.Symbol): void {
 		const queue = parent.getChildren();
 		for (const child of queue) {
-			if (child.kind === ts.SyntaxKind.JSDocComment) {
+			if (child.kind === ts.SyntaxKind.JSDoc) {
 				continue;
 			}
 
@@ -85,8 +88,12 @@ export class TypesUsageEvaluator {
 			if (ts.isIdentifier(child)) {
 				// identifiers in labelled tuples don't have symbols for their labels
 				// so let's just skip them from collecting
-				// since this feature is for TypeScript > 4, we have to check that a function exist before accessing it
-				if (isNamedTupleMember(child.parent) && child.parent.name === child) {
+				if (ts.isNamedTupleMember(child.parent) && child.parent.name === child) {
+					continue;
+				}
+
+				// `{ propertyName: name }` - in this case we don't need to handle `propertyName` as it has no symbol
+				if (ts.isBindingElement(child.parent) && child.parent.propertyName === child) {
 					continue;
 				}
 
@@ -111,7 +118,7 @@ export class TypesUsageEvaluator {
 	private getSymbol(node: ts.Node): ts.Symbol {
 		const nodeSymbol = this.typeChecker.getSymbolAtLocation(node);
 		if (nodeSymbol === undefined) {
-			throw new Error(`Cannot find symbol for node: ${node.getText()}`);
+			throw new Error(`Cannot find symbol for node "${node.getText()}" in "${node.parent.getText()}" from "${node.getSourceFile().fileName}"`);
 		}
 
 		return this.getActualSymbol(nodeSymbol);
