@@ -1,5 +1,19 @@
 # @repka-kit/ts
 
+## 1.0.1
+
+### Patch Changes
+
+- [#22](https://github.com/zaripych/repka/pull/22)
+  [`d659637`](https://github.com/zaripych/repka/commit/d659637a7318334d75324dc59b0bdbc6c01caa08)
+  Thanks [@zaripych](https://github.com/zaripych)! - Include TypeScript
+  declarations in the published package
+
+- [#22](https://github.com/zaripych/repka/pull/22)
+  [`d659637`](https://github.com/zaripych/repka/commit/d659637a7318334d75324dc59b0bdbc6c01caa08)
+  Thanks [@zaripych](https://github.com/zaripych)! - Update dts-bundle-generator
+  to the latest version
+
 ## 1.0.0
 
 ### Major Changes
