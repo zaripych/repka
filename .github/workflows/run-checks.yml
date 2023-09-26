@@ -55,11 +55,7 @@ jobs:
         if: ${{ inputs.changed-only }}
         run: >-
           git fetch origin main &&
-          pnpm jest
-            --integration
-            --color
-            --maxWorkers 2
-            --changedSince FETCH_HEAD
+          pnpm jest --integration --color --maxWorkers 2 --changedSince FETCH_HEAD
         env:
           LOG_LEVEL: debug
           TEST_ROOT_DIR: ${{ github.workspace }}/../
