@@ -28,6 +28,11 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
 
+      - name: Build Changed
+        run: >-
+          git fetch origin main &&
+          pnpm -r build:tools
+
       - name: Lint Changed
         if: ${{ inputs.changed-only }}
         run: >-
