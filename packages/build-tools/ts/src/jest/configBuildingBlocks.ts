@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import type { Config } from 'jest';
 import { defaults } from 'jest-config';
@@ -16,44 +16,15 @@ export const extensions = [
 
 export const ignoreDirs = ['/node_modules/', '/dist/', '/.tsc-out/'];
 
-export const jestTransformConfigProp = (
-  jestPluginRoot?: string
-): Pick<Config, 'transform'> => {
-  const esbuild = jestPluginRoot
-    ? join(jestPluginRoot, 'esbuild-jest')
-    : 'esbuild-jest';
-
-  const esbuildDefaultOpts = {
-    target: `node${process.versions.node}`,
-    sourcemap: true,
-  };
-
-  const loaderByExt = {
-    ts: { loader: 'ts', format: 'esm' },
-    cts: { loader: 'ts', format: 'cjs' },
-    mts: { loader: 'ts', format: 'esm' },
-    ctsx: { loader: 'tsx', format: 'cjs' },
-    mtsx: { loader: 'tsx', format: 'esm' },
-    tsx: { loader: 'tsx', format: 'esm' },
-  };
+export const jestTransformConfigProp = (): Pick<Config, 'transform'> => {
+  const esbuild = fileURLToPath(
+    new URL('./esbuildJestTransform.gen.mjs', import.meta.url)
+  );
 
   return {
-    transform: Object.fromEntries(
-      Object.entries(loaderByExt).map(([ext, opts]) => [
-        `^.+\\.${ext}$`,
-        [
-          esbuild,
-          {
-            ...esbuildDefaultOpts,
-            format: opts.format,
-            loaders: {
-              [`.${ext}`]: opts.loader,
-              [`.test.${ext}`]: opts.loader,
-            },
-          },
-        ],
-      ])
-    ),
+    transform: {
+      [`^.+\\.${extensions.join('|')}$`]: esbuild,
+    },
   };
 };
 
@@ -63,9 +34,18 @@ export const commonDefaults: Config = {
     ...ignoreDirs.map((dir) => `<rootDir>${dir}`),
     '<rootDir>/.*/test-cases/',
   ],
-  transformIgnorePatterns: [...ignoreDirs.map((dir) => `<rootDir>${dir}`)],
-  coveragePathIgnorePatterns: [...ignoreDirs.map((dir) => `<rootDir>${dir}`)],
-  modulePathIgnorePatterns: [...ignoreDirs.map((dir) => `<rootDir>${dir}`)],
+  transformIgnorePatterns: [
+    ...ignoreDirs,
+    ...ignoreDirs.map((dir) => `<rootDir>${dir}`),
+  ],
+  coveragePathIgnorePatterns: [
+    ...ignoreDirs,
+    ...ignoreDirs.map((dir) => `<rootDir>${dir}`),
+  ],
+  modulePathIgnorePatterns: [
+    ...ignoreDirs,
+    ...ignoreDirs.map((dir) => `<rootDir>${dir}`),
+  ],
   moduleFileExtensions: [
     ...new Set([...defaults.moduleFileExtensions, ...extensions]),
   ],

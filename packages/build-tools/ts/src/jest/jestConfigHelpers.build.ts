@@ -14,8 +14,10 @@ export const buildJestConfigHelpers = ({
       entryFileNames: `[name].gen.mjs`,
       chunkFileNames: `[name].gen.mjs`,
       banner: `// This file is bundled up from './src/*' and needs to be committed`,
+      sourcemap: false,
     },
     input: {
+      esbuildJestTransform: './src/jest/esbuildJestTransform.ts',
       jestConfigHelpers: './src/jest/jestConfigHelpers.ts',
     },
   };
