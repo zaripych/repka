@@ -683,63 +683,7 @@ await runTsScript({
   return void 0;
 }
 
-async function isDirectory(path) {
-  return stat(path).then((result) => result.isDirectory()).catch(() => void 0);
-}
-
-async function* upwardDirectoryWalk(opts) {
-  var _a;
-  let current = opts.start;
-  while (current !== "/" && current !== "~/" && !(((_a = opts.stops) == null ? void 0 : _a.includes(current)) ?? false)) {
-    const path = opts.appendPath ? join(current, opts.appendPath) : current;
-    const candidate = await opts.test(path);
-    if (candidate) {
-      yield typeof candidate === "string" ? candidate : path;
-    }
-    current = dirname(current);
-  }
-}
-async function upwardDirectorySearch(opts) {
-  const walk = upwardDirectoryWalk(opts);
-  for await (const dir of walk) {
-    return dir;
-  }
-  return void 0;
-}
-
-async function lookup(opts) {
-  return await upwardDirectorySearch({
-    start: opts.path,
-    appendPath: join("node_modules", opts.lookupPackageName),
-    test: isDirectory
-  });
-}
-async function findDevDependency(opts) {
-  const lookupPackageName = opts.lookupPackageName;
-  return await lookup({
-    path: opts.path ?? moduleRootDirectory(),
-    lookupPackageName
-  });
-}
-
-const jestPluginRoot = onceAsync(async () => {
-  const result = await findDevDependency({
-    lookupPackageName: "esbuild-jest"
-  });
-  if (!result) {
-    logger.warn(
-      'Jest plugins root cannot be determined. Do you have "@repka-kit/ts" in devDependencies at the monorepo root or at the local package?'
-    );
-  } else {
-    if (logger.logLevel === "debug") {
-      logger.debug("Found jest plugins root at", dirname(result));
-    }
-  }
-  return result ? dirname(result) : ".";
-});
-
 async function createConfig(flavor, rootDir, parentRootDir) {
-  const pluginRoot = jestPluginRoot();
   const baseConfig = flavor === "unit" ? unitTestDefaults() : customFlavorTestDefaults(flavor);
   const globalSetup = generateScript({
     script: "setup",
@@ -761,7 +705,7 @@ async function createConfig(flavor, rootDir, parentRootDir) {
   const resolvedConfig = (await jestConfig).config;
   const config = {
     ...baseConfig,
-    ...jestTransformConfigProp(await pluginRoot),
+    ...jestTransformConfigProp(),
     ...resolvedConfig,
     globalSetup: await globalSetup,
     globalTeardown: await globalTeardown
