@@ -11,6 +11,10 @@ on:
         required: false
         type: string
 
+      snapshot:
+        required: false
+        type: boolean
+
     secrets:
       NPM_TOKEN:
         required: true
@@ -34,12 +38,51 @@ jobs:
       - name: Test NODE_AUTH_TOKEN
         shell: bash
         run: >-
-          [ -z "$NODE_AUTH_TOKEN" ] &&  echo "NODE_AUTH_TOKEN is not set" ||
+          [ -z "$NODE_AUTH_TOKEN" ] &&
+          echo "NODE_AUTH_TOKEN is not set" ||
           echo "NODE_AUTH_TOKEN is set"
+
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - id: create-and-publish-snapshot
+        name: Create and Publish Snapshot
+        if: ${{ inputs.snapshot }}
+        shell: bash
+        run: >-
+          pnpm changeset version --snapshot snap &&
+          echo "snapshot-version=$(jq -r .version 
+            ./packages/build-tools/ts/package.json)" >> "$GITHUB_OUTPUT" &&
+          pnpm changeset publish --no-git-tag --tag snap
+
+      - id: message-about-snapshot
+        name: Message About Snapshot Release
+        if: ${{ inputs.snapshot }}
+        shell: bash
+        run: |
+          set -eu
+
+          # Message to be posted as a comment
+          export MESSAGE="👍 We have just released \`@repka-kit/ts@$VERSION\`, you can install it using:
+
+          \`\`\`sh
+          npm install @repka-kit/ts@$VERSION
+          \`\`\`
+          "
+
+          # Ensure we do not comment more than once
+          export number_of_comments=$(gh pr view "$PR_URL" --json comments --jq '.comments | map(select(.author.login == "github-actions")) | length')
+
+          if [ "$number_of_comments" -eq 0 ]; then
+              echo "Found zero comments, adding the comment"
+              gh pr comment "$PR_URL" --body "$MESSAGE"
+          fi
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
       - name: Create and Publish Versions
+        if: ${{ ! inputs.snapshot }}
         uses: changesets/action@v1
         with:
           commit: 'chore: update versions'
