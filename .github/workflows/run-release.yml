@@ -31,28 +31,14 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
 
-      - name: Build
-        shell: bash
-        run: pnpm -r --filter @repka-kit/ts... "/build:tools|declarations/"
-
-      - name: Test NODE_AUTH_TOKEN
-        shell: bash
-        run: >-
-          [ -z "$NODE_AUTH_TOKEN" ] &&
-          echo "NODE_AUTH_TOKEN is not set" ||
-          echo "NODE_AUTH_TOKEN is set"
-
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - id: create-and-publish-snapshot
         name: Create and Publish Snapshot
         if: ${{ inputs.snapshot }}
         shell: bash
         run: >-
           pnpm changeset version --snapshot snap &&
-          echo "snapshot-version=$(jq -r .version 
-            ./packages/build-tools/ts/package.json)" >> "$GITHUB_OUTPUT" &&
+          pnpm -r --filter @repka-kit/ts... "/build:tools|declarations/" &&
+          echo "snapshot-version=$(jq -r .version ./packages/build-tools/ts/package.json)" >> "$GITHUB_OUTPUT" &&
           pnpm changeset publish --no-git-tag --tag snap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -83,6 +69,11 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        if: ${{ ! inputs.snapshot }}
+        shell: bash
+        run: pnpm -r --filter @repka-kit/ts... "/build:tools|declarations/"
 
       - name: Create and Publish Versions
         if: ${{ ! inputs.snapshot }}
