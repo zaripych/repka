@@ -67,6 +67,7 @@ jobs:
               gh pr comment "$PR_URL" --body "$MESSAGE"
           fi
         env:
+          VERSION: ${{ steps.create-and-publish-snapshot.outputs.snapshot-version }}
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
