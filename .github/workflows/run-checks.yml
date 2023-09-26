@@ -16,6 +16,11 @@ on:
         default: false
         type: boolean
 
+      lint:
+        required: false
+        default: false
+        type: boolean
+
 jobs:
   checks:
     name: Checks
@@ -29,12 +34,13 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Build Changed
+        if: ${{ inputs.lint }}
         run: >-
           git fetch origin main &&
           pnpm -r build:tools
 
       - name: Lint Changed
-        if: ${{ inputs.changed-only }}
+        if: ${{ inputs.changed-only && inputs.lint }}
         run: >-
           git fetch origin main &&
           pnpm -r --filter '...[FETCH_HEAD]' lint
@@ -59,7 +65,7 @@ jobs:
           TEST_ROOT_DIR: ${{ github.workspace }}/../
 
       - name: Lint
-        if: ${{ ! inputs.changed-only }}
+        if: ${{ ! inputs.changed-only && inputs.lint }}
         run: >-
           git fetch origin main &&
           pnpm -r lint

@@ -12,6 +12,8 @@ jobs:
       matrix:
         runs-on: [ubuntu-latest]
     with:
+      lint: true
+      changes-only: true
       runs-on: ${{ matrix.runs-on }}
 
   other-platform-checks:
@@ -21,6 +23,8 @@ jobs:
       matrix:
         runs-on: [windows-latest, macos-latest]
     with:
+      lint: false
+      changes-only: true
       runs-on: ${{ matrix.runs-on }}
 
   release:
