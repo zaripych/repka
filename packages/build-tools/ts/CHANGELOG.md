@@ -1,5 +1,15 @@
 # @repka-kit/ts
 
+## 1.0.2
+
+### Patch Changes
+
+- [#24](https://github.com/zaripych/repka/pull/24)
+  [`ff5ed6c`](https://github.com/zaripych/repka/commit/ff5ed6cbfca65a0cd39f8bb7eeef3dca47a7d90c)
+  Thanks [@zaripych](https://github.com/zaripych)! - fix: get rid of the
+  unmaintained esbuild-jest dependency in favour of pure esbuild transformer
+  without mocks hoisting
+
 ## 1.0.1
 
 ### Patch Changes
