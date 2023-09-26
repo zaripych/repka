@@ -11,6 +11,10 @@ on:
         required: false
         type: string
 
+      snapshot:
+        required: false
+        type: boolean
+
     secrets:
       NPM_TOKEN:
         required: true
@@ -27,19 +31,27 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
 
+      - id: create-and-publish-snapshot
+        name: Create and Publish Snapshot
+        if: ${{ inputs.snapshot }}
+        shell: bash
+        run: >-
+          pnpm changeset version --snapshot snap &&
+          pnpm -r --filter @repka-kit/ts... "/build:tools|declarations/" &&
+          echo "snapshot-version=$(jq -r .version ./packages/build-tools/ts/package.json)" >> "$GITHUB_OUTPUT" &&
+          pnpm publish -r --no-git-checks --tag snap --access public --dry-run &&
+          pnpm changeset publish --no-git-tag --tag snap
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Build
+        if: ${{ ! inputs.snapshot }}
         shell: bash
         run: pnpm -r --filter @repka-kit/ts... "/build:tools|declarations/"
 
-      - name: Test NODE_AUTH_TOKEN
-        shell: bash
-        run: >-
-          [ -z "$NODE_AUTH_TOKEN" ] &&  echo "NODE_AUTH_TOKEN is not set" ||
-          echo "NODE_AUTH_TOKEN is set"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Create and Publish Versions
+        if: ${{ ! inputs.snapshot }}
         uses: changesets/action@v1
         with:
           commit: 'chore: update versions'

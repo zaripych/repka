@@ -11,7 +11,6 @@ import {
   unitTestDefaults,
 } from './configBuildingBlocks';
 import { generateScript } from './generateScript';
-import { jestPluginRoot } from './jestPluginRoot';
 
 export type TestFlavor =
   | 'unit'
@@ -25,8 +24,6 @@ async function createConfig(
   rootDir: string,
   parentRootDir?: string
 ) {
-  const pluginRoot = jestPluginRoot();
-
   const baseConfig =
     flavor === 'unit' ? unitTestDefaults() : customFlavorTestDefaults(flavor);
 
@@ -55,7 +52,7 @@ async function createConfig(
 
   const config = {
     ...baseConfig,
-    ...jestTransformConfigProp(await pluginRoot),
+    ...jestTransformConfigProp(),
     ...resolvedConfig,
     globalSetup: await globalSetup,
     globalTeardown: await globalTeardown,

@@ -10,6 +10,28 @@ jobs:
     uses: ./.github/workflows/run-checks.yml
     strategy:
       matrix:
-        runs-on: [ubuntu-latest, windows-latest, macos-latest]
+        runs-on: [ubuntu-latest]
     with:
+      lint: true
+      changed-only: true
       runs-on: ${{ matrix.runs-on }}
+
+  other-platform-checks:
+    name: ${{ matrix.runs-on }}
+    uses: ./.github/workflows/run-checks.yml
+    strategy:
+      matrix:
+        runs-on: [windows-latest, macos-latest]
+    with:
+      lint: false
+      changed-only: true
+      runs-on: ${{ matrix.runs-on }}
+
+  release:
+    name: Release Snapshot
+    uses: ./.github/workflows/run-release.yml
+    needs: [quick-checks]
+    with:
+      snapshot: true
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
