@@ -54,6 +54,9 @@ jobs:
           echo "snapshot-version=$(jq -r .version 
             ./packages/build-tools/ts/package.json)" >> "$GITHUB_OUTPUT" &&
           pnpm changeset publish --no-git-tag --tag snap
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - id: message-about-snapshot
         name: Message About Snapshot Release
@@ -79,7 +82,7 @@ jobs:
           fi
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create and Publish Versions
         if: ${{ ! inputs.snapshot }}
