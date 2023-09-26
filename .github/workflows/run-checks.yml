@@ -55,7 +55,7 @@ jobs:
         if: ${{ inputs.changed-only }}
         run: >-
           git fetch origin main &&
-          pnpm jest --integration --color --maxWorkers 2 --changedSince FETCH_HEAD
+          pnpm -r --filter '...[FETCH_HEAD]' integration -- --maxWorkers 2
         env:
           LOG_LEVEL: debug
           TEST_ROOT_DIR: ${{ github.workspace }}/../
