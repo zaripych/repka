@@ -11,3 +11,7 @@ packages/build-tools/ts/configs/eslint/tsconfig.eslint.json
 
 # Do not prettify 3-rd party repo
 packages/build-tools/dts-bundle-generator/sub-repo
+
+# Do not prettify CHANGELOG.md as it is written by changelog
+# and should not have format changed by prettier
+CHANGELOG.md
