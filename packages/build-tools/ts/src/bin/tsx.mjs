@@ -50,7 +50,7 @@ const onError = (err) => {
   process.exitCode = 1;
 };
 
-binPath('tsx', 'tsx/dist/cli.js').then((result) => {
+binPath('tsx', 'tsx/dist/cli.mjs').then((result) => {
   const cp = spawn(process.execPath, [result, ...process.argv.slice(2)], {
     stdio: 'inherit',
   });

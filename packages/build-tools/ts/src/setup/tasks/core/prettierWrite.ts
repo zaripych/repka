@@ -4,7 +4,7 @@ import { binPath } from '../../../utils/binPath';
 export const prettierPath = () =>
   binPath({
     binName: 'prettier',
-    binScriptPath: 'prettier/bin-prettier.js',
+    binScriptPath: 'prettier/bin/prettier.cjs',
   });
 
 export async function prettierWrite(paths: string[]) {

@@ -115,7 +115,7 @@ async function runDtsBundleGeneratorViaStdIn(config: BundlerConfig) {
       : [
           await binPath({
             binName: 'tsx',
-            binScriptPath: 'tsx/dist/cli.js',
+            binScriptPath: 'tsx/dist/cli.mjs',
           }),
           join(path, './src/bin/dts-bundle-generator.cts'),
         ],

@@ -10,7 +10,7 @@ const onError = (err: unknown) => {
 
 binPath({
   binName: 'prettier',
-  binScriptPath: 'prettier/bin-prettier.js',
+  binScriptPath: 'prettier/bin/prettier.cjs',
 }).then((result) => {
   const cp = spawn(process.execPath, [result, ...process.argv.slice(2)], {
     stdio: 'inherit',

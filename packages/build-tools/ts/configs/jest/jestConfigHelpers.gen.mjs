@@ -376,7 +376,7 @@ async function runTsScript(opts) {
       [
         await binPath({
           binName: "tsx",
-          binScriptPath: "tsx/dist/cli.js"
+          binScriptPath: "tsx/dist/cli.mjs"
         }),
         location,
         ...opts.args || []

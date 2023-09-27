@@ -66,7 +66,7 @@ export async function commandTemplate(opts: {
       [
         await binPath({
           binName: 'tsx',
-          binScriptPath: 'tsx/dist/cli.js',
+          binScriptPath: 'tsx/dist/cli.mjs',
         }),
         configLocation,
         ...opts.command.args,
