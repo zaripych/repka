@@ -1,5 +1,13 @@
 # @repka-kit/ts
 
+## 1.0.3
+
+### Patch Changes
+
+- [`5a916a7`](https://github.com/zaripych/repka/commit/5a916a744aaa35ea2eb30924e1d8bc0cbab5dc3f)
+  Thanks [@zaripych](https://github.com/zaripych)! - dependencies: upgrade most
+  of the dependencies
+
 ## 1.0.2
 
 ### Patch Changes
