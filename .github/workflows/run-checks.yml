@@ -73,3 +73,6 @@ jobs:
       - name: Integration
         if: ${{ ! inputs.changed-only }}
         run: pnpm jest --integration --color --maxWorkers 2
+        env:
+          LOG_LEVEL: debug
+          TEST_ROOT_DIR: ${{ github.workspace }}/../
