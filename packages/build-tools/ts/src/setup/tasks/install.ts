@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { spawnToPromise } from '../../child-process/index';
+import { spawnOutputConditional } from '../../child-process/index';
 import type { PackageJson } from '../../package-json/packageJson';
 import { determinePackageManager } from '../../utils/determinePackageManager';
 import { taskFactory } from './core/definition';
@@ -61,7 +61,7 @@ export const install = taskFactory(
             args.push('--no-frozen-lockfile');
             args.push('--reporter=default');
           }
-          await spawnToPromise(command, args, {
+          await spawnOutputConditional(command, args, {
             cwd: opts.directory,
             stdio: 'pipe',
             exitCodes: [0],

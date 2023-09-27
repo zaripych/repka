@@ -15,6 +15,7 @@ export const buildEslintConfigHelpers = ({
       entryFileNames: `[name].gen.cjs`,
       chunkFileNames: `[name].gen.cjs`,
       banner: `// This file is bundled up from './src/*' and needs to be committed`,
+      sourcemap: false,
     },
     input: {
       eslintConfigHelpers: './src/eslint/eslintConfigHelpers.ts',

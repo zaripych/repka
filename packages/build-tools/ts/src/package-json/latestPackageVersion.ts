@@ -65,10 +65,5 @@ export async function isPackageVersionValid(name: string, version: string) {
     );
   }
 
-  console.log({
-    versions,
-    version,
-  });
-
   return versions.includes(version);
 }
