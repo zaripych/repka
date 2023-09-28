@@ -40,13 +40,12 @@ jobs:
 
           package_json_path="./packages/build-tools/ts/package.json"
 
-          # Change package.json version to create snapshot
-          pnpm changeset version --snapshot snap
-
           # Skip if there are no changes in the package.json
-          if ! git diff --exit-code --quiet HEAD -- $package_json_path; then
-            echo "No changes in package.json"
-            exit 0
+          if git diff --quiet HEAD -- $package_json_path; then
+              echo "No changes in package.json"
+              exit 0
+          else
+              echo "Found changes in package.json"
           fi
 
           pnpm -r --filter @repka-kit/ts... "/build:tools|declarations/"
