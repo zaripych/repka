@@ -84,9 +84,10 @@ module.exports = {
       'error',
       {
         tags: ['line', 'dedent', 'markdown'],
-        functions: ['dedent', 'line'],
+        functions: ['dedent', 'line', 'markdown'],
         selectors: [],
         comments: [],
+        indent: syncEslintConfigHelpers().indent,
       },
     ],
   },
