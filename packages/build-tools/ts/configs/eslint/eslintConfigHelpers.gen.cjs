@@ -1,6 +1,7 @@
 // This file is bundled up from './src/*' and needs to be committed
 'use strict';
 
+var prettier = require('prettier');
 var node_child_process = require('node:child_process');
 var node_url = require('node:url');
 var node_util = require('node:util');
@@ -262,6 +263,13 @@ const readMonorepoPackagesGlobs = onceAsync(async () => {
   };
 });
 
+const getIndentForTemplateIndentRule = async (root) => {
+  const prettierConfig = await prettier.resolveConfig(root);
+  const useTabs = (prettierConfig == null ? void 0 : prettierConfig.useTabs) ?? false;
+  const tabWidth = (prettierConfig == null ? void 0 : prettierConfig.tabWidth) ?? 2;
+  const indent = useTabs ? "	".repeat(tabWidth) : " ".repeat(tabWidth);
+  return indent;
+};
 const eslintConfigHelpers = async () => {
   const { root, packagesGlobs } = await readMonorepoPackagesGlobs();
   const globs = new Set(
@@ -272,7 +280,8 @@ const eslintConfigHelpers = async () => {
   return {
     monorepoRootPath: root,
     packagesGlobs,
-    tsConfigGlobs: globs.size === 0 ? ["tsconfig.json"] : [...globs]
+    tsConfigGlobs: globs.size === 0 ? ["tsconfig.json"] : [...globs],
+    indent: await getIndentForTemplateIndentRule(root)
   };
 };
 const syncEslintConfigHelpers = once(() => {
@@ -284,4 +293,5 @@ const syncEslintConfigHelpers = once(() => {
 });
 
 exports.eslintConfigHelpers = eslintConfigHelpers;
+exports.getIndentForTemplateIndentRule = getIndentForTemplateIndentRule;
 exports.syncEslintConfigHelpers = syncEslintConfigHelpers;
