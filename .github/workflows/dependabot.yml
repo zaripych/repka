@@ -29,7 +29,9 @@ jobs:
           if [ -z "$CHANGES" ]; then
             echo "No changesets found, creating changeset";
 
-            gh pr checkout "$PR_URL"
+            git fetch origin $HEAD_REF
+            git checkout -B $HEAD_REF origin/$HEAD_REF
+
             # Create a changeset which is just an .md file:
             echo "
             ---
@@ -48,7 +50,6 @@ jobs:
 
             git commit -m "chore: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION"
             
-            git log -10 --oneline
             git push
           else
             echo "Changeset found, skipping changeset creation";
@@ -63,7 +64,6 @@ jobs:
           COMMIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
           COMMIT_AUTHOR_NAME: github-actions[bot]
           PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{ github.token }}
 
       # - name: Approve a PR if not already approved
       #   shell: bash
