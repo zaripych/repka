@@ -33,7 +33,7 @@ jobs:
             git checkout -B $HEAD_REF origin/$HEAD_REF
 
             # Create a changeset which is just an .md file:
-            cat << EOF > .changeset/dependabot-$(date +%s).md
+            cat <<- EOF > .changeset/dependabot-$(date +%s).md
             ---
             '@repka-kit/ts': patch
             ---
