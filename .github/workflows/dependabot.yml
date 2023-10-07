@@ -64,25 +64,26 @@ jobs:
           DEPENDENCY_NAMES: ${{ steps.metadata.outputs.dependency-names }}
           PREVIOUS_VERSION: ${{ steps.metadata.outputs.previous-version }}
           NEW_VERSION: ${{ steps.metadata.outputs.new-version }}
-          COMMIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
-          COMMIT_AUTHOR_NAME: github-actions[bot]
+          COMMIT_AUTHOR_EMAIL: zaripych@users.noreply.github.com
+          COMMIT_AUTHOR_NAME: zaripych
           PR_URL: ${{github.event.pull_request.html_url}}
 
       - name: Approve a PR if not already approved
         shell: bash
         run: |
           gh pr checkout "$PR_URL"
-          if [ "$(gh pr status --json reviewDecision -q .currentBranch.reviewDecision)" != "APPROVED" ];
+          if [ "$(gh pr view "$PR_URL" --json latestReviews -q '.latestReviews[0].state')" != "APPROVED" ];
           then gh pr review --approve "$PR_URL"
           else echo "PR already approved, skipping additional approvals to minimize emails/notification noise.";
           fi
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.PAT_GH_TOKEN }}
 
       - name: Enable auto-merge for Dependabot PRs
         if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
-        run: gh pr merge --auto --squash "$PR_URL"
+        run: |
+          gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.PAT_GH_TOKEN }}
