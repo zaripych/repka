@@ -33,13 +33,13 @@ jobs:
             git checkout -B $HEAD_REF origin/$HEAD_REF
 
             # Create a changeset which is just an .md file:
-            cat <<- EOF > .changeset/dependabot-$(date +%s).md
-            ---
-            '@repka-kit/ts': patch
-            ---
-            
-            deps: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION
-            EOF
+            cat << EOF > .changeset/dependabot-$(date +%s).md
+          ---
+          '@repka-kit/ts': patch
+          ---
+
+          deps: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION
+          EOF
 
             # See this on how to push changes to the PR branch:
             # https://stackoverflow.com/questions/57921401/push-to-origin-from-github-action/58393457#58393457
