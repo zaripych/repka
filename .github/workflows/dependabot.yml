@@ -22,7 +22,8 @@ jobs:
       - name: Add a changeset
         shell: bash
         run: |
-          CHANGES = $(git diff --name-only $BASE_REF -- '.changeset/*')
+          git fetch origin $BASE_REF
+          CHANGES = $(git diff --name-only $FETCH_HEAD -- '.changeset/*')
 
           if [ -z "$CHANGES" ]; then
             echo "No changesets found, creating changeset";
