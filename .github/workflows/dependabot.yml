@@ -1,6 +1,9 @@
 name: Dependabot
 
-on: pull_request
+on:
+  pull_request:
+    branches:
+      - dependabot/*
 
 permissions:
   contents: write
@@ -42,8 +45,8 @@ jobs:
             git config --global user.name "$COMMIT_AUTHOR_NAME"
 
             git commit -m "chore: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION"
-            git log -3 --oneline
-            git push origin HEAD:$HEAD_REF
+            git log -10 --oneline
+            git push
           else
             echo "Changeset found, skipping changeset creation";
           fi
