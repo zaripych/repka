@@ -29,6 +29,7 @@ jobs:
 
   release:
     name: Release Snapshot
+    if: ${{ github.actor != 'dependabot[bot]' }}
     uses: ./.github/workflows/run-release.yml
     needs: [quick-checks]
     with:
