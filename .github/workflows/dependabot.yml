@@ -44,7 +44,8 @@ jobs:
             git config --global user.name "$COMMIT_AUTHOR_NAME"
 
             git commit -m "chore: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION"
-            git push HEAD:$HEAD_REF
+            git log -3 --oneline
+            git push origin HEAD:$HEAD_REF
           else
             echo "Changeset found, skipping changeset creation";
           fi
