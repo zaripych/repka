@@ -2,8 +2,6 @@ name: Dependabot
 
 on:
   pull_request:
-    branches:
-      - dependabot/**
 
 permissions:
   contents: write
