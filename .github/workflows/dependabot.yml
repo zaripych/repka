@@ -30,13 +30,13 @@ jobs:
             echo "No changesets found, creating changeset";
 
             # Create a changeset which is just an .md file:
-            echo << #
+            echo <<END
             ---
             '@repka-kit/ts': patch
             ---
             
             deps: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION
-            # > .changeset/dependabot-$(date +%s).md
+            END > .changeset/dependabot-$(date +%s).md
 
             git add .changeset
             git commit -m "chore: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION"
