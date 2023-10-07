@@ -24,7 +24,7 @@ jobs:
         run: |
           set -eu
           git fetch origin $BASE_REF
-          CHANGES=$(git diff --name-only $FETCH_HEAD -- '.changeset/*')
+          CHANGES=$(git diff --name-only FETCH_HEAD -- '.changeset/*')
 
           if [ -z "$CHANGES" ]; then
             echo "No changesets found, creating changeset";
