@@ -15,3 +15,4 @@ packages/build-tools/dts-bundle-generator/sub-repo
 # Do not prettify CHANGELOG.md as it is written by changelog
 # and should not have format changed by prettier
 CHANGELOG.md
+*/CHANGELOG.md
