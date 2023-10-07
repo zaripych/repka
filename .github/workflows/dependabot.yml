@@ -39,6 +39,10 @@ jobs:
             " > .changeset/dependabot-$(date +%s).md
 
             git add .changeset
+            
+            git config --global user.email "$COMMIT_AUTHOR_EMAIL"
+            git config --global user.name "$COMMIT_AUTHOR_NAME"
+
             git commit -m "chore: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION"
             git push
           else
@@ -50,6 +54,8 @@ jobs:
           DEPENDENCY_NAMES: ${{ steps.metadata.outputs.dependency-names }}
           PREVIOUS_VERSION: ${{ steps.metadata.outputs.previous-version }}
           NEW_VERSION: ${{ steps.metadata.outputs.new-version }}
+          COMMIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          COMMIT_AUTHOR_NAME: github-actions[bot]
 
       # - name: Approve a PR if not already approved
       #   shell: bash
