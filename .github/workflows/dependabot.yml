@@ -1,0 +1,69 @@
+name: Dependabot
+
+on: pull_request_target
+
+permissions:
+  pull-requests: write
+  issues: write
+  repository-projects: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+      - name: Fetch Dependabot Metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Add a changeset
+        shell: bash
+        run: |
+          CHANGES = $(git diff --name-only $BASE_REF -- '.changeset/*')
+
+          if [ -z "$CHANGES" ]; then
+            echo "No changesets found, creating changeset";
+
+            # Create a changeset which is just an .md file:
+            echo << #
+            ---
+            '@repka-kit/ts': patch
+            ---
+            
+            deps: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION
+            # > .changeset/dependabot-$(date +%s).md
+
+            git add .changeset
+            git commit -m "chore: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION"
+            git push
+          else
+            echo "Changeset found, skipping changeset creation";
+          fi
+
+        env:
+          BASE_REF: ${{github.event.pull_request.base.ref}}
+          DEPENDENCY_NAMES: ${{ steps.metadata.outputs.dependency-names }}
+          PREVIOUS_VERSION: ${{ steps.metadata.outputs.previous-version }}
+          NEW_VERSION: ${{ steps.metadata.outputs.new-version }}
+
+      # - name: Approve a PR if not already approved
+      #   shell: bash
+      #   run: |
+      #     gh pr checkout "$PR_URL"
+      #     if [ "$(gh pr status --json reviewDecision -q .currentBranch.reviewDecision)" != "APPROVED" ];
+      #     then gh pr review --approve "$PR_URL"
+      #     else echo "PR already approved, skipping additional approvals to minimize emails/notification noise.";
+      #     fi
+      #   env:
+      #     PR_URL: ${{github.event.pull_request.html_url}}
+      #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      # - name: Enable auto-merge for Dependabot PRs
+      #   if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
+      #   run: gh pr merge --auto --squash --merge "$PR_URL"
+      #   env:
+      #     PR_URL: ${{github.event.pull_request.html_url}}
+      #     GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
