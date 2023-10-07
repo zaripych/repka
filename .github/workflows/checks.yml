@@ -1,8 +1,17 @@
 name: Checks
 
-on: [pull_request]
+on:
+  pull_request:
+    paths-ignore:
+      - '.github/**'
+      - '.changeset/**'
+      - '.vscode/**'
+      - README.md
+      - LICENSE
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quick-checks:
@@ -29,6 +38,7 @@ jobs:
 
   release:
     name: Release Snapshot
+    if: ${{ github.actor != 'dependabot[bot]' }}
     uses: ./.github/workflows/run-release.yml
     needs: [quick-checks]
     with:

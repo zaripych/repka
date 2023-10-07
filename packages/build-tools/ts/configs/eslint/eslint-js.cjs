@@ -1,3 +1,5 @@
+const { syncEslintConfigHelpers } = require('./eslintConfigHelpers.gen.cjs');
+
 module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
@@ -15,9 +17,10 @@ module.exports = {
       'error',
       {
         tags: ['line', 'dedent', 'markdown'],
-        functions: ['dedent', 'line'],
+        functions: ['dedent', 'line', 'markdown'],
         selectors: [],
         comments: [],
+        indent: syncEslintConfigHelpers().indent,
       },
     ],
   },
