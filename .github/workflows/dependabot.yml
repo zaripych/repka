@@ -33,8 +33,7 @@ jobs:
             git checkout -B $HEAD_REF origin/$HEAD_REF
 
             # Create a changeset which is just an .md file:
-            echo "
-            ---
+            echo "---
             '@repka-kit/ts': patch
             ---
             
