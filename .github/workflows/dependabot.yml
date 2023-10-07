@@ -3,7 +3,7 @@ name: Dependabot
 on:
   pull_request:
     branches:
-      - dependabot/*
+      - dependabot/**
 
 permissions:
   contents: write
@@ -39,6 +39,8 @@ jobs:
             deps: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION
             " > .changeset/dependabot-$(date +%s).md
 
+            # See this on how to push changes to the PR branch:
+            # https://stackoverflow.com/questions/57921401/push-to-origin-from-github-action/58393457#58393457
             git add .changeset
             
             git config --global user.email "$COMMIT_AUTHOR_EMAIL"
