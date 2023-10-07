@@ -44,13 +44,14 @@ jobs:
             git config --global user.name "$COMMIT_AUTHOR_NAME"
 
             git commit -m "chore: update $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION"
-            git push
+            git push HEAD:$HEAD_REF
           else
             echo "Changeset found, skipping changeset creation";
           fi
 
         env:
-          BASE_REF: ${{github.event.pull_request.base.ref}}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
           DEPENDENCY_NAMES: ${{ steps.metadata.outputs.dependency-names }}
           PREVIOUS_VERSION: ${{ steps.metadata.outputs.previous-version }}
           NEW_VERSION: ${{ steps.metadata.outputs.new-version }}
