@@ -1,5 +1,5 @@
 import virtual from '@rollup/plugin-virtual';
-import { escapeRegExp, isTruthy } from '@utils/ts';
+import { isTruthy } from '@utils/ts';
 import type { OutputOptions, Plugin, RollupWatchOptions } from 'rollup';
 
 import type { PackageBinEntryPoint } from '../config/nodePackageConfig';
@@ -32,7 +32,8 @@ function buildShebangBinsPlugins(entryPoints: PackageBinEntryPoint[]) {
       `../${binName}.js`,
       {
         virtualModuleLocation: `./src/bin/${binName}.bundled.ts`,
-        proxySourceCode: `export * from "${`../${binName}.js`}";`,
+        proxySourceCode: `#!/usr/bin/env node
+export * from "${`../${binName}.js`}";`,
       },
     ])
   );
@@ -76,6 +77,7 @@ export function buildShebangBinsBundleConfig({
     return {
       bundledEsmBins: [],
       bundledEsmBinsInputs: {},
+      bundledEsmBinsPlugins: [],
       binConfigs: [],
     };
   }
@@ -86,25 +88,22 @@ export function buildShebangBinsBundleConfig({
 
   const standard = defaultRollupConfig();
 
-  const replaceExistingShebangPrefix = rollupRemoveShebangPlugin({
-    include: [
-      ...binEntryPoints.map((entry) => new RegExp(escapeRegExp(entry.binName))),
-    ],
+  const removeExistingShebangPrefix = rollupRemoveShebangPlugin({
+    include: binEntryPoints.flatMap((entry) => `**/${entry.binName}.*`),
   });
 
   const shared = {
     ...standard,
-    plugins: [...plugins, standard.plugins, replaceExistingShebangPrefix],
+    plugins: [...plugins, standard.plugins],
   };
 
   const bundledBinOutput: OutputOptions = {
     ...(shared.output as OutputOptions),
     dir: './dist/bin',
-    plugins: [rollupMakeExecutablePlugin()],
+    plugins: [rollupMakeExecutablePlugin(), removeExistingShebangPrefix],
   };
 
   const cjsBins = binEntryPoints.filter((entry) => entry.format === 'cjs');
-
   const esmBins = binEntryPoints.filter((entry) => entry.format === 'esm');
 
   const banner = `#!/usr/bin/env node`;
@@ -118,7 +117,7 @@ export function buildShebangBinsBundleConfig({
         format: 'cjs',
         entryFileNames: `[name].cjs`,
         chunkFileNames: `chunk.[hash].cjs`,
-        banner,
+        banner: (chunk) => (chunk.isEntry ? banner : ''),
       },
     ],
   };
@@ -135,7 +134,7 @@ export function buildShebangBinsBundleConfig({
         format: 'esm',
         entryFileNames: `[name].mjs`,
         chunkFileNames: `chunk.[hash].mjs`,
-        banner,
+        banner: (chunk) => (chunk.isEntry ? banner : ''),
       },
     ],
   };
@@ -152,6 +151,7 @@ export function buildShebangBinsBundleConfig({
      * Entry points for the above bins to be merged with main entry points
      */
     bundledEsmBinsInputs,
+    bundledEsmBinsPlugins: [removeExistingShebangPrefix],
     /**
      * Extra rollup configs that represent following:
      * - CJS output that is not part of the main bundle

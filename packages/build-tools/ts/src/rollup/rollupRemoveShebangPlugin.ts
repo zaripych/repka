@@ -12,8 +12,7 @@ export const rollupRemoveShebangPlugin = (opts?: {
   return {
     name: 'removeShebang',
     renderChunk(code, chunk, options) {
-      const id = chunk.fileName;
-      if (!filter(id)) return null;
+      if (!filter(chunk.fileName)) return null;
 
       const sourceMaps = Boolean(options.sourcemap);
 

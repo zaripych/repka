@@ -123,11 +123,15 @@ export function buildForNode(opts?: BuildOpts) {
           combineDefaultRollupConfigBuildOpts(baseOpts, opts)
         );
 
-      const { binConfigs, bundledEsmBinsInputs, binEntryPoints } =
-        buildShebangBinsBundleConfig({
-          config,
-          defaultRollupConfig: defaultConfig,
-        });
+      const {
+        binConfigs,
+        bundledEsmBinsInputs,
+        bundledEsmBinsPlugins,
+        binEntryPoints,
+      } = buildShebangBinsBundleConfig({
+        config,
+        defaultRollupConfig: defaultConfig,
+      });
 
       const extraConfigs = opts?.extraRollupConfigs
         ? await Promise.resolve(
@@ -178,6 +182,7 @@ export function buildForNode(opts?: BuildOpts) {
               packageJson: opts?.outputPackageJson,
             }),
             ...(opts?.copy || []).map((opts) => rollupPluginCopy(opts)),
+            ...bundledEsmBinsPlugins,
           ]),
         };
       };
