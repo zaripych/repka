@@ -1,9 +1,10 @@
 import virtual from '@rollup/plugin-virtual';
-import { isTruthy } from '@utils/ts';
+import { escapeRegExp, isTruthy } from '@utils/ts';
 import type { OutputOptions, Plugin, RollupWatchOptions } from 'rollup';
 
 import type { PackageBinEntryPoint } from '../config/nodePackageConfig';
 import { rollupMakeExecutablePlugin } from './rollupMakeExecutablePlugin';
+import { rollupRemoveShebangPlugin } from './rollupRemoveShebangPlugin';
 import type { RollupOptionsBuilderOpts } from './standardRollupConfig';
 
 function buildBinInputs(
@@ -85,9 +86,15 @@ export function buildShebangBinsBundleConfig({
 
   const standard = defaultRollupConfig();
 
+  const replaceExistingShebangPrefix = rollupRemoveShebangPlugin({
+    include: [
+      ...binEntryPoints.map((entry) => new RegExp(escapeRegExp(entry.binName))),
+    ],
+  });
+
   const shared = {
     ...standard,
-    plugins: [...plugins, standard.plugins],
+    plugins: [...plugins, standard.plugins, replaceExistingShebangPrefix],
   };
 
   const bundledBinOutput: OutputOptions = {
