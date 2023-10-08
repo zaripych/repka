@@ -21,7 +21,6 @@ export function transformPackageJson(opts: {
   } = opts;
 
   const main = entryPoints.find((entry) => entry.chunkName === 'main');
-  assert(!!main);
 
   return (packageJson: Record<string, JsonType>): Record<string, JsonType> => {
     const keys = [
@@ -62,39 +61,43 @@ export function transformPackageJson(opts: {
       ...Object.entries(ignoredBinEntryPoints || {}),
     ]);
 
-    const mainOutput = './' + posix.relative('./dist', main.outputPath);
+    const mainOutput = main
+      ? './' + posix.relative('./dist', main.outputPath)
+      : undefined;
+
+    const exports =
+      entryPoints.length === 1
+        ? Object.entries(ignoredEntryPoints || {}).length === 0
+          ? mainOutput
+          : {
+              ...ignoredEntryPoints,
+              ...(mainOutput && {
+                '.': mainOutput,
+              }),
+            }
+        : entryPoints.reduce(
+            (acc, entry) => ({
+              ...acc,
+              [entry.entryPoint]:
+                './' + posix.relative('./dist', entry.outputPath),
+            }),
+            {
+              ...opts.ignoredEntryPoints,
+            }
+          );
 
     const next = {
       name,
       version,
       type,
       ...rest,
-      ...('main' in packageJson && {
-        main: mainOutput,
-      }),
+      ...('main' in packageJson &&
+        mainOutput && {
+          main: mainOutput,
+        }),
       ...(Object.keys(bin).length > 0 && { bin }),
-      ...(entryPoints.length === 1
-        ? {
-            exports:
-              Object.entries(ignoredEntryPoints || {}).length === 0
-                ? mainOutput
-                : {
-                    ...ignoredEntryPoints,
-                    '.': mainOutput,
-                  },
-          }
-        : {
-            exports: entryPoints.reduce(
-              (acc, entry) => ({
-                ...acc,
-                [entry.entryPoint]:
-                  './' + posix.relative('./dist', entry.outputPath),
-              }),
-              {
-                ...opts.ignoredEntryPoints,
-              }
-            ),
-          }),
+      ...((typeof exports === 'string' ||
+        (exports && Object.entries(exports).length > 0)) && { exports }),
     };
 
     return next;

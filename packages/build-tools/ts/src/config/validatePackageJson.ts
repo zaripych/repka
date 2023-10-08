@@ -1,3 +1,4 @@
+import { line } from '../markdown/line';
 import type { PackageJson } from '../package-json/packageJson';
 
 export function validatePackageJson(packageJson: PackageJson) {
@@ -15,10 +16,15 @@ export function validatePackageJson(packageJson: PackageJson) {
   }
   const exports = packageJson.exports;
   if (!exports) {
-    throw new Error(
-      '"exports" in package.json should be defined, for starters you can point it' +
-        ' to your main entry point; ie "./src/index.ts"'
-    );
+    if (!packageJson.bin && !packageJson.main) {
+      throw new Error(
+        line`
+          "exports" in package.json should be defined, for starters you can
+          point it to your main entry point; ie "./src/index.ts".
+          Alternatively, you can also define "bin" or "main" in package.json.
+        `
+      );
+    }
   }
   if (packageJson.typings) {
     throw new Error(
@@ -26,10 +32,14 @@ export function validatePackageJson(packageJson: PackageJson) {
     );
   }
   const types = packageJson.types;
-  if (!types) {
+  if (!types && (exports || packageJson.main)) {
     throw new Error(
-      `"types" in package.json should be defined, point it` +
-        ` directly to your TypeScript files; ie "./src/index.ts"`
+      line`
+        "types" in package.json should be defined, point it to your
+        TypeScript files; ie "./src/index.ts". This would allow your
+        packages to be imported in other TypeScript packages in the
+        monorepo.
+      `
     );
   }
   return {

@@ -198,7 +198,11 @@ export function packageInstallTemplate(opts: PackageInstallTemplateOpts) {
       const tasks = `/(${buildTasks.join('|')})/`;
       await spawnOutputConditional(
         packageManager,
-        ['-r', process.platform === 'win32' ? `"${tasks}"` : tasks],
+        [
+          '--filter',
+          '{.}...',
+          process.platform === 'win32' ? `"${tasks}"` : tasks,
+        ],
         {
           cwd: packageRootDirectory,
           shell: process.platform === 'win32',

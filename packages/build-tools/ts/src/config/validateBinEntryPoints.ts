@@ -1,5 +1,5 @@
 import { readFile, stat } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 
 import { logger } from '../logger/logger';
 import type { PackageBinEntryPoint } from './nodePackageConfig';
@@ -16,7 +16,7 @@ export async function validateBinEntryPoints({
   const binEntries =
     typeof bin === 'string' && packageName
       ? Object.entries({
-          [packageName]: bin,
+          [basename(packageName)]: bin,
         })
       : typeof bin === 'object'
       ? Object.entries(bin)

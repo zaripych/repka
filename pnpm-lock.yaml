@@ -192,6 +192,18 @@ importers:
         version: 3.10.0
     publishDirectory: dist
 
+  packages/playground/bin-only:
+    devDependencies:
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
+      '@testing-tools/packages':
+        specifier: workspace:*
+        version: link:../../testing-tools/packages
+      '@utils/ts':
+        specifier: workspace:*
+        version: link:../../utils/ts
+
   packages/playground/todo-list-cli:
     devDependencies:
       '@playground/todo-list-store':
