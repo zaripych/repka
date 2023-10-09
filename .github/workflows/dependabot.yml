@@ -10,7 +10,7 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    # if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
       - name: Fetch Dependabot Metadata
         id: metadata
@@ -72,6 +72,16 @@ jobs:
           COMMIT_AUTHOR_NAME: zaripych
           PR_URL: ${{github.event.pull_request.html_url}}
 
+      - name: Enable auto-merge for Dependabot PRs
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
+        run: |
+          gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          # @note Using Personal Access Token here to ensure
+          # the jobs in the main branch trigger Check workflows.
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+
       - name: Approve a PR if not already approved
         shell: bash
         run: |
@@ -83,14 +93,4 @@ jobs:
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           # TODO: Do we need a PAT here?
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
-
-      - name: Enable auto-merge for Dependabot PRs
-        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
-        run: |
-          gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          # @note Using Personal Access Token here to ensure
-          # the jobs in the main branch trigger Check workflows.
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
