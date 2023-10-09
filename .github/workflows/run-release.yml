@@ -89,3 +89,4 @@ jobs:
           # the checks wouldn't be triggered otherwise
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          HUSKY: 0
