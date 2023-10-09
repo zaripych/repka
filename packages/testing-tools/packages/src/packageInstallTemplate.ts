@@ -11,8 +11,8 @@ import { basename, join, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 
-import { spawnOutputConditional } from '@build-tools/ts';
-import { logger } from '@build-tools/ts';
+import { spawnOutputConditional } from '@utils/child-process';
+import { logger } from '@utils/logger';
 import { hasOne, onceAsync } from '@utils/ts';
 
 import { getTestConfig } from './getTestConfig';

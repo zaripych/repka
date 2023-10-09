@@ -233,9 +233,39 @@ importers:
       '@jest/globals':
         specifier: 29.7.0
         version: 29.7.0
+      '@utils/child-process':
+        specifier: workspace:*
+        version: link:../../utils/child-process
+      '@utils/logger':
+        specifier: workspace:*
+        version: link:../../utils/logger
       '@utils/ts':
         specifier: workspace:*
         version: link:../../utils/ts
+
+  packages/utils/child-process:
+    devDependencies:
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
+      '@utils/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@utils/ts':
+        specifier: workspace:*
+        version: link:../ts
+      utility-types:
+        specifier: 3.10.0
+        version: 3.10.0
+
+  packages/utils/logger:
+    devDependencies:
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
+      '@utils/ts':
+        specifier: workspace:*
+        version: link:../ts
 
   packages/utils/ts: {}
 

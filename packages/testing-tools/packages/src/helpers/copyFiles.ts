@@ -17,7 +17,7 @@ import {
   resolve,
 } from 'node:path';
 
-import { logger } from '@build-tools/ts';
+import { logger } from '@utils/logger';
 import fg from 'fast-glob';
 
 export type CopyOptsExtra = Pick<
