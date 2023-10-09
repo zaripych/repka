@@ -20,7 +20,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release-checks:
-    if: ${{ inputs.checks == null || inputs.checks == true }}
+    if: ${{ github.event.inputs.checks == '' || inputs.checks == true }}
     name: ${{ matrix.runs-on }}
     uses: ./.github/workflows/run-checks.yml
     strategy:
@@ -30,7 +30,7 @@ jobs:
       runs-on: ${{ matrix.runs-on }}
 
   release:
-    if: ${{ inputs.release == null || inputs.release == true }}
+    if: ${{ github.event.inputs.release == '' || inputs.release == true }}
     name: Release
     uses: ./.github/workflows/run-release.yml
     needs: [release-checks]
