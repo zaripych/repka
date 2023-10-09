@@ -28,4 +28,4 @@ jobs:
       # as was observed with this PR
       # https://github.com/zaripych/repka/pull/34
       # the checks wouldn't be triggered otherwise
-      GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+      PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
