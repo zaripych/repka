@@ -30,7 +30,7 @@ jobs:
       runs-on: ${{ matrix.runs-on }}
 
   release:
-    if: ${{ github.event.inputs.release == '' || inputs.release == true }}
+    if: ${{ github.event.inputs.release == '' || (always() && inputs.release == true) }}
     name: Release
     uses: ./.github/workflows/run-release.yml
     needs: [release-checks]
