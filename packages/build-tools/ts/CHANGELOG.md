@@ -1,11 +1,55 @@
 # @repka-kit/ts
 
+## 1.0.4
+
+### Patch Changes
+
+- [#29](https://github.com/zaripych/repka/pull/29)
+  [`b993809`](https://github.com/zaripych/repka/commit/b993809d04de25a2c6dc6621a0f5b1f748c28922)
+  Thanks [@dependabot](https://github.com/apps/dependabot)! - deps: update
+  @types/yargs from 17.0.25 to 17.0.26
+
+- [#36](https://github.com/zaripych/repka/pull/36)
+  [`0c1921b`](https://github.com/zaripych/repka/commit/0c1921bb991624bad59b107c08fa2747da787d23)
+  Thanks [@dependabot](https://github.com/apps/dependabot)! - deps: update
+  @types/node from 20.7.0 to 20.8.3
+
+- [#32](https://github.com/zaripych/repka/pull/32)
+  [`98f2552`](https://github.com/zaripych/repka/commit/98f2552a4f1e43b13f383df302b62a2e3375c889)
+  Thanks [@dependabot](https://github.com/apps/dependabot)! - deps: update
+  esbuild from 0.19.3 to 0.19.4
+
+- [#30](https://github.com/zaripych/repka/pull/30)
+  [`ba8c1d8`](https://github.com/zaripych/repka/commit/ba8c1d8a56e855057ddfb4805447e86f8761eb67)
+  Thanks [@dependabot](https://github.com/apps/dependabot)! - deps: update
+  eslint-plugin-jest from 27.4.0 to 27.4.2
+
+- [#35](https://github.com/zaripych/repka/pull/35)
+  [`6e42fe0`](https://github.com/zaripych/repka/commit/6e42fe065fa45ebd265fb14c89df365b4d8c28cf)
+  Thanks [@dependabot](https://github.com/apps/dependabot)! - deps: update
+  rollup from 3.29.3 to 4.0.2
+
+- [#27](https://github.com/zaripych/repka/pull/27)
+  [`6da2cef`](https://github.com/zaripych/repka/commit/6da2cef0af79817745091b172bd07c02f60679e6)
+  Thanks [@zaripych](https://github.com/zaripych)! - chore: simulated changes
+
+- [#37](https://github.com/zaripych/repka/pull/37)
+  [`7a3d137`](https://github.com/zaripych/repka/commit/7a3d1370e9929ec9602960efa014b82df589ca75)
+  Thanks [@zaripych](https://github.com/zaripych)! - fix: this pr allows
+  packages to be bin-only without exports or types entries
+
+- [#27](https://github.com/zaripych/repka/pull/27)
+  [`6da2cef`](https://github.com/zaripych/repka/commit/6da2cef0af79817745091b172bd07c02f60679e6)
+  Thanks [@zaripych](https://github.com/zaripych)! - fix: indent for
+  unicorn/template-indent is determined from prettier
+
 ## 1.0.3
 
 ### Patch Changes
 
 - [`5a916a7`](https://github.com/zaripych/repka/commit/5a916a744aaa35ea2eb30924e1d8bc0cbab5dc3f)
-  Thanks [@zaripych](https://github.com/zaripych)! - dependencies: upgrade most of the dependencies
+  Thanks [@zaripych](https://github.com/zaripych)! - dependencies: upgrade most
+  of the dependencies
 
 ## 1.0.2
 
