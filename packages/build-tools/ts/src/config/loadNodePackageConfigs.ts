@@ -67,7 +67,10 @@ async function tryBuildingPackageConfig(
   const entryPointsBuildResult = await deps.buildEntryPoints();
   const binEntryPointsBuildResult = await deps.buildBinEntryPoints();
 
-  if (entryPointsBuildResult.entryPoints.length === 0) {
+  if (
+    entryPointsBuildResult.entryPoints.length === 0 &&
+    binEntryPointsBuildResult.binEntryPoints.length === 0
+  ) {
     throw new Error(
       "The package doesn't have any entry points, nothing to bundle!"
     );

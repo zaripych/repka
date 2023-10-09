@@ -7,7 +7,8 @@
     "target": "esnext",
     "moduleResolution": "node",
     "incremental": true,
-    "composite": true
+    "composite": true,
+    "noUncheckedIndexedAccess": false
   },
   "include": ["src", "sub-repo/src"],
   "exclude": ["src/*.d.ts"]

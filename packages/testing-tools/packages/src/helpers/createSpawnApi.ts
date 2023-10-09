@@ -6,8 +6,8 @@ import type {
   SpawnOptionsWithExtra,
   SpawnResultOpts,
   SpawnResultReturn,
-} from '@build-tools/ts';
-import { spawnResult as spawnResultCore } from '@build-tools/ts';
+} from '@utils/child-process';
+import { spawnResult as spawnResultCore } from '@utils/child-process';
 import { captureStackTrace, escapeRegExp } from '@utils/ts';
 
 import { searchAndReplaceTextTransform } from './replaceTextInFiles';

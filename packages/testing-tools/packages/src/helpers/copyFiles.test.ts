@@ -1,5 +1,5 @@
-import { spawnResult } from '@build-tools/ts';
 import { expect, it, jest } from '@jest/globals';
+import { spawnResult } from '@utils/child-process';
 import fg from 'fast-glob';
 import { access, readlink, symlink, writeFile } from 'fs/promises';
 import { mkdir } from 'fs/promises';

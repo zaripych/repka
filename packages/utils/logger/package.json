@@ -1,5 +1,5 @@
 {
-  "name": "@testing-tools/packages",
+  "name": "@utils/logger",
   "version": "0.0.0-development",
   "private": true,
   "type": "module",
@@ -7,16 +7,11 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "lint": "repka lint",
-    "test": "repka test"
+    "lint": "repka lint"
   },
-  "dependencies": {
-    "fast-glob": "3.3.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@jest/globals": "29.7.0",
-    "@utils/child-process": "workspace:*",
-    "@utils/logger": "workspace:*",
     "@utils/ts": "workspace:*"
   }
 }
