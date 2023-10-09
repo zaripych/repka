@@ -195,14 +195,23 @@ importers:
         version: 3.10.0
     publishDirectory: dist
 
+  packages/playground/bin-only:
+    devDependencies:
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
+      '@testing-tools/packages':
+        specifier: workspace:*
+        version: link:../../testing-tools/packages
+      '@utils/ts':
+        specifier: workspace:*
+        version: link:../../utils/ts
+
   packages/playground/todo-list-cli:
     devDependencies:
       '@playground/todo-list-store':
         specifier: workspace:*
         version: link:../todo-list-store
-      '@repka-kit/ts':
-        specifier: workspace:*
-        version: link:../../build-tools/ts
       '@testing-tools/packages':
         specifier: workspace:*
         version: link:../../testing-tools/packages
@@ -216,11 +225,7 @@ importers:
         specifier: 4.1.5
         version: 4.1.5
 
-  packages/playground/todo-list-store:
-    devDependencies:
-      '@repka-kit/ts':
-        specifier: workspace:*
-        version: link:../../build-tools/ts
+  packages/playground/todo-list-store: {}
 
   packages/testing-tools/packages:
     dependencies:
@@ -231,9 +236,39 @@ importers:
       '@jest/globals':
         specifier: 29.7.0
         version: 29.7.0
+      '@utils/child-process':
+        specifier: workspace:*
+        version: link:../../utils/child-process
+      '@utils/logger':
+        specifier: workspace:*
+        version: link:../../utils/logger
       '@utils/ts':
         specifier: workspace:*
         version: link:../../utils/ts
+
+  packages/utils/child-process:
+    devDependencies:
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
+      '@utils/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@utils/ts':
+        specifier: workspace:*
+        version: link:../ts
+      utility-types:
+        specifier: 3.10.0
+        version: 3.10.0
+
+  packages/utils/logger:
+    devDependencies:
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
+      '@utils/ts':
+        specifier: workspace:*
+        version: link:../ts
 
   packages/utils/ts: {}
 

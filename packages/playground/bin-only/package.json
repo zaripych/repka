@@ -1,0 +1,17 @@
+{
+  "name": "@playground/bin-only",
+  "version": "0.0.0-development",
+  "private": true,
+  "type": "module",
+  "bin": "./src/bin/program.ts",
+  "scripts": {
+    "build": "repka build:node",
+    "lint": "repka lint"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@jest/globals": "29.7.0",
+    "@testing-tools/packages": "workspace:*",
+    "@utils/ts": "workspace:*"
+  }
+}

@@ -1,4 +1,4 @@
-import { spawnOutputConditional } from '@build-tools/ts';
+import { spawnOutputConditional } from '@utils/child-process';
 import { UnreachableError } from '@utils/ts';
 
 export type SupportedPackageManagers =

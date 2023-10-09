@@ -4,7 +4,7 @@ import { basename, join } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 
-import { logger } from '@build-tools/ts';
+import { logger } from '@utils/logger';
 import { onceAsync } from '@utils/ts';
 import fg from 'fast-glob';
 
