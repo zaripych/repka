@@ -89,4 +89,6 @@ jobs:
           # the checks wouldn't be triggered otherwise
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB || secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # @note see prettier.config.cjs for more information
+          CHANGESETS_VERSION: 1
           HUSKY: 0

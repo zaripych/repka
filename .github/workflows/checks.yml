@@ -39,4 +39,3 @@ jobs:
       snapshot: true
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      #PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
