@@ -4,9 +4,9 @@
   "private": true,
   "description": "Based of fork of dts-bundle-generator by @timokov",
   "type": "module",
-  "exports": "./dist/index.js",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "exports": "./src/index.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "scripts": {
     "build:tools": "tsx ./build.ts",
     "lint": "echo \"No linting in this package! It's linted via TypeScript as part of @repka/ts package.\""
