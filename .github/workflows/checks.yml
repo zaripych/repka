@@ -2,6 +2,12 @@ name: Checks
 
 on:
   pull_request:
+    paths-ignore:
+      - '.github/**'
+      - '.changeset/**'
+      - '.vscode/**'
+      - README.md
+      - LICENSE
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -39,3 +45,4 @@ jobs:
       snapshot: true
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
