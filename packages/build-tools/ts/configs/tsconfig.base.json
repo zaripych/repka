@@ -34,7 +34,7 @@
     "strict": true,
     "stripInternal": true,
     "useUnknownInCatchVariables": true,
-    "noErrorTruncation": true,
+    // "noErrorTruncation": true,
     "composite": true,
     "incremental": true
     // "exactOptionalPropertyTypes": true,
