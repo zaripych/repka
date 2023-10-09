@@ -27,8 +27,7 @@ runs:
       uses: actions/setup-node@v3
       with:
         registry-url: 'https://registry.npmjs.org'
-        node-version:
-          ${{ inputs.node-version || steps.node-version.outputs.version }}
+        node-version: ${{ inputs.node-version || steps.node-version.outputs.version }}
 
     - uses: pnpm/action-setup@v2
       name: Install pnpm

@@ -19,7 +19,11 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PAT_GH_TOKEN }}
+          # @note Using Personal Access Token here to ensure
+          # the jobs below trigger Check workflows when we commit
+          # changesets to the PR branch, because Checks are required
+          # for the PR to be merged.
+          token: ${{ secrets.PAT_GITHUB }}
 
       - name: Add a changeset
         shell: bash
@@ -78,7 +82,8 @@ jobs:
           fi
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{ secrets.PAT_GH_TOKEN }}
+          # TODO: Do we need a PAT here?
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
 
       - name: Enable auto-merge for Dependabot PRs
         if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
@@ -86,4 +91,6 @@ jobs:
           gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{ secrets.PAT_GH_TOKEN }}
+          # @note Using Personal Access Token here to ensure
+          # the jobs in the main branch trigger Check workflows.
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}

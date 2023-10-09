@@ -18,6 +18,8 @@ on:
     secrets:
       NPM_TOKEN:
         required: true
+      PAT_GITHUB:
+        required: true
 
 jobs:
   release:
@@ -80,5 +82,10 @@ jobs:
           version: pnpm run ci:version
           publish: pnpm changeset publish
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GH_TOKEN }}
+          # @note Using Personal Access Token here to ensure
+          # the creation of the PR triggers Checks workflows
+          # as was observed with this PR
+          # https://github.com/zaripych/repka/pull/34
+          # the checks wouldn't be triggered otherwise
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

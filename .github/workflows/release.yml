@@ -23,3 +23,9 @@ jobs:
     needs: [release-checks]
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # @note Using Personal Access Token here to ensure
+      # the creation of the PR triggers Checks workflows
+      # as was observed with this PR
+      # https://github.com/zaripych/repka/pull/34
+      # the checks wouldn't be triggered otherwise
+      GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
