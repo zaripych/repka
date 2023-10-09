@@ -1,6 +1,17 @@
 name: Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      checks:
+        type: boolean
+        required: false
+        default: true
+      release:
+        type: boolean
+        required: false
+        default: true
+
   push:
     branches:
       - main
@@ -9,6 +20,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release-checks:
+    if: ${{ github.event.inputs.checks || true }}
     name: ${{ matrix.runs-on }}
     uses: ./.github/workflows/run-checks.yml
     strategy:
@@ -18,6 +30,7 @@ jobs:
       runs-on: ${{ matrix.runs-on }}
 
   release:
+    if: ${{ github.event.inputs.release || true }}
     name: Release
     uses: ./.github/workflows/run-release.yml
     needs: [release-checks]
