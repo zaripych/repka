@@ -27,7 +27,7 @@
     "@repka-kit/ts": "workspace:*",
     "husky": "8.0.3"
   },
-  "packageManager": "pnpm@8.7.1",
+  "packageManager": "pnpm@8.9.0",
   "engines": {
     "node": "18",
     "npm": "👻 please-use-pnpm 👻",
