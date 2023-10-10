@@ -73,6 +73,19 @@ jobs:
         shell: bash
         run: pnpm -r --filter @repka-kit/ts... "/build:tools|declarations/"
 
+      - name: PAT Test
+        if: ${{ ! inputs.snapshot }}
+        shell: bash
+        run: |
+          if [[ -n "$PAT_GITHUB" ]]; then
+            echo "PAT_GITHUB is set"
+          else
+            echo "PAT_GITHUB is not set"
+            exit 1
+          fi
+        env:
+          PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
+
       - name: Create and Publish Versions
         if: ${{ ! inputs.snapshot }}
         uses: changesets/action@v1
@@ -87,7 +100,7 @@ jobs:
           # as was observed with this PR
           # https://github.com/zaripych/repka/pull/34
           # the checks wouldn't be triggered otherwise
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           # @note see prettier.config.cjs for more information
           CHANGESETS_VERSION: 1
