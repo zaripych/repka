@@ -3,6 +3,8 @@ description: 'Checkout the code and run pnpm install'
 author: 'zaripych'
 
 inputs:
+  token:
+    description: GitHub token to use for checkout, default to the GITHUB_TOKEN secret.
   node-version:
     description:
       Version of Node.js to use, default to the version specified in the
@@ -16,6 +18,7 @@ runs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        token: ${{ inputs.token || github.token }}
 
     - name: Get Node Version
       id: node-version

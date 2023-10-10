@@ -1,4 +1,4 @@
-name: Release
+name: Main Push
 
 on:
   workflow_dispatch:
@@ -7,6 +7,7 @@ on:
         type: boolean
         required: false
         default: true
+
       release:
         type: boolean
         required: false
@@ -22,7 +23,7 @@ jobs:
   release-checks:
     if: ${{ github.event.inputs.checks == '' || inputs.checks == true }}
     name: ${{ matrix.runs-on }}
-    uses: ./.github/workflows/run-checks.yml
+    uses: ./.github/workflows/call-checks.yml
     strategy:
       matrix:
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
@@ -32,7 +33,7 @@ jobs:
   release:
     if: ${{ !failure() && !cancelled() && (github.event.inputs.release == '' || inputs.release == true) }}
     name: Release
-    uses: ./.github/workflows/run-release.yml
+    uses: ./.github/workflows/call-release.yml
     needs: [release-checks]
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,4 +1,4 @@
-name: Checks
+name: Release
 
 on:
   workflow_call:
@@ -31,6 +31,7 @@ jobs:
       - name: Checkout And Install
         uses: zaripych/repka/.github/actions/checkout-and-install@checkout-and-install-latest
         with:
+          token: ${{ secrets.PAT_GITHUB || secrets.GITHUB_TOKEN }}
           node-version: ${{ inputs.node-version }}
 
       - id: create-and-publish-snapshot
@@ -100,7 +101,7 @@ jobs:
           # as was observed with this PR
           # https://github.com/zaripych/repka/pull/34
           # the checks wouldn't be triggered otherwise
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB || secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           # @note see prettier.config.cjs for more information
           CHANGESETS_VERSION: 1

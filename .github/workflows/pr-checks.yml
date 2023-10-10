@@ -2,6 +2,12 @@ name: Checks
 
 on:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      checks:
+        type: boolean
+        required: false
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -9,8 +15,9 @@ concurrency:
 
 jobs:
   quick-checks:
+    if: ${{ github.event.inputs.checks == '' || inputs.checks == true }}
     name: ${{ matrix.runs-on }}
-    uses: ./.github/workflows/run-checks.yml
+    uses: ./.github/workflows/call-checks.yml
     strategy:
       matrix:
         runs-on: [ubuntu-latest]
@@ -20,8 +27,9 @@ jobs:
       runs-on: ${{ matrix.runs-on }}
 
   other-platform-checks:
+    if: ${{ github.event.inputs.checks == '' || inputs.checks == true }}
     name: ${{ matrix.runs-on }}
-    uses: ./.github/workflows/run-checks.yml
+    uses: ./.github/workflows/call-checks.yml
     strategy:
       matrix:
         runs-on: [windows-latest, macos-latest]
@@ -29,13 +37,3 @@ jobs:
       lint: false
       changed-only: true
       runs-on: ${{ matrix.runs-on }}
-
-  release:
-    name: Release Snapshot
-    if: ${{ github.actor != 'dependabot[bot]' }}
-    uses: ./.github/workflows/run-release.yml
-    needs: [quick-checks]
-    with:
-      snapshot: true
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
