@@ -14,12 +14,12 @@ importers:
       '@build-tools/ts':
         specifier: workspace:@repka-kit/ts@*
         version: link:packages/build-tools/ts
-      '@changesets/changelog-github':
-        specifier: 0.4.8
-        version: 0.4.8
       '@changesets/cli':
         specifier: 2.26.2
         version: 2.26.2
+      '@repka-kit/changeset-changelog':
+        specifier: workspace:*
+        version: link:packages/changeset/changelog
       '@repka-kit/ts':
         specifier: workspace:*
         version: link:packages/build-tools/ts
@@ -194,6 +194,15 @@ importers:
         specifier: 3.10.0
         version: 3.10.0
     publishDirectory: dist
+
+  packages/changeset/changelog:
+    devDependencies:
+      '@changesets/changelog-github':
+        specifier: 0.4.8
+        version: 0.4.8
+      '@changesets/types':
+        specifier: 5.2.1
+        version: 5.2.1
 
   packages/playground/bin-only:
     devDependencies:
