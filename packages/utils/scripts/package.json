@@ -1,0 +1,18 @@
+{
+  "name": "@repka-kit/scripts",
+  "version": "0.0.0-development",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "publish-snapshot": "./src/bin/publish-snapshot.ts"
+  },
+  "scripts": {
+    "lint": "repka lint"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@utils/child-process": "workspace:*",
+    "@utils/text": "workspace:*",
+    "@utils/ts": "workspace:*"
+  }
+}

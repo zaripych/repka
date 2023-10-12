@@ -16,7 +16,7 @@
     "prepare": "husky install",
     "prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml|yaml)' --write",
     "publish:beta": "pnpm build && pnpm publish -r --tag beta --access public",
-    "publish:snapshot": "pnpm build && pnpm publish -r --tag snapshot --access public",
+    "publish:snapshot": "publish-snapshot",
     "test": "pnpm jest",
     "test:changed": "pnpm jest --integration --changedSince=origin/main"
   },
@@ -24,6 +24,7 @@
     "@build-tools/ts": "workspace:@repka-kit/ts@*",
     "@changesets/cli": "2.26.2",
     "@repka-kit/changeset-changelog": "workspace:*",
+    "@repka-kit/scripts": "workspace:*",
     "@repka-kit/ts": "workspace:*",
     "husky": "8.0.3"
   },

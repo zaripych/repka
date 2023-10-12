@@ -37,7 +37,7 @@ const getReleaseLine: GetReleaseLine = async (
       ? `[${changeset.commit}](https://github.com/${repo}/commit/${changeset.commit})`
       : '';
 
-    return [commitLink, changeset.summary].join(' - ');
+    return ' - ' + [commitLink, changeset.summary].filter(Boolean).join(' - ');
   }
 };
 
