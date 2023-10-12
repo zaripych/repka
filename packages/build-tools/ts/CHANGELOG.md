@@ -1,5 +1,11 @@
 # @repka-kit/ts
 
+## 1.0.5
+
+### Patch Changes
+
+- [#54](https://github.com/zaripych/repka/pull/54) [`7e97d9c`](https://github.com/zaripych/repka/commit/7e97d9c8eb4336adff1ddfcb3d95530e951d0688) Thanks [@zaripych](https://github.com/zaripych)! - fix: allow types in package.json to be undefined
+
 ## 1.0.4
 
 ### Patch Changes
