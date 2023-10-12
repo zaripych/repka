@@ -21,8 +21,9 @@ export async function spawnOutputConditional(
   ...parameters: SpawnParameterMix<
     SpawnResultOpts & {
       /**
-       * By default will output to `stderr` when spawn result failed with an error, when
-       * status code is not zero or when `Logger.logLevel` is `debug`
+       * By default will output to `stderr` when spawn result failed with an
+       * error, when status code is not zero or when `Logger.logLevel` is
+       * `debug`
        */
       shouldOutput?: (result: SpawnResultReturn) => boolean;
     }
@@ -32,7 +33,11 @@ export async function spawnOutputConditional(
   const result = await spawnResult(child, opts);
   const shouldOutput = opts.shouldOutput ?? defaultShouldOutput;
   if (shouldOutput(result)) {
-    logger.error(result.output.join(''));
+    if ('log' in opts && !opts.log) {
+      throw new Error('Expected "log" to be defined');
+    }
+    const log = opts.log ?? ((text: string) => logger.error(text));
+    log(result.output.join(''));
   }
   if (result.error) {
     return Promise.reject(result.error);

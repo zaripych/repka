@@ -1,0 +1,18 @@
+{
+  "name": "@utils/markdown",
+  "version": "0.0.0-development",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "lint": "repka lint"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@jest/globals": "29.7.0",
+    "@utils/child-process": "workspace:*",
+    "dedent": "1.5.1"
+  }
+}

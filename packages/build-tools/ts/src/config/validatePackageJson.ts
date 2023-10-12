@@ -31,23 +31,11 @@ export function validatePackageJson(packageJson: PackageJson) {
       '"typings" in package.json should not be defined, use "types"'
     );
   }
-  const types = packageJson.types;
-  if (!types && (exports || packageJson.main)) {
-    throw new Error(
-      line`
-        "types" in package.json should be defined, point it to your
-        TypeScript files; ie "./src/index.ts". This would allow your
-        packages to be imported in other TypeScript packages in the
-        monorepo.
-      `
-    );
-  }
   return {
     ...packageJson,
     name,
     version,
     type,
     exports,
-    types,
   };
 }

@@ -14,12 +14,15 @@ importers:
       '@build-tools/ts':
         specifier: workspace:@repka-kit/ts@*
         version: link:packages/build-tools/ts
-      '@changesets/changelog-github':
-        specifier: 0.4.8
-        version: 0.4.8
       '@changesets/cli':
         specifier: 2.26.2
         version: 2.26.2
+      '@repka-kit/changeset-changelog':
+        specifier: workspace:*
+        version: link:packages/changeset/changelog
+      '@repka-kit/scripts':
+        specifier: workspace:*
+        version: link:packages/utils/scripts
       '@repka-kit/ts':
         specifier: workspace:*
         version: link:packages/build-tools/ts
@@ -195,6 +198,15 @@ importers:
         version: 3.10.0
     publishDirectory: dist
 
+  packages/changeset/changelog:
+    devDependencies:
+      '@changesets/changelog-github':
+        specifier: 0.4.8
+        version: 0.4.8
+      '@changesets/types':
+        specifier: 5.2.1
+        version: 5.2.1
+
   packages/playground/bin-only:
     devDependencies:
       '@jest/globals':
@@ -262,6 +274,39 @@ importers:
         version: 3.10.0
 
   packages/utils/logger:
+    devDependencies:
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
+      '@utils/ts':
+        specifier: workspace:*
+        version: link:../ts
+
+  packages/utils/markdown:
+    devDependencies:
+      '@jest/globals':
+        specifier: 29.7.0
+        version: 29.7.0
+      '@utils/child-process':
+        specifier: workspace:*
+        version: link:../child-process
+      dedent:
+        specifier: 1.5.1
+        version: 1.5.1
+
+  packages/utils/scripts:
+    devDependencies:
+      '@utils/child-process':
+        specifier: workspace:*
+        version: link:../child-process
+      '@utils/text':
+        specifier: workspace:*
+        version: link:../text
+      '@utils/ts':
+        specifier: workspace:*
+        version: link:../ts
+
+  packages/utils/text:
     devDependencies:
       '@jest/globals':
         specifier: 29.7.0
@@ -2684,7 +2729,6 @@ packages:
     peerDependenciesMeta:
       babel-plugin-macros:
         optional: true
-    dev: false
 
   /deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}

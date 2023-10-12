@@ -1,6 +1,7 @@
 import type { SpawnOptions } from 'node:child_process';
 import { ChildProcess } from 'node:child_process';
 import { spawn } from 'node:child_process';
+import { format } from 'node:util';
 
 import { logger } from '@utils/logger';
 import { captureStackTrace } from '@utils/ts';
@@ -18,6 +19,13 @@ export type SpawnToPromiseOpts = {
    * the process code manually afterwards)
    */
   exitCodes: number[] | 'inherit' | 'any';
+
+  /**
+   * Overrides the default log function (which is `logger.debug`), can be
+   * used to log to a different stream or to silence the output completely.
+   * When set to `undefined` then no logging will be performed.
+   */
+  log?: (text: string) => void | undefined;
 };
 
 type SharedOpts = Pick<SpawnOptions, 'cwd'>;
@@ -77,7 +85,11 @@ export async function spawnToPromise(
 
   const cmd = () => [command, ...args].join(' ');
 
-  logger.debug(['>', cmd()].join(' '), ...(cwd ? [`in ${cwd}`] : []));
+  const log = 'log' in opts ? opts.log : (text: string) => logger.debug(text);
+
+  if (log) {
+    log(format(['>', cmd()].join(' '), ...(cwd ? [`in ${cwd}`] : [])));
+  }
 
   await new Promise<void>((res, rej) =>
     child
