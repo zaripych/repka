@@ -80,7 +80,7 @@
     "js-yaml": "4.1.0",
     "lint-staged": "14.0.1",
     "magic-string": "0.30.4",
-    "prettier": "3.0.3",
+    "prettier": "3.1.0",
     "prompts": "2.4.2",
     "rollup": "4.0.2",
     "rollup-plugin-analyzer": "4.0.0",
