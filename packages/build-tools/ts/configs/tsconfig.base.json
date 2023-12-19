@@ -10,7 +10,9 @@
       // @repka-kit/ts
       "../node_modules/@types",
       "../../../node_modules/@types",
-      "../../../.pnpm/node_modules/@types"
+      "../../../.pnpm/node_modules/@types",
+      "../../../../../node_modules/@types",
+      "../../../../../.pnpm/node_modules/@types"
     ],
     "sourceMap": false,
     "moduleResolution": "bundler",
