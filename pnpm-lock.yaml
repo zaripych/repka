@@ -83,8 +83,8 @@ importers:
         specifier: 3.0.2
         version: 3.0.2(rollup@4.0.2)
       '@rollup/pluginutils':
-        specifier: 5.0.5
-        version: 5.0.5(rollup@4.0.2)
+        specifier: 5.1.0
+        version: 5.1.0(rollup@4.0.2)
       '@types/jest':
         specifier: 29.5.11
         version: 29.5.11
@@ -1644,7 +1644,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.0.5(rollup@4.0.2)
+      '@rollup/pluginutils': 5.1.0(rollup@4.0.2)
       commondir: 1.0.1
       estree-walker: 2.0.2
       glob: 8.1.0
@@ -1662,7 +1662,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.0.5(rollup@4.0.2)
+      '@rollup/pluginutils': 5.1.0(rollup@4.0.2)
       rollup: 4.0.2
     dev: false
 
@@ -1675,7 +1675,7 @@ packages:
       rollup:
         optional: true
     dependencies:
-      '@rollup/pluginutils': 5.0.5(rollup@4.0.2)
+      '@rollup/pluginutils': 5.1.0(rollup@4.0.2)
       '@types/resolve': 1.20.2
       deepmerge: 4.3.1
       is-builtin-module: 3.2.1
@@ -1721,6 +1721,21 @@ packages:
       estree-walker: 2.0.2
       picomatch: 2.3.1
       rollup: 4.0.2
+
+  /@rollup/pluginutils@5.1.0(rollup@4.0.2):
+    resolution: {integrity: sha512-XTIWOPPcpvyKI6L1NHo0lFlCyznUEyPmPY1mc3KpPVDYulHSTvyeLNVW00QTLIAFNhR3kYnJTQHeGqU4M3n09g==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@types/estree': 1.0.1
+      estree-walker: 2.0.2
+      picomatch: 2.3.1
+      rollup: 4.0.2
+    dev: false
 
   /@rollup/rollup-android-arm-eabi@4.0.2:
     resolution: {integrity: sha512-xDvk1pT4vaPU2BOLy0MqHMdYZyntqpaBf8RhBiezlqG9OjY8F50TyctHo8znigYKd+QCFhCmlmXHOL/LoaOl3w==}
