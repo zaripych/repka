@@ -1,5 +1,33 @@
 # @repka-kit/ts
 
+## 1.0.6
+
+### Patch Changes
+
+- [#69](https://github.com/zaripych/repka/pull/69) [`9c8e469`](https://github.com/zaripych/repka/commit/9c8e469c192eb3197278e47a54d6ca5e3826a8c3) Thanks [@zaripych](https://github.com/zaripych)! - fix: base tsconfig has references to types from repka which are now correctly resolved if monorepo packages globs are packages/\*
+
+- [#55](https://github.com/zaripych/repka/pull/55) [`3349f87`](https://github.com/zaripych/repka/commit/3349f87fe262b55d4e55fde5a071429bc6c86a88) - deps: update @rollup/plugin-commonjs from 25.0.5 to 25.0.7
+
+- [#59](https://github.com/zaripych/repka/pull/59) [`a576856`](https://github.com/zaripych/repka/commit/a576856329f2ea550eec2e428ad6bd8eb02a92b9) - deps: update @types/prompts from 2.4.5 to 2.4.6
+
+- [#61](https://github.com/zaripych/repka/pull/61) [`a4db49a`](https://github.com/zaripych/repka/commit/a4db49a886f5719717a523cbbf25138771ed8e89) - deps: update @types/yargs from 17.0.28 to 17.0.29
+
+- [#62](https://github.com/zaripych/repka/pull/62) [`9e14a3c`](https://github.com/zaripych/repka/commit/9e14a3c9ffbe36d9385f57a17bd5145964031aec) - deps: update @types/jest from 29.5.5 to 29.5.6
+
+- [#63](https://github.com/zaripych/repka/pull/63) [`86c2d34`](https://github.com/zaripych/repka/commit/86c2d34cdfb81184f097fcdf72b382d622fac94e) - deps: update @types/js-yaml from 4.0.6 to 4.0.8
+
+- [#65](https://github.com/zaripych/repka/pull/65) [`7c51291`](https://github.com/zaripych/repka/commit/7c5129106c7fa1234a28445f56d219d9d1955a56) - deps: update @typescript-eslint/eslint-plugin from 6.7.5 to 6.9.0
+
+- [#66](https://github.com/zaripych/repka/pull/66) [`e42c89a`](https://github.com/zaripych/repka/commit/e42c89a01d981a0ac6db229a2fd5feb27270ebef) - deps: update esbuild from 0.19.4 to 0.19.5
+
+- [#67](https://github.com/zaripych/repka/pull/67) [`eb125c4`](https://github.com/zaripych/repka/commit/eb125c447d010054d8cf8a1086d7c2418c24d5ce) - deps: update prettier from 3.0.3 to 3.1.0
+
+- [#68](https://github.com/zaripych/repka/pull/68) [`e43b591`](https://github.com/zaripych/repka/commit/e43b591ea680a3e65fb10988e5b5d0272ac7e34d) - deps: update eslint-plugin-jest from 27.4.2 to 27.6.0
+
+- [#74](https://github.com/zaripych/repka/pull/74) [`937041a`](https://github.com/zaripych/repka/commit/937041ac8b920b70e316a64cf2c3fc4635a11788) - deps: update @types/jest from 29.5.6 to 29.5.11
+
+- [#70](https://github.com/zaripych/repka/pull/70) [`4dd9c39`](https://github.com/zaripych/repka/commit/4dd9c39441ffddba36d358681db6be3cdf04539b) Thanks [@zaripych](https://github.com/zaripych)! - fix: update babel package dependencies to address critical vulnerabilities there
+
 ## 1.0.5
 
 ### Patch Changes
