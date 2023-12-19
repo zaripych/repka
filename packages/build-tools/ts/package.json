@@ -1,6 +1,6 @@
 {
   "name": "@repka-kit/ts",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Next generation build tools for monorepo: lint, bundle and package your TypeScript projects",
   "keywords": [
     "repka",
@@ -59,9 +59,9 @@
     "@rollup/plugin-node-resolve": "15.2.3",
     "@rollup/plugin-replace": "5.0.3",
     "@rollup/plugin-virtual": "3.0.2",
-    "@rollup/pluginutils": "5.0.5",
+    "@rollup/pluginutils": "5.1.0",
     "@types/jest": "29.5.11",
-    "@types/node": "20.8.3",
+    "@types/node": "20.10.5",
     "@typescript-eslint/eslint-plugin": "6.9.0",
     "@typescript-eslint/parser": "6.7.4",
     "builtin-modules": "3.3.0",
