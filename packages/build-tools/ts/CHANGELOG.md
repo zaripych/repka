@@ -1,5 +1,17 @@
 # @repka-kit/ts
 
+## 1.0.7
+
+### Patch Changes
+
+- [#72](https://github.com/zaripych/repka/pull/72) [`b83c0c1`](https://github.com/zaripych/repka/commit/b83c0c154c934f24f67165470302b331de99b431) - deps: update commander from 11.0.0 to 11.1.0
+
+- [#73](https://github.com/zaripych/repka/pull/73) [`7d03f7c`](https://github.com/zaripych/repka/commit/7d03f7c408f6e2f8f9ef374200e7499c01be17a4) - deps: update @rollup/pluginutils from 5.0.5 to 5.1.0
+
+- [#76](https://github.com/zaripych/repka/pull/76) [`008da4a`](https://github.com/zaripych/repka/commit/008da4a8c7af3c7cca5df4cde17c250b924d3876) - deps: update @types/node from 20.8.3 to 20.10.5
+
+- [#78](https://github.com/zaripych/repka/pull/78) [`9047962`](https://github.com/zaripych/repka/commit/90479625a1a3d70390afe301f4a7b454ba1ec2e3) - deps: update lint-staged from 14.0.1 to 15.2.0
+
 ## 1.0.6
 
 ### Patch Changes
