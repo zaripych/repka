@@ -12,6 +12,6 @@
   "dependencies": {},
   "devDependencies": {
     "@changesets/changelog-github": "0.4.8",
-    "@changesets/types": "5.2.1"
+    "@changesets/types": "6.0.0"
   }
 }
