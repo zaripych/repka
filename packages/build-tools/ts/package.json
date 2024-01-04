@@ -1,6 +1,6 @@
 {
   "name": "@repka-kit/ts",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Next generation build tools for monorepo: lint, bundle and package your TypeScript projects",
   "keywords": [
     "repka",

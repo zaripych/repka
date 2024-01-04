@@ -1,5 +1,13 @@
 # @repka-kit/ts
 
+## 1.0.8
+
+### Patch Changes
+
+- [#80](https://github.com/zaripych/repka/pull/80) [`4a1c287`](https://github.com/zaripych/repka/commit/4a1c28787096268d2826044dd48a5c6ee8319c86) - deps: update @types/prompts from 2.4.6 to 2.4.9
+
+- [#86](https://github.com/zaripych/repka/pull/86) [`37db02c`](https://github.com/zaripych/repka/commit/37db02c80fa57ddf522d0d04267f82e6848ce9e3) Thanks [@zaripych](https://github.com/zaripych)! - fix: copy peer dependencies and engines to the output package.json
+
 ## 1.0.7
 
 ### Patch Changes
