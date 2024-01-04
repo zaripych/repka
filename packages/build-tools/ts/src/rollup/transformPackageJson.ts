@@ -36,6 +36,9 @@ export function transformPackageJson(opts: {
       'version',
       'type',
       'bin',
+      'peerDependencies',
+      'peerDependenciesMeta',
+      'engines',
     ] as const;
 
     type Key = (typeof keys)[number];
