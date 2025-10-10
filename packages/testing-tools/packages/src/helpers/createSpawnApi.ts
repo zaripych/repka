@@ -95,7 +95,7 @@ export function createTestSpawnApi(
     const combined: string[] = [];
 
     const collectOutput = (data: Buffer | string) => {
-      combined.push(data instanceof Buffer ? data.toString('utf8') : data);
+      combined.push(typeof data === 'string' ? data : data.toString('utf8'));
     };
 
     const userReplace = spawnOpts?.searchAndReplace

@@ -13,7 +13,7 @@
     "lint": "pnpm -r lint",
     "lint-staged": "lint-staged",
     "lint:changed": "pnpm --filter='...[origin/main]' -r lint",
-    "prepare": "husky install",
+    "prepare": "husky",
     "prettify:all": "prettier './**/*.(json|js|jsx|ts|tsx|html|css|yml|yaml)' --write",
     "publish:beta": "pnpm build && pnpm publish -r --tag beta --access public",
     "publish:snapshot": "publish-snapshot",
@@ -22,23 +22,26 @@
   },
   "devDependencies": {
     "@build-tools/ts": "workspace:@repka-kit/ts@*",
-    "@changesets/cli": "2.26.2",
+    "@changesets/cli": "2.29.7",
     "@repka-kit/changeset-changelog": "workspace:*",
     "@repka-kit/scripts": "workspace:*",
     "@repka-kit/ts": "workspace:*",
-    "husky": "8.0.3"
+    "husky": "9.1.7"
   },
-  "packageManager": "pnpm@8.9.0",
+  "packageManager": "pnpm@10.18.0",
   "engines": {
-    "node": "18",
+    "node": "22",
     "npm": "👻 please-use-pnpm 👻",
-    "pnpm": ">=7",
+    "pnpm": ">=10",
     "yarn": "👻 please-use-pnpm 👻"
   },
   "pnpm": {
     "overrides": {
       "semver@<5.7.2": ">=5.7.2",
       "@babel/traverse@<7.23.2": ">=7.23.2"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

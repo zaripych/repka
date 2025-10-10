@@ -72,7 +72,7 @@ const randomText = (length) => {
 
 function asyncToSync(moduleLocation, fn, args) {
   const key = randomText(8);
-  const url = node_url.fileURLToPath((typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.src || new URL('eslintConfigHelpers.gen.cjs', document.baseURI).href)));
+  const url = node_url.fileURLToPath((typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('eslintConfigHelpers.gen.cjs', document.baseURI).href)));
   const modulePath = node_url.fileURLToPath(moduleLocation);
   const modulePathCrossPlatform = process.platform === "win32" ? `file://${modulePath}` : modulePath;
   const result = node_child_process.spawnSync(process.execPath, [url, key], {
@@ -286,7 +286,7 @@ const eslintConfigHelpers = async () => {
 };
 const syncEslintConfigHelpers = once(() => {
   return asyncToSync(
-    (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.src || new URL('eslintConfigHelpers.gen.cjs', document.baseURI).href)),
+    (typeof document === 'undefined' ? require('u' + 'rl').pathToFileURL(__filename).href : (_documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === 'SCRIPT' && _documentCurrentScript.src || new URL('eslintConfigHelpers.gen.cjs', document.baseURI).href)),
     "eslintConfigHelpers",
     []
   );

@@ -9,8 +9,8 @@ await packageInstallTemplate({
         ...(typeof json['dependencies'] === 'object'
           ? json['dependencies']
           : undefined),
-        typescript: '5.2.2',
-        '@types/node': '16',
+        typescript: '5.9.3',
+        '@types/node': '22',
       },
     };
   },

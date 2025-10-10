@@ -17,6 +17,7 @@ export const lintCommand = () =>
     )
     .helpOption(false)
     .allowUnknownOption(true)
+    .allowExcessArguments(true)
     .action(async (_opts: unknown, command: Command) => {
       await commandTemplate({
         cliCommand: 'lint',

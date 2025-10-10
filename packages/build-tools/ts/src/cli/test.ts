@@ -16,6 +16,7 @@ export const testCommand = () =>
     )
     .helpOption(false)
     .allowUnknownOption(true)
+    .allowExcessArguments(true)
     .action(async (_, command: Command) => {
       await commandTemplate({
         cliCommand: 'test',

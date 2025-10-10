@@ -11,9 +11,9 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@jest/globals": "29.7.0",
+    "@jest/globals": "30.2.0",
     "@utils/logger": "workspace:*",
     "@utils/ts": "workspace:*",
-    "utility-types": "3.10.0"
+    "utility-types": "3.11.0"
   }
 }

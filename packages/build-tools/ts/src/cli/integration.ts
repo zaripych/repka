@@ -19,6 +19,7 @@ export const integrationCommand = () =>
     )
     .helpOption(false)
     .allowUnknownOption(true)
+    .allowExcessArguments(true)
     .action(async (_, command: Command) => {
       await commandTemplate({
         cliCommand: 'integration',

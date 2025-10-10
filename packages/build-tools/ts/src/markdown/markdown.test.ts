@@ -2,7 +2,7 @@ import { expect, it, jest } from '@jest/globals';
 
 import { glowFormat, glowFormat_defaultDeps } from './glowFormat';
 import { glowPrint, glowPrint_defaultDeps } from './glowPrint';
-import { format, markdown, print } from './markdown';
+import { format, print } from './markdown';
 
 const noop = () => {
   return;
@@ -25,15 +25,15 @@ it('should print when glow is not in the system', async () => {
       }
     )
   );
-  await print(markdown`> Hello world`, {
+  await print(`> Hello world`, {
     glowPrint: glowPrintFn,
   });
-  expect(write).toBeCalledWith(
+  expect(write).toHaveBeenCalledWith(
     expect.stringContaining(`
   > Hello world
 `)
   );
-  expect(disableGlow).toBeCalledTimes(1);
+  expect(disableGlow).toHaveBeenCalledTimes(1);
 });
 
 it('should format when glow is not in the system', async () => {
@@ -52,9 +52,9 @@ it('should format when glow is not in the system', async () => {
     )
   );
   expect(
-    await format(markdown`Hello _world_`, {
+    await format(`Hello _world_`, {
       glowFormat: glowFormatFn,
     })
   ).toMatchInlineSnapshot(`"Hello _world_"`);
-  expect(disableGlow).toBeCalledTimes(1);
+  expect(disableGlow).toHaveBeenCalledTimes(1);
 });

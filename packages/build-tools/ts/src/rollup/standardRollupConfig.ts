@@ -10,7 +10,6 @@ import type {
   ResolveIdHook,
   RollupWatchOptions,
 } from 'rollup';
-import analyze from 'rollup-plugin-analyzer';
 
 import type { NodePackageConfig } from '../config/nodePackageConfig';
 import { resolveNodeBuiltinsPlugin } from './resolveNodeBuiltinsPlugin';
@@ -159,10 +158,10 @@ const plugins = (opts?: DefaultRollupConfigBuildOpts): InputPluginOption => {
     //   sourceMaps: true,
     //   minify: true,
     // }),
-    opts?.analyze &&
-      analyze({
-        summaryOnly: true,
-        limit: 5,
-      }),
+    // opts?.analyze &&
+    //   analyze({
+    //     summaryOnly: true,
+    //     limit: 5,
+    //   }),
   ];
 };

@@ -1,5 +1,5 @@
 // This file is bundled up from './src/*' and needs to be committed
-import { transformSync, transform } from 'esbuild';
+import { transform, transformSync } from 'esbuild';
 import { extname, basename } from 'node:path';
 
 const getExtensionAndPrefix = (filePath) => {

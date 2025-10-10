@@ -2,7 +2,7 @@ import type { BivarianceHack } from './bivarianceHack';
 
 export type MemoizedFunctionStore<
   K extends string,
-  T extends BivarianceHack<unknown[], Promise<unknown>>
+  T extends BivarianceHack<unknown[], Promise<unknown>>,
 > = {
   [P in K]: T;
 } & {
@@ -17,7 +17,7 @@ export type MemoizedFunctionStore<
 
 export function memoizeFunction<
   K extends string,
-  T extends BivarianceHack<unknown[], Promise<unknown>>
+  T extends BivarianceHack<unknown[], Promise<unknown>>,
 >(
   functionName: K,
   opts: {
@@ -73,6 +73,6 @@ export function memoizeFunction<
         resultByArgs.set(key, value);
       },
     }),
-  } as MemoizedFunctionStore<K, T>;
+  } as unknown as MemoizedFunctionStore<K, T>;
   return result;
 }

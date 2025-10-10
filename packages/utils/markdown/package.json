@@ -11,8 +11,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@jest/globals": "29.7.0",
+    "@jest/globals": "30.2.0",
     "@utils/child-process": "workspace:*",
-    "dedent": "1.5.1"
+    "dedent": "1.7.0"
   }
 }

@@ -37,8 +37,8 @@ it('should print when glow is not in the system', async () => {
     glowPrint: glowPrintFn,
   });
 
-  expect(disableGlow).toBeCalledTimes(1);
-  expect(write).toBeCalledWith(expect.stringContaining(`Hello _world_`));
+  expect(disableGlow).toHaveBeenCalledTimes(1);
+  expect(write).toHaveBeenCalledWith(expect.stringContaining(`Hello _world_`));
 });
 
 it('should format when glow is not in the system', async () => {
@@ -73,5 +73,5 @@ it('should format when glow is not in the system', async () => {
 
 # Header`);
 
-  expect(disableGlow).toBeCalledTimes(1);
+  expect(disableGlow).toHaveBeenCalledTimes(1);
 });

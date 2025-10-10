@@ -7,6 +7,7 @@ export const initCommand = () =>
     .description(`Initialize the repository`)
     .helpOption(true)
     .allowUnknownOption(true)
+    .allowExcessArguments(true)
     .option('--force', 'Force setting up repository despite warnings', false)
     .action(async ({ force }: { force: boolean }) => {
       await setup({ force });
